@@ -63,8 +63,15 @@ Example MCP client configuration:
 	}
 
 	cfg := tools.ConfigFromEnv()
+	mode, err := cfg.Mode()
+	if err != nil {
+		log.Fatalf("imagor-mcp: %v", err)
+	}
 	if _, err := cfg.Signer(); err != nil {
 		log.Fatalf("imagor-mcp: %v", err)
+	}
+	if mode == tools.ModeUnsafe {
+		fmt.Fprintln(os.Stderr, "imagor-mcp: running in UNSAFE mode; emitted URLs carry no signature")
 	}
 
 	server := mcp.NewServer(&mcp.Implementation{

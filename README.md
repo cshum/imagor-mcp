@@ -34,17 +34,34 @@ Or build from source:
 go build -o imagor-mcp ./cmd/imagor-mcp
 ```
 
+## Modes
+
+Exactly one mode applies, selected by the environment. There is no implicit
+fallback between them.
+
+| Mode | Selected by | Output |
+|---|---|---|
+| **signed** | `IMAGOR_SECRET` set | `<signature>/<path>` — production |
+| **unsafe** | `IMAGOR_UNSAFE=1` | `unsafe/<path>` — development only |
+| **path_out** | neither set | the bare `<path>`, for the caller to sign |
+
+**Setting both `IMAGOR_SECRET` and `IMAGOR_UNSAFE` is refused at startup.** They
+state opposite intentions, and silently picking one is how an unsigned
+deployment reaches production. The server never falls back to unsigned URLs on
+its own.
+
 ## Configuration
 
 | Variable | Meaning |
 |---|---|
-| `IMAGOR_SECRET` | Signing secret. **Unset means path-out mode**: the server returns unsigned paths for the caller to sign. |
-| `IMAGOR_SIGNER_TYPE` | `sha1` (default), `sha256`, or `sha512`. Use `sha256` in production. |
-| `IMAGOR_SIGNER_TRUNCATE` | Signature length in characters, e.g. `40`. |
-| `IMAGOR_BASE_URL` | Optional imagor origin, reported back in tool output. |
+| `IMAGOR_SECRET` | Signing secret. Selects **signed** mode. |
+| `IMAGOR_UNSAFE` | `1`, `true`, `yes` or `on`. Selects **unsafe** mode. Must be explicit. |
+| `IMAGOR_SIGNER_TYPE` | `sha1` (default), `sha256` or `sha512`. Use `sha256` in production. |
+| `IMAGOR_SIGNER_TRUNCATE` | Signature length in characters, e.g. `40`. `0` means no truncation. |
+| `IMAGOR_BASE_URL` | Optional imagor origin. When set, output includes a full `absolute_url`. |
 
-These must match the target imagor instance exactly, or its signature
-verification will reject the URLs.
+The signing settings must match the target imagor instance exactly, or its
+signature verification will reject the URLs.
 
 ## MCP client configuration
 
@@ -69,7 +86,7 @@ The server speaks MCP over stdio, so nothing listens on a port.
 
 | Tool | Purpose |
 |---|---|
-| `build_imagor_url` | Build a **signed** URL from typed transformation parameters. Refused when no secret is configured. |
+| `build_imagor_url` | Build a request path ready to send to imagor, signed or `unsafe/` as configured. Refused in path-out mode. |
 | `build_imagor_path` | Build an **unsigned** path for the caller to sign. Use when the MCP server should not hold the secret. |
 | `validate_imagor_path` | Parse a path, report whether it round-trips unchanged, and summarize the transformation. |
 | `describe_imagor` | Report the supported path grammar and the current signing mode. |
@@ -85,6 +102,9 @@ URLs. Trust the component; do not trust the agent using it.
 
 - **No secret = path-out mode.** The safest deployment gives the server no
   secret at all and signs in the calling application.
+- **Unsafe mode is opt-in and loud.** It warns on stderr at startup, and
+  `describe_imagor` reports it as a limitation at runtime. The target imagor
+  must itself be running with `IMAGOR_UNSAFE=1`.
 - **stdio only.** With stdio transport nothing listens on the network.
 - **No generic signing tool.** The server can only emit paths its own typed
   tools constructed.

@@ -24,28 +24,75 @@ import (
 	"github.com/cshum/imagor-mcp/internal/pathgen"
 )
 
+// Mode is how the server produces request paths.
+type Mode string
+
+const (
+	// ModeSigned signs every path with IMAGOR_SECRET. Use in production.
+	ModeSigned Mode = "signed"
+	// ModeUnsafe emits "unsafe/" paths and signs nothing. Development only;
+	// the target imagor must itself be running with IMAGOR_UNSAFE=1.
+	ModeUnsafe Mode = "unsafe"
+	// ModePathOut returns bare paths for the caller to sign. The server holds
+	// no secret at all.
+	ModePathOut Mode = "path_out"
+)
+
 // Config is the runtime configuration, read from the environment so that the
 // signing secret never travels through the MCP tool surface.
 type Config struct {
-	// Secret is IMAGOR_SECRET. Empty means path-out only: the server returns
-	// unsigned paths and the caller signs them.
+	// Secret is IMAGOR_SECRET. Setting it selects ModeSigned.
 	Secret string
+	// Unsafe is IMAGOR_UNSAFE. Setting it selects ModeUnsafe, and it must be
+	// explicit: the server never falls back to unsigned URLs on its own.
+	Unsafe bool
 	// SignerType is IMAGOR_SIGNER_TYPE: sha1 (default), sha256 or sha512.
 	SignerType string
 	// Truncate is IMAGOR_SIGNER_TRUNCATE, in characters. 0 means no truncation.
 	Truncate int
-	// BaseURL is the optional imagor origin, used to return absolute URLs.
+	// BaseURL is the optional imagor origin. When set, tool output carries an
+	// absolute URL alongside the request path.
 	BaseURL string
 }
 
 // ConfigFromEnv reads configuration from the process environment.
 func ConfigFromEnv() Config {
-	truncate, _ := strconv.Atoi(os.Getenv("IMAGOR_SIGNER_TRUNCATE"))
+	truncate, _ := strconv.Atoi(strings.TrimSpace(os.Getenv("IMAGOR_SIGNER_TRUNCATE")))
 	return Config{
-		Secret:     os.Getenv("IMAGOR_SECRET"),
+		Secret:     strings.TrimSpace(os.Getenv("IMAGOR_SECRET")),
+		Unsafe:     isTruthy(os.Getenv("IMAGOR_UNSAFE")),
 		SignerType: strings.ToLower(strings.TrimSpace(os.Getenv("IMAGOR_SIGNER_TYPE"))),
 		Truncate:   truncate,
-		BaseURL:    strings.TrimSuffix(os.Getenv("IMAGOR_BASE_URL"), "/"),
+		BaseURL:    strings.TrimSuffix(strings.TrimSpace(os.Getenv("IMAGOR_BASE_URL")), "/"),
+	}
+}
+
+// isTruthy mirrors imagor's own boolean environment parsing.
+func isTruthy(v string) bool {
+	switch strings.ToLower(strings.TrimSpace(v)) {
+	case "1", "true", "yes", "on":
+		return true
+	}
+	return false
+}
+
+// Mode reports which of the three modes the configuration selects.
+//
+// IMAGOR_SECRET and IMAGOR_UNSAFE state opposite intentions, so setting both
+// is refused rather than silently resolved. Guessing which one the operator
+// meant is how an unsigned deployment reaches production.
+func (c Config) Mode() (Mode, error) {
+	switch {
+	case c.Secret != "" && c.Unsafe:
+		return "", fmt.Errorf(
+			"IMAGOR_SECRET and IMAGOR_UNSAFE are both set and contradict each other: " +
+				"set IMAGOR_SECRET for signed URLs, or IMAGOR_UNSAFE alone for development, but not both")
+	case c.Secret != "":
+		return ModeSigned, nil
+	case c.Unsafe:
+		return ModeUnsafe, nil
+	default:
+		return ModePathOut, nil
 	}
 }
 
@@ -112,10 +159,12 @@ type TransformInput struct {
 
 // BuildOutput is the result of building a path or URL.
 type BuildOutput struct {
-	Path   string `json:"path" jsonschema:"the imagor path, without a leading slash"`
-	URL    string `json:"url,omitempty" jsonschema:"full request path including signature, to append to the imagor origin"`
-	Signed bool   `json:"signed" jsonschema:"whether a signature was applied"`
-	Note   string `json:"note,omitempty" jsonschema:"human-readable notes about the result"`
+	Mode        string `json:"mode" jsonschema:"how the path was produced: signed, unsafe or path_out"`
+	Path        string `json:"path" jsonschema:"the imagor path, without any signature or unsafe prefix"`
+	URL         string `json:"url,omitempty" jsonschema:"a request path ready to send to imagor, including its signature or unsafe prefix; empty in path_out mode"`
+	AbsoluteURL string `json:"absolute_url,omitempty" jsonschema:"the full URL to fetch, present only when IMAGOR_BASE_URL is configured"`
+	Signed      bool   `json:"signed" jsonschema:"whether the URL carries a signature"`
+	Note        string `json:"note,omitempty" jsonschema:"human-readable notes about the result"`
 }
 
 // toParams converts tool input into imagorpath.Params, appending the
@@ -182,8 +231,12 @@ func (in TransformInput) toParams() (imagorpath.Params, error) {
 	}, nil
 }
 
-// build validates the composition and renders it.
+// build validates the composition and renders it in the configured mode.
 func (c Config) build(in TransformInput) (BuildOutput, error) {
+	mode, err := c.Mode()
+	if err != nil {
+		return BuildOutput{}, err
+	}
 	p, err := in.toParams()
 	if err != nil {
 		return BuildOutput{}, err
@@ -191,44 +244,53 @@ func (c Config) build(in TransformInput) (BuildOutput, error) {
 	if err := pathgen.Validate(p); err != nil {
 		return BuildOutput{}, err
 	}
-	signer, err := c.Signer()
-	if err != nil {
-		return BuildOutput{}, err
-	}
 
-	out := BuildOutput{Path: pathgen.Build(p)}
-	if signer != nil {
+	out := BuildOutput{Mode: string(mode), Path: pathgen.Build(p)}
+	switch mode {
+	case ModeSigned:
+		signer, err := c.Signer()
+		if err != nil {
+			return BuildOutput{}, err
+		}
 		out.URL = pathgen.BuildURL(p, signer)
 		out.Signed = true
-	} else {
-		out.Note = "no IMAGOR_SECRET configured: returning an unsigned path for the caller to sign"
+	case ModeUnsafe:
+		// A nil signer makes imagorpath emit the "unsafe/" prefix, which is
+		// exactly what a target imagor running with IMAGOR_UNSAFE expects.
+		out.URL = pathgen.BuildURL(p, nil)
+		out.Note = "unsafe mode: this URL carries no signature and only works against an imagor instance running with IMAGOR_UNSAFE=1"
+	default:
+		out.Note = "path_out mode: sign this path with your own secret before serving it"
 	}
 	if c.BaseURL != "" && out.URL != "" {
-		out.Note = "prepend " + c.BaseURL + "/ to url, or use path with your own origin"
+		out.AbsoluteURL = c.BaseURL + "/" + out.URL
 	}
 	return out, nil
 }
 
-// BuildURLTool returns a signed URL for a transformation.
+// BuildURLTool returns a request URL ready to send to imagor.
 func (c Config) BuildURLTool(_ context.Context, _ *mcp.CallToolRequest, in TransformInput) (*mcp.CallToolResult, BuildOutput, error) {
 	out, err := c.build(in)
 	if err != nil {
 		return nil, BuildOutput{}, err
 	}
-	if !out.Signed {
-		return nil, BuildOutput{}, fmt.Errorf("IMAGOR_SECRET is not set, so no signed URL can be produced; use build_imagor_path and sign in the caller")
+	if out.URL == "" {
+		return nil, BuildOutput{}, fmt.Errorf(
+			"this server runs in path_out mode, so it holds no signing secret and cannot produce a request URL; use build_imagor_path and sign the result in the caller, or configure IMAGOR_SECRET")
 	}
 	return nil, out, nil
 }
 
-// BuildPathTool returns an unsigned imagor path.
+// BuildPathTool returns the bare imagor path, with no signature or prefix.
 func (c Config) BuildPathTool(_ context.Context, _ *mcp.CallToolRequest, in TransformInput) (*mcp.CallToolResult, BuildOutput, error) {
 	out, err := c.build(in)
 	if err != nil {
 		return nil, BuildOutput{}, err
 	}
 	out.URL = ""
+	out.AbsoluteURL = ""
 	out.Signed = false
+	out.Note = "bare path, with no signature and no unsafe prefix"
 	return nil, out, nil
 }
 
@@ -328,6 +390,7 @@ type ParamDoc struct {
 
 // DescribeOutput describes the imagor path grammar this server targets.
 type DescribeOutput struct {
+	Mode         string     `json:"mode" jsonschema:"signed, unsafe or path_out"`
 	SignerType   string     `json:"signer_type"`
 	Truncate     int        `json:"truncate"`
 	Signed       bool       `json:"signing_enabled"`
@@ -346,7 +409,12 @@ type DescribeOutput struct {
 // imagor does not currently expose its filter registry in a machine-readable
 // form and a hand-maintained copy would silently rot.
 func (c Config) DescribeTool(_ context.Context, _ *mcp.CallToolRequest, _ any) (*mcp.CallToolResult, DescribeOutput, error) {
+	mode, err := c.Mode()
+	if err != nil {
+		return nil, DescribeOutput{}, err
+	}
 	out := DescribeOutput{
+		Mode:         string(mode),
 		SignerType:   c.SignerType,
 		Truncate:     c.Truncate,
 		Signed:       c.Secret != "",
@@ -360,8 +428,16 @@ func (c Config) DescribeTool(_ context.Context, _ *mcp.CallToolRequest, _ any) (
 			"this server does not upload, store or render images; it only constructs paths and signatures",
 		},
 	}
-	if out.SignerType == "" && c.Secret != "" {
+	if out.SignerType == "" {
 		out.SignerType = "sha1"
+	}
+	switch mode {
+	case ModeUnsafe:
+		out.Limitations = append(out.Limitations,
+			"UNSAFE MODE: this server emits unsigned URLs and only works against an imagor instance running with IMAGOR_UNSAFE=1. Never use it in production.")
+	case ModePathOut:
+		out.Limitations = append(out.Limitations,
+			"path_out mode: this server holds no signing secret, so build_imagor_url is unavailable. Sign the path returned by build_imagor_path in the caller.")
 	}
 	return nil, out, nil
 }

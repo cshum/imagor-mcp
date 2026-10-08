@@ -37,7 +37,7 @@ func connect(t *testing.T, env map[string]string) *mcp.ClientSession {
 	t.Cleanup(cancel)
 
 	cmd := exec.Command(binPath)
-	cmd.Env = append(os.Environ(), "IMAGOR_SECRET=", "IMAGOR_SIGNER_TYPE=", "IMAGOR_SIGNER_TRUNCATE=")
+	cmd.Env = append(os.Environ(), "IMAGOR_SECRET=", "IMAGOR_UNSAFE=", "IMAGOR_SIGNER_TYPE=", "IMAGOR_SIGNER_TRUNCATE=", "IMAGOR_BASE_URL=")
 	for k, v := range env {
 		cmd.Env = append(cmd.Env, k+"="+v)
 	}
@@ -256,5 +256,117 @@ func TestDescribeReflectsImagorParams(t *testing.T) {
 	}
 	if len(out.Limitations) == 0 {
 		t.Error("expected the filter-catalogue limitation to be declared")
+	}
+}
+
+// Unsafe mode must produce a genuinely usable "unsafe/" request path, and must
+// never claim it is signed.
+func TestUnsafeMode(t *testing.T) {
+	s := connect(t, map[string]string{"IMAGOR_UNSAFE": "1"})
+
+	var out struct {
+		Mode   string `json:"mode"`
+		Path   string `json:"path"`
+		URL    string `json:"url"`
+		Signed bool   `json:"signed"`
+		Note   string `json:"note"`
+	}
+	if err := callTool(t, s, "build_imagor_url", map[string]any{
+		"image":  "example.com/a.jpg",
+		"width":  320,
+		"height": 240,
+		"smart":  true,
+	}, &out); err != nil {
+		t.Fatalf("build_imagor_url in unsafe mode: %v", err)
+	}
+	if out.Mode != "unsafe" {
+		t.Errorf("mode = %q, want unsafe", out.Mode)
+	}
+	if !strings.HasPrefix(out.URL, "unsafe/") {
+		t.Errorf("unsafe URL must carry the unsafe/ prefix, got %q", out.URL)
+	}
+	if out.Signed {
+		t.Error("unsafe mode must not report signed=true")
+	}
+	if out.URL != "unsafe/"+out.Path {
+		t.Errorf("URL %q is not the unsafe prefix plus path %q", out.URL, out.Path)
+	}
+	if !strings.Contains(out.Note, "IMAGOR_UNSAFE") {
+		t.Errorf("note should warn about the target instance, got %q", out.Note)
+	}
+}
+
+// build_imagor_path must stay usable in every mode, since it is the fallback
+// for callers that sign themselves.
+func TestPathToolWorksInUnsafeAndSignedModes(t *testing.T) {
+	for name, env := range map[string]map[string]string{
+		"unsafe": {"IMAGOR_UNSAFE": "1"},
+		"signed": {"IMAGOR_SECRET": "s", "IMAGOR_SIGNER_TYPE": "sha256"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			s := connect(t, env)
+			var out struct {
+				Path        string `json:"path"`
+				URL         string `json:"url"`
+				AbsoluteURL string `json:"absolute_url"`
+				Signed      bool   `json:"signed"`
+			}
+			if err := callTool(t, s, "build_imagor_path", map[string]any{
+				"image": "example.com/a.jpg",
+				"width": 100,
+			}, &out); err != nil {
+				t.Fatalf("build_imagor_path: %v", err)
+			}
+			if out.Path == "" {
+				t.Error("path must not be empty")
+			}
+			if out.URL != "" || out.AbsoluteURL != "" || out.Signed {
+				t.Errorf("path tool must return an unprefixed path: %+v", out)
+			}
+		})
+	}
+}
+
+// Setting both a secret and unsafe mode states opposite intentions, so the
+// server must refuse to start rather than pick one.
+func TestSecretAndUnsafeTogetherRefuseStartup(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, binPath)
+	cmd.Env = append(os.Environ(), "IMAGOR_SECRET=mysecret", "IMAGOR_UNSAFE=1")
+	out, err := cmd.CombinedOutput()
+	if err == nil {
+		t.Fatalf("expected startup to fail, got success with output: %s", out)
+	}
+	if !strings.Contains(string(out), "contradict") {
+		t.Errorf("expected a contradiction error, got: %s", out)
+	}
+}
+
+func TestAbsoluteURLUsesBaseURL(t *testing.T) {
+	s := connect(t, map[string]string{
+		"IMAGOR_SECRET":          "mysecret",
+		"IMAGOR_SIGNER_TYPE":     "sha256",
+		"IMAGOR_SIGNER_TRUNCATE": "40",
+		"IMAGOR_BASE_URL":        "https://img.example.com/", // trailing slash must be trimmed
+	})
+
+	var out struct {
+		URL         string `json:"url"`
+		AbsoluteURL string `json:"absolute_url"`
+	}
+	if err := callTool(t, s, "build_imagor_url", map[string]any{
+		"image": "example.com/a.jpg",
+		"width": 100,
+	}, &out); err != nil {
+		t.Fatalf("build_imagor_url: %v", err)
+	}
+	want := "https://img.example.com/" + out.URL
+	if out.AbsoluteURL != want {
+		t.Errorf("absolute_url = %q, want %q", out.AbsoluteURL, want)
+	}
+	if strings.Contains(out.AbsoluteURL, "img.example.com//") {
+		t.Errorf("trailing slash on the base URL was not trimmed: %q", out.AbsoluteURL)
 	}
 }
