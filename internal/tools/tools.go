@@ -10,6 +10,7 @@ import (
 	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
+	"errors"
 	"fmt"
 	"hash"
 	"os"
@@ -200,11 +201,12 @@ func (in TransformInput) toParams() (imagorpath.Params, error) {
 		if name == "" {
 			return imagorpath.Params{}, fmt.Errorf("filter name must not be empty")
 		}
-		// imagor ignores unknown filters and bad argument counts silently,
-		// returning an unchanged image with a 200 response, so the name and
-		// arity are checked here instead.
-		if err := filtercat.Validate(name, f.Args); err != nil {
-			return imagorpath.Params{}, err
+		// imagor ignores unknown filter names and missing required arguments
+		// silently, returning an unchanged image with a 200 response, so those
+		// are refused here. Excess arguments only warn — see filterWarnings —
+		// because imagor's tolerance differs per filter.
+		if outcome, msg := filtercat.Check(name, f.Args); outcome == filtercat.Rejected {
+			return imagorpath.Params{}, errors.New(msg)
 		}
 		filters = append(filters, imagorpath.Filter{Name: name, Args: f.Args})
 	}
@@ -238,6 +240,20 @@ func (in TransformInput) toParams() (imagorpath.Params, error) {
 		Meta:          in.Meta,
 		Filters:       filters,
 	}, nil
+}
+
+// filterWarnings reports filters that are known to imagor but carry more
+// arguments than documented. Refusing these blocked filters that work, so they
+// are surfaced instead: grayscale(1) still applies, while blur(1,2,3) is
+// ignored outright, and only the caller can tell which case it is in.
+func filterWarnings(p imagorpath.Params) []string {
+	var warnings []string
+	for _, f := range p.Filters {
+		if outcome, msg := filtercat.Check(f.Name, f.Args); outcome == filtercat.Warned {
+			warnings = append(warnings, msg)
+		}
+	}
+	return warnings
 }
 
 // compositionWarnings reports combinations that pass validation but will not do
@@ -278,7 +294,7 @@ func (c Config) build(in TransformInput) (BuildOutput, error) {
 	}
 
 	out := BuildOutput{Mode: string(mode), Path: pathgen.Build(p)}
-	out.Warnings = compositionWarnings(p)
+	out.Warnings = append(compositionWarnings(p), filterWarnings(p)...)
 	switch mode {
 	case ModeSigned:
 		signer, err := c.Signer()

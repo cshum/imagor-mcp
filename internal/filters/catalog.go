@@ -12,6 +12,7 @@
 package filters
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"sort"
@@ -67,29 +68,65 @@ func Catalog() map[string]Spec {
 	return out
 }
 
-// Validate checks a filter name and its argument string against the catalogue.
+// Outcome describes how a filter name and its arguments were judged.
+type Outcome int
+
+const (
+	// Accepted means the filter is known and its argument count is within the
+	// documented range.
+	Accepted Outcome = iota
+	// Warned means the filter is known but has more arguments than documented.
+	// Measured behaviour varies by filter, so this is reported rather than
+	// refused.
+	Warned
+	// Rejected means the filter cannot work.
+	Rejected
+)
+
+// Check judges a filter name and its argument string against the catalogue.
 //
-// Arguments are split with imagor's own SplitArgs, so the count this function
-// validates is exactly the count imagor would receive.
-func Validate(name, args string) error {
+// Refusal is reserved for cases where the outcome is certain. An unknown name
+// is never applied by imagor. A missing required argument was measured against
+// v1.9.7 to return an unchanged image with a 200 response for blur, rotate,
+// brightness, hue, contrast, saturation, format and quality.
+//
+// Too many arguments only warns, because behaviour genuinely varies: measured
+// on v1.9.7, grayscale(1) still applies while blur(1,2,3) is ignored. An
+// earlier version refused both, which blocked working filters.
+//
+// Arguments are counted with imagor's own SplitArgs, so the count judged here
+// is the count imagor would receive.
+func Check(name, args string) (Outcome, string) {
 	spec, ok := Lookup(name)
 	if !ok {
-		return fmt.Errorf("unknown filter %q%s; imagor ignores unrecognised filters silently, "+
-			"so this would have produced an unchanged image with a 200 response. "+
-			"Call list_imagor_filters to see the %d supported filters",
-			name, suggest(name), len(Names()))
+		return Rejected, fmt.Sprintf(
+			"unknown filter %q%s; imagor ignores unrecognised filters silently, so this would "+
+				"have produced an unchanged image with a 200 response. Call list_imagor_filters "+
+				"to see the %d supported filters", name, suggest(name), len(Names()))
 	}
 	if !spec.Documented || spec.MaxArgs < 0 {
-		return nil
+		return Accepted, ""
 	}
 	got := len(imagorpath.SplitArgs(args))
 	switch {
 	case got < spec.MinArgs:
-		return fmt.Errorf("filter %q expects at least %d argument(s) but got %d%s",
+		return Rejected, fmt.Sprintf(
+			"filter %q expects at least %d argument(s) but got %d%s; imagor was measured to ignore "+
+				"a filter in this state rather than return an error",
 			name, spec.MinArgs, got, arityHint(name, spec))
 	case got > spec.MaxArgs:
-		return fmt.Errorf("filter %q accepts at most %d argument(s) but got %d%s",
-			name, spec.MaxArgs, got, arityHint(name, spec))
+		return Warned, fmt.Sprintf(
+			"filter %q has %d argument(s) where imagor documents at most %d%s; imagor may use "+
+				"defaults or ignore the filter entirely, so verify the result",
+			name, got, spec.MaxArgs, arityHint(name, spec))
+	}
+	return Accepted, ""
+}
+
+// Validate reports only whether a filter must be refused.
+func Validate(name, args string) error {
+	if outcome, msg := Check(name, args); outcome == Rejected {
+		return errors.New(msg)
 	}
 	return nil
 }

@@ -1,0 +1,57 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      # The server is pure Go, so unlike imagor this needs no libvips, no cgo
+      # and no container to build or test.
+      - name: Download modules
+        run: go mod download
+
+      - name: Check formatting
+        run: |
+          unformatted="$(gofmt -l ./cmd ./internal)"
+          if [ -n "$unformatted" ]; then
+            echo "These files are not gofmt'd:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test
+        run: go test ./... -race
+
+      # The filter catalogue is generated from the imagor release pinned in
+      # go.mod. If a dependency bump changes it, the regenerated file must be
+      # committed: a stale catalogue rejects filters that exist, or accepts
+      # ones imagor would ignore in silence.
+      - name: Check the filter catalogue is current
+        run: |
+          go generate ./internal/filters
+          if ! git diff --exit-code -- internal/filters/catalog_gen.go; then
+            echo "::error::internal/filters/catalog_gen.go is out of date."
+            echo "::error::Run 'go generate ./internal/filters' and commit the result."
+            exit 1
+          fi

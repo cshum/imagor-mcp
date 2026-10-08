@@ -394,23 +394,68 @@ func TestInventedFilterIsRefusedByTool(t *testing.T) {
 	}
 }
 
-func TestWrongArgumentCountIsRefusedByTool(t *testing.T) {
+// Excess arguments warn rather than refuse. Measured on imagor v1.9.7,
+// grayscale(1) still applies while blur(1,2,3) is ignored, so refusing both
+// blocked a filter that works. The warning carries the uncertainty instead.
+func TestExcessArgumentsWarnRatherThanRefuse(t *testing.T) {
 	s := connect(t, map[string]string{
 		"IMAGOR_SECRET":          "mysecret",
 		"IMAGOR_SIGNER_TYPE":     "sha256",
 		"IMAGOR_SIGNER_TRUNCATE": "40",
 	})
 
-	err := callTool(t, s, "build_imagor_url", map[string]any{
+	for _, name := range []string{"blur", "grayscale"} {
+		t.Run(name, func(t *testing.T) {
+			var out struct {
+				URL      string   `json:"url"`
+				Warnings []string `json:"warnings"`
+			}
+			err := callTool(t, s, "build_imagor_url", map[string]any{
+				"image":   "example.com/a.jpg",
+				"width":   200,
+				"filters": []map[string]any{{"name": name, "args": "1,2,3"}},
+			}, &out)
+			if err != nil {
+				t.Fatalf("%s with extra arguments must not be refused: %v", name, err)
+			}
+			if out.URL == "" {
+				t.Error("expected a URL alongside the warning")
+			}
+			if len(out.Warnings) == 0 {
+				t.Fatalf("%s with extra arguments should warn", name)
+			}
+			if !strings.Contains(out.Warnings[0], name) {
+				t.Errorf("warning should name the filter, got %q", out.Warnings[0])
+			}
+		})
+	}
+}
+
+// Regression: grayscale(1) was refused before the strictness was graduated,
+// even though imagor applies it.
+func TestOverSpecifiedButWorkingCompositionBuilds(t *testing.T) {
+	s := connect(t, map[string]string{
+		"IMAGOR_SECRET":          "mysecret",
+		"IMAGOR_SIGNER_TYPE":     "sha256",
+		"IMAGOR_SIGNER_TRUNCATE": "40",
+	})
+
+	var out struct {
+		URL      string   `json:"url"`
+		Warnings []string `json:"warnings"`
+	}
+	if err := callTool(t, s, "build_imagor_url", map[string]any{
 		"image":   "example.com/a.jpg",
 		"width":   200,
-		"filters": []map[string]any{{"name": "blur", "args": "1,2,3"}},
-	}, &struct{}{})
-	if err == nil {
-		t.Fatal("build_imagor_url must refuse blur with too many arguments")
+		"filters": []map[string]any{{"name": "grayscale", "args": "1"}},
+	}, &out); err != nil {
+		t.Fatalf("grayscale(1) works on imagor and must not be refused: %v", err)
 	}
-	if !strings.Contains(err.Error(), "at most") {
-		t.Errorf("error should state the limit, got: %v", err)
+	if !strings.Contains(out.URL, "grayscale(1)") {
+		t.Errorf("expected the filter in the URL, got %q", out.URL)
+	}
+	if len(out.Warnings) != 1 {
+		t.Errorf("expected exactly one warning, got %v", out.Warnings)
 	}
 }
 

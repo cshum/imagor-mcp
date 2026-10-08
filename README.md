@@ -148,22 +148,31 @@ One combination is valid but inert, and is reported as a warning rather than an
 error: `quality()` only affects lossy output. With no `format()` filter the
 result may be lossless PNG, where `quality(30)` changes nothing.
 
+Refusal is reserved for what is certain. An unknown name is never applied, and
+a missing required argument was measured to leave the image unchanged for eight
+documented filters. Too many arguments only warns, because imagor's tolerance
+differs per filter.
+
 ## Limitations
 
 - **Argument values are not validated, only names and counts.** `quality(abc)`
   has the correct arity and passes validation; imagor then ignores it. Value
   types are not reliably derivable from the filter reference, so they are not
   enforced.
-- **Arity checking is stricter than imagor.** Several filters tolerate fewer
-  arguments than their documentation states and fall back to defaults. Measured
-  against v1.9.7: `sharpen()`, `pixelate()`, `fill()`, `text(a,b)` and
-  `grayscale(1)` all still take effect. This server refuses them anyway. The
-  asymmetry is deliberate — a refusal is loud and the agent corrects it in one
-  turn, whereas imagor's silent no-op is invisible — but it is a real
-  difference, and `IMAGOR_MCP_EXTRA_FILTERS` is not a workaround for it.
+- **Refusal is limited to what is certain.** A missing required argument is
+  refused, because imagor was measured to ignore the filter silently in that
+  state for `blur`, `rotate`, `brightness`, `hue`, `contrast`, `saturation`,
+  `format` and `quality`. Too many arguments only warns, because tolerance
+  genuinely varies: `grayscale(1)` still applies while `blur(1,2,3)` is ignored
+  outright. An earlier version refused both, which blocked working filters.
+- **Some filters accept fewer arguments than documented and still work.**
+  Measured on v1.9.7: `sharpen()`, `pixelate()`, `fill()` and `text(a,b)` take
+  effect with fewer arguments than the reference states. A refusal from this
+  server is therefore not proof that imagor would have failed the request.
 - **The catalogue is tied to one imagor release.** It is generated from the
-  version in `go.mod`. After upgrading imagor, re-run `go generate
-  ./internal/filters`; the diff shows exactly which filters changed.
+  version in `go.mod`, and CI fails if the generated file no longer matches.
+  After upgrading imagor, run `go generate ./internal/filters` and commit the
+  result; the diff shows exactly which filters changed.
 - **No upload or POST support.** External upload needs its own signed-grant
   mechanism and is deliberately out of scope.
 - **No rendering.** The server never fetches or processes an image.
@@ -179,6 +188,11 @@ The test suite spawns the real binary over stdio and includes signature values
 verified against a running imagor instance and against imagor's published
 documentation, so the assertions are anchored to external ground truth rather
 than to this implementation.
+
+CI runs `gofmt -l`, `go vet`, `go test -race`, and a check that the generated
+filter catalogue still matches the imagor release pinned in `go.mod`. Regenerate
+it with `go generate ./internal/filters` after a dependency bump. No container
+and no libvips are needed, because the server is pure Go.
 
 ## Licence
 

@@ -29,33 +29,58 @@ func TestTypoSuggestionIsOffered(t *testing.T) {
 	}
 }
 
-func TestArityIsEnforced(t *testing.T) {
+// Refusal is reserved for outcomes that are certain; excess arguments warn
+// because imagor's tolerance genuinely differs per filter.
+func TestArityOutcomes(t *testing.T) {
+	for _, tc := range []struct {
+		name, args string
+		want       Outcome
+		why        string
+	}{
+		{"blur", "5", Accepted, "blur takes exactly one argument"},
+		{"blur", "", Rejected, "measured: blur() is silently ignored"},
+		{"blur", "1,2,3", Warned, "measured: blur(1,2,3) is silently ignored, but other filters tolerate extras"},
+		{"grayscale", "", Accepted, "takes no arguments"},
+		{"grayscale", "1", Warned, "measured: grayscale(1) still applies, so it must not be refused"},
+		{"text", "hello,10,10", Accepted, "three required arguments"},
+		{"text", "hello,10", Rejected, "one required argument short"},
+		{"image", "path,x,y", Accepted, "three required arguments"},
+		{"redact", "", Accepted, "all arguments optional"},
+		{"redact", "a,b,c", Warned, "more than the two documented optional arguments"},
+		{"expire", "1700000000000", Accepted, "exactly one argument"},
+	} {
+		t.Run(tc.name+"/"+tc.args, func(t *testing.T) {
+			got, msg := Check(tc.name, tc.args)
+			if got != tc.want {
+				t.Fatalf("Check(%q, %q) = %v, want %v (%s); message: %q",
+					tc.name, tc.args, got, tc.want, tc.why, msg)
+			}
+			if got != Accepted && msg == "" {
+				t.Error("non-accepted outcomes must explain themselves")
+			}
+		})
+	}
+}
+
+// Validate must refuse only what Check rejects.
+func TestValidateRefusesOnlyRejections(t *testing.T) {
 	for _, tc := range []struct {
 		name, args string
 		wantErr    bool
-		why        string
 	}{
-		{"blur", "5", false, "blur takes one argument"},
-		{"blur", "", true, "missing required argument"},
-		{"blur", "1,2,3", true, "too many arguments, imagor would ignore the filter"},
-		{"grayscale", "", false, "no arguments is correct"},
-		{"grayscale", "1", true, "grayscale takes none"},
-		{"text", "hello,10,10", false, "three required arguments"},
-		{"text", "hello,10", true, "one required argument short"},
-		{"image", "path,x,y", false, "three required arguments"},
-		{"redact", "", false, "all arguments optional"},
-		{"redact", "a,b,c", true, "more than the two optional arguments"},
-		{"expire", "1700000000000", false, "exactly one argument"},
+		{"blur", "5", false},
+		{"blur", "", true},
+		{"blur", "1,2,3", false},  // warned, not refused
+		{"grayscale", "1", false}, // warned, not refused
+		{"vintage", "70", true},   // unknown name
 	} {
-		t.Run(tc.name+"/"+tc.args, func(t *testing.T) {
-			err := Validate(tc.name, tc.args)
-			if tc.wantErr && err == nil {
-				t.Fatalf("%s(%s) should be rejected: %s", tc.name, tc.args, tc.why)
-			}
-			if !tc.wantErr && err != nil {
-				t.Fatalf("%s(%s) should be accepted (%s), got: %v", tc.name, tc.args, tc.why, err)
-			}
-		})
+		err := Validate(tc.name, tc.args)
+		if tc.wantErr && err == nil {
+			t.Errorf("Validate(%q, %q) should have refused", tc.name, tc.args)
+		}
+		if !tc.wantErr && err != nil {
+			t.Errorf("Validate(%q, %q) should not have refused: %v", tc.name, tc.args, err)
+		}
 	}
 }
 
@@ -69,8 +94,8 @@ func TestMultipleDocumentedFormsAreUnioned(t *testing.T) {
 	if err := Validate("focal", "100,200"); err != nil {
 		t.Errorf("two-argument focal should be accepted: %v", err)
 	}
-	if err := Validate("focal", "100,200,300"); err == nil {
-		t.Error("three-argument focal should be rejected")
+	if got, msg := Check("focal", "100,200,300"); got != Warned {
+		t.Errorf("three-argument focal should warn, got %v (%q)", got, msg)
 	}
 }
 
