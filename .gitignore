@@ -1,0 +1,10 @@
+# binaries
+/imagor-mcp
+/dist/
+
+# test artefacts
+*.out
+coverage.txt
+
+# stray binaries from `go build ./...`
+/spike
