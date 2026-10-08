@@ -34,6 +34,9 @@ Or build from source:
 go build -o imagor-mcp ./cmd/imagor-mcp
 ```
 
+The server is pure Go. It builds with `CGO_ENABLED=0` and needs neither libvips
+nor cgo, unlike imagor itself, so `go install` works with no native toolchain.
+
 ## Modes
 
 Exactly one mode applies, selected by the environment. There is no implicit
@@ -179,11 +182,4 @@ than to this implementation.
 
 ## Licence
 
-MIT, matching vipsgen, imagorface and imagor-base — the other standalone tools
-in this family.
-
-imagor itself is Apache-2.0, and this project imports its `imagorpath` package.
-Apache-2.0 is permissive, so consuming it imposes no licence condition here: no
-code is copied, only imported. `imagorpath` is pure Go, so this server builds
-with `CGO_ENABLED=0` and needs neither libvips nor cgo — the binary is
-self-contained.
+MIT. See [LICENSE](LICENSE).
