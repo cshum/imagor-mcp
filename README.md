@@ -59,6 +59,7 @@ its own.
 | `IMAGOR_SIGNER_TYPE` | `sha1` (default), `sha256` or `sha512`. Use `sha256` in production. |
 | `IMAGOR_SIGNER_TRUNCATE` | Signature length in characters, e.g. `40`. `0` means no truncation. |
 | `IMAGOR_BASE_URL` | Optional imagor origin. When set, output includes a full `absolute_url`. |
+| `IMAGOR_MCP_EXTRA_FILTERS` | Comma-separated extra filter names, for extensions and forks that register filters imagor does not document. Bypass name checking and are not arity-validated. |
 
 The signing settings must match the target imagor instance exactly, or its
 signature verification will reject the URLs.
@@ -89,6 +90,7 @@ The server speaks MCP over stdio, so nothing listens on a port.
 | `build_imagor_url` | Build a request path ready to send to imagor, signed or `unsafe/` as configured. Refused in path-out mode. |
 | `build_imagor_path` | Build an **unsigned** path for the caller to sign. Use when the MCP server should not hold the secret. |
 | `validate_imagor_path` | Parse a path, report whether it round-trips unchanged, and summarize the transformation. |
+| `list_imagor_filters` | List the accepted filters with their argument counts, optionally filtered by name. |
 | `describe_imagor` | Report the supported path grammar and the current signing mode. |
 
 Every transformation parameter maps onto a concept in the imagor path grammar.
@@ -117,12 +119,48 @@ URLs. Trust the component; do not trust the agent using it.
 Do not host this server multi-tenant on behalf of users whose signing keys you
 would then hold. Ship it self-hosted alongside imagor.
 
+## Filter validation
+
+imagor accepts any `name(args)` in a `filters:` segment. **Unknown filter names
+and wrong argument counts produce no error**: the request returns `200` with the
+image unchanged. Measured against imagor v1.9.7, all of the following returned
+byte-identical output to a filter-less request:
+
+```
+filters:vintage(70)      unknown name
+filters:blur(1,2,3)      too many arguments
+filters:blur()           missing a required argument
+filters:rotate()         missing a required argument
+filters:brightness()     missing a required argument
+filters:format()         missing a required argument
+```
+
+That is a reasonable choice for a permissive server and a dangerous one for an
+agent, which cannot tell a working URL from an inert one. This server is the
+strict layer, kept outside imagor: filter names and argument counts are checked
+before a path is signed, and the catalogue is generated from the exact imagor
+release in `go.mod` (see `cmd/genfilters`, run via `go generate ./internal/filters`).
+
+One combination is valid but inert, and is reported as a warning rather than an
+error: `quality()` only affects lossy output. With no `format()` filter the
+result may be lossless PNG, where `quality(30)` changes nothing.
+
 ## Limitations
 
-- **The filter catalogue is not enumerated.** imagor does not currently expose
-  its filter registry in a machine-readable form, and a hand-maintained copy
-  would silently rot as filters change. Pass filter names and arguments
-  directly; `describe_imagor` reports this limitation at runtime.
+- **Argument values are not validated, only names and counts.** `quality(abc)`
+  has the correct arity and passes validation; imagor then ignores it. Value
+  types are not reliably derivable from the filter reference, so they are not
+  enforced.
+- **Arity checking is stricter than imagor.** Several filters tolerate fewer
+  arguments than their documentation states and fall back to defaults. Measured
+  against v1.9.7: `sharpen()`, `pixelate()`, `fill()`, `text(a,b)` and
+  `grayscale(1)` all still take effect. This server refuses them anyway. The
+  asymmetry is deliberate — a refusal is loud and the agent corrects it in one
+  turn, whereas imagor's silent no-op is invisible — but it is a real
+  difference, and `IMAGOR_MCP_EXTRA_FILTERS` is not a workaround for it.
+- **The catalogue is tied to one imagor release.** It is generated from the
+  version in `go.mod`. After upgrading imagor, re-run `go generate
+  ./internal/filters`; the diff shows exactly which filters changed.
 - **No upload or POST support.** External upload needs its own signed-grant
   mechanism and is deliberately out of scope.
 - **No rendering.** The server never fetches or processes an image.

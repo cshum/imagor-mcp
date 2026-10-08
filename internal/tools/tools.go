@@ -21,6 +21,7 @@ import (
 	"github.com/cshum/imagor/imagorpath"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
+	filtercat "github.com/cshum/imagor-mcp/internal/filters"
 	"github.com/cshum/imagor-mcp/internal/pathgen"
 )
 
@@ -159,12 +160,13 @@ type TransformInput struct {
 
 // BuildOutput is the result of building a path or URL.
 type BuildOutput struct {
-	Mode        string `json:"mode" jsonschema:"how the path was produced: signed, unsafe or path_out"`
-	Path        string `json:"path" jsonschema:"the imagor path, without any signature or unsafe prefix"`
-	URL         string `json:"url,omitempty" jsonschema:"a request path ready to send to imagor, including its signature or unsafe prefix; empty in path_out mode"`
-	AbsoluteURL string `json:"absolute_url,omitempty" jsonschema:"the full URL to fetch, present only when IMAGOR_BASE_URL is configured"`
-	Signed      bool   `json:"signed" jsonschema:"whether the URL carries a signature"`
-	Note        string `json:"note,omitempty" jsonschema:"human-readable notes about the result"`
+	Mode        string   `json:"mode" jsonschema:"how the path was produced: signed, unsafe or path_out"`
+	Path        string   `json:"path" jsonschema:"the imagor path, without any signature or unsafe prefix"`
+	URL         string   `json:"url,omitempty" jsonschema:"a request path ready to send to imagor, including its signature or unsafe prefix; empty in path_out mode"`
+	AbsoluteURL string   `json:"absolute_url,omitempty" jsonschema:"the full URL to fetch, present only when IMAGOR_BASE_URL is configured"`
+	Signed      bool     `json:"signed" jsonschema:"whether the URL carries a signature"`
+	Note        string   `json:"note,omitempty" jsonschema:"human-readable notes about the result"`
+	Warnings    []string `json:"warnings,omitempty" jsonschema:"compositions that are valid but will not do what was intended"`
 }
 
 // toParams converts tool input into imagorpath.Params, appending the
@@ -194,10 +196,17 @@ func (in TransformInput) toParams() (imagorpath.Params, error) {
 
 	filters := make(imagorpath.Filters, 0, len(in.Filters)+2)
 	for _, f := range in.Filters {
-		if strings.TrimSpace(f.Name) == "" {
+		name := strings.TrimSpace(f.Name)
+		if name == "" {
 			return imagorpath.Params{}, fmt.Errorf("filter name must not be empty")
 		}
-		filters = append(filters, imagorpath.Filter{Name: f.Name, Args: f.Args})
+		// imagor ignores unknown filters and bad argument counts silently,
+		// returning an unchanged image with a 200 response, so the name and
+		// arity are checked here instead.
+		if err := filtercat.Validate(name, f.Args); err != nil {
+			return imagorpath.Params{}, err
+		}
+		filters = append(filters, imagorpath.Filter{Name: name, Args: f.Args})
 	}
 	if in.MaxAgeSeconds > 0 {
 		filters = append(filters, imagorpath.Filter{Name: "max_age", Args: strconv.Itoa(in.MaxAgeSeconds)})
@@ -231,6 +240,29 @@ func (in TransformInput) toParams() (imagorpath.Params, error) {
 	}, nil
 }
 
+// compositionWarnings reports combinations that pass validation but will not do
+// what the caller expects. Argument-count checking cannot catch these, because
+// each filter involved is individually well formed.
+func compositionWarnings(p imagorpath.Params) []string {
+	if !imagorpath.HasFilter(p, "quality") {
+		return nil
+	}
+	for _, f := range p.Filters {
+		if f.Name != "format" {
+			continue
+		}
+		switch strings.ToLower(strings.TrimSpace(f.Args)) {
+		case "jpeg", "jpg", "webp", "avif", "heif":
+			return nil // a lossy format is requested, so quality applies
+		}
+	}
+	return []string{
+		"quality() only affects lossy output formats. No lossy format() filter is present, so the " +
+			"result depends on the client's Accept header and may be lossless PNG, in which case " +
+			"quality has no effect. Add format(jpeg), format(webp) or format(avif) to be certain.",
+	}
+}
+
 // build validates the composition and renders it in the configured mode.
 func (c Config) build(in TransformInput) (BuildOutput, error) {
 	mode, err := c.Mode()
@@ -246,6 +278,7 @@ func (c Config) build(in TransformInput) (BuildOutput, error) {
 	}
 
 	out := BuildOutput{Mode: string(mode), Path: pathgen.Build(p)}
+	out.Warnings = compositionWarnings(p)
 	switch mode {
 	case ModeSigned:
 		signer, err := c.Signer()
@@ -390,16 +423,18 @@ type ParamDoc struct {
 
 // DescribeOutput describes the imagor path grammar this server targets.
 type DescribeOutput struct {
-	Mode         string     `json:"mode" jsonschema:"signed, unsafe or path_out"`
-	SignerType   string     `json:"signer_type"`
-	Truncate     int        `json:"truncate"`
-	Signed       bool       `json:"signing_enabled"`
-	BaseURL      string     `json:"base_url,omitempty"`
-	PathParams   []ParamDoc `json:"path_params" jsonschema:"path grammar parameters, reflected from the imagor path type"`
-	HAlignValues []string   `json:"h_align_values"`
-	VAlignValues []string   `json:"v_align_values"`
-	TrimByValues []string   `json:"trim_by_values"`
-	Limitations  []string   `json:"limitations"`
+	Mode          string     `json:"mode" jsonschema:"signed, unsafe or path_out"`
+	ImagorVersion string     `json:"imagor_version" jsonschema:"the imagor release the filter catalogue was generated from"`
+	FilterCount   int        `json:"filter_count" jsonschema:"number of filters accepted by the tools"`
+	SignerType    string     `json:"signer_type"`
+	Truncate      int        `json:"truncate"`
+	Signed        bool       `json:"signing_enabled"`
+	BaseURL       string     `json:"base_url,omitempty"`
+	PathParams    []ParamDoc `json:"path_params" jsonschema:"path grammar parameters, reflected from the imagor path type"`
+	HAlignValues  []string   `json:"h_align_values"`
+	VAlignValues  []string   `json:"v_align_values"`
+	TrimByValues  []string   `json:"trim_by_values"`
+	Limitations   []string   `json:"limitations"`
 }
 
 // DescribeTool reports the supported grammar and the server's signing mode.
@@ -414,18 +449,20 @@ func (c Config) DescribeTool(_ context.Context, _ *mcp.CallToolRequest, _ any) (
 		return nil, DescribeOutput{}, err
 	}
 	out := DescribeOutput{
-		Mode:         string(mode),
-		SignerType:   c.SignerType,
-		Truncate:     c.Truncate,
-		Signed:       c.Secret != "",
-		BaseURL:      c.BaseURL,
-		PathParams:   reflectParams(),
-		HAlignValues: []string{imagorpath.HAlignLeft, imagorpath.HAlignRight},
-		VAlignValues: []string{imagorpath.VAlignTop, imagorpath.VAlignBottom},
-		TrimByValues: []string{imagorpath.TrimByTopLeft, imagorpath.TrimByBottomRight},
+		Mode:          string(mode),
+		ImagorVersion: filtercat.ImagorVersion,
+		FilterCount:   len(filtercat.Names()),
+		SignerType:    c.SignerType,
+		Truncate:      c.Truncate,
+		Signed:        c.Secret != "",
+		BaseURL:       c.BaseURL,
+		PathParams:    reflectParams(),
+		HAlignValues:  []string{imagorpath.HAlignLeft, imagorpath.HAlignRight},
+		VAlignValues:  []string{imagorpath.VAlignTop, imagorpath.VAlignBottom},
+		TrimByValues:  []string{imagorpath.TrimByTopLeft, imagorpath.TrimByBottomRight},
 		Limitations: []string{
-			"the filter catalogue is not machine-readable in imagor today, so this server does not enumerate it; pass filter names and arguments directly",
 			"this server does not upload, store or render images; it only constructs paths and signatures",
+			"filter names and argument counts are validated against imagor " + filtercat.ImagorVersion + "; imagor itself ignores unrecognised filters silently",
 		},
 	}
 	if out.SignerType == "" {
@@ -440,6 +477,73 @@ func (c Config) DescribeTool(_ context.Context, _ *mcp.CallToolRequest, _ any) (
 			"path_out mode: this server holds no signing secret, so build_imagor_url is unavailable. Sign the path returned by build_imagor_path in the caller.")
 	}
 	return nil, out, nil
+}
+
+// ListFiltersInput selects which filters to return.
+type ListFiltersInput struct {
+	NameContains string `json:"name_contains,omitempty" jsonschema:"optional case-insensitive substring to filter names by, for example \"strip\" to find the metadata filters"`
+}
+
+// FilterDoc documents one filter.
+type FilterDoc struct {
+	Name       string `json:"name"`
+	Signature  string `json:"signature" jsonschema:"human-readable argument count, for example \"text(3 to 13 args)\""`
+	MinArgs    int    `json:"min_args"`
+	MaxArgs    int    `json:"max_args" jsonschema:"-1 means the signature is undocumented and the argument count is not validated"`
+	Documented bool   `json:"documented" jsonschema:"false when the filter is registered in imagor but absent from its filter reference"`
+}
+
+// ListFiltersOutput is the filter catalogue.
+type ListFiltersOutput struct {
+	ImagorVersion string      `json:"imagor_version" jsonschema:"the imagor release the catalogue was generated from"`
+	Count         int         `json:"count"`
+	Filters       []FilterDoc `json:"filters"`
+	Note          string      `json:"note,omitempty"`
+}
+
+// ListFiltersTool returns the filter catalogue.
+//
+// Argument counts come from imagor's own filter reference and are enforced by
+// build_imagor_url, so an agent chooses from filters that exist rather than
+// guessing names that imagor would ignore.
+func (c Config) ListFiltersTool(_ context.Context, _ *mcp.CallToolRequest, in ListFiltersInput) (*mcp.CallToolResult, ListFiltersOutput, error) {
+	needle := strings.ToLower(strings.TrimSpace(in.NameContains))
+	out := ListFiltersOutput{ImagorVersion: filtercat.ImagorVersion}
+	for _, name := range filtercat.Names() {
+		if needle != "" && !strings.Contains(strings.ToLower(name), needle) {
+			continue
+		}
+		spec, ok := filtercat.Lookup(name)
+		if !ok {
+			continue
+		}
+		out.Filters = append(out.Filters, FilterDoc{
+			Name:       name,
+			Signature:  signatureFor(name, spec),
+			MinArgs:    spec.MinArgs,
+			MaxArgs:    spec.MaxArgs,
+			Documented: spec.Documented,
+		})
+	}
+	out.Count = len(out.Filters)
+	if out.Count == 0 {
+		out.Note = fmt.Sprintf("no filter name contains %q", in.NameContains)
+	}
+	return nil, out, nil
+}
+
+// signatureFor renders a filter's accepted argument count for humans.
+func signatureFor(name string, spec filtercat.Spec) string {
+	switch {
+	case !spec.Documented || spec.MaxArgs < 0:
+		return name + "(argument count not validated)"
+	case spec.MinArgs == 0 && spec.MaxArgs == 0:
+		return name + "()"
+	case spec.MinArgs == spec.MaxArgs:
+		return fmt.Sprintf("%s(%d arg)", name, spec.MinArgs)
+	default:
+		return fmt.Sprintf("%s(%d to %d args)", name, spec.MinArgs, spec.MaxArgs)
+	}
 }
 
 // reflectParams lists the imagor path grammar parameters from imagor's own type.
@@ -479,6 +583,14 @@ func Register(s *mcp.Server, cfg Config) {
 		Description: "Parse an imagor path and report whether it round-trips unchanged, plus a short " +
 			"summary of the transformation it describes. Use this to check a path before serving it.",
 	}, cfg.ValidateTool)
+
+	mcp.AddTool(s, &mcp.Tool{
+		Name: "list_imagor_filters",
+		Description: "List the imagor filters this server accepts, with each filter's argument count. " +
+			"imagor ignores unrecognised filters and wrong argument counts silently — the request " +
+			"returns 200 with the image unchanged — so use this to pick filters that exist instead " +
+			"of guessing names.",
+	}, cfg.ListFiltersTool)
 
 	mcp.AddTool(s, &mcp.Tool{
 		Name: "describe_imagor",
