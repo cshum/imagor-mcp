@@ -43,6 +43,9 @@ type spec struct {
 	// imagor's own words rather than a paraphrase that can drift.
 	Signature   string
 	Description string
+	// Arguments are the per-argument descriptions from the reference, which is
+	// where the accepted forms are written down.
+	Arguments []string
 }
 
 func main() {
@@ -111,6 +114,7 @@ func parseDocs(path string) (map[string]spec, error) {
 	out := map[string]spec{}
 	for _, sec := range splitSections(string(b)) {
 		desc := firstParagraph(sec.body)
+		args := arguments(sec.body, signatureArgs(sec.heading))
 		for _, form := range strings.Split(sec.heading, " or ") {
 			name, min, max, ok := parseForm(strings.TrimSpace(form))
 			if !ok {
@@ -131,7 +135,7 @@ func parseDocs(path string) (map[string]spec, error) {
 			}
 			out[name] = spec{
 				Name: name, MinArgs: min, MaxArgs: max, Documented: true,
-				Signature: sec.heading, Description: desc,
+				Signature: sec.heading, Description: desc, Arguments: args,
 			}
 		}
 	}
@@ -188,6 +192,104 @@ func firstParagraph(body []string) string {
 		b.WriteString(t)
 	}
 	return b.String()
+}
+
+// arguments reads the argument descriptions under a heading. Only bullets whose
+// label matches an argument name in the signature are kept, so a section's other
+// lists (supported formats, examples) are not mistaken for grammar.
+func arguments(body []string, names []string) []string {
+	if len(names) == 0 {
+		return nil
+	}
+	want := map[string]bool{}
+	for _, n := range names {
+		want[n] = true
+	}
+	var out []string
+	var cur strings.Builder
+	flush := func() {
+		if s := strings.TrimSpace(cur.String()); s != "" {
+			out = append(out, s)
+		}
+		cur.Reset()
+	}
+	for _, line := range body {
+		trimmed := strings.TrimSpace(line)
+		if trimmed == "" {
+			continue
+		}
+		if strings.HasPrefix(line, "- ") {
+			flush()
+			label := bulletLabel(strings.TrimPrefix(trimmed, "- "))
+			if !want[label] {
+				continue
+			}
+			cur.WriteString(strings.TrimPrefix(trimmed, "- "))
+			continue
+		}
+		// Sub-bullets carry the accepted forms, so they continue their argument.
+		if cur.Len() == 0 || strings.HasPrefix(trimmed, "<") ||
+			strings.HasPrefix(trimmed, "|") || strings.HasPrefix(trimmed, "#") {
+			continue
+		}
+		if strings.HasSuffix(cur.String(), ":") {
+			cur.WriteString(" ")
+		} else {
+			cur.WriteString("; ")
+		}
+		cur.WriteString(strings.TrimSpace(strings.TrimPrefix(trimmed, "-")))
+	}
+	flush()
+	for i, s := range out {
+		out[i] = truncate(s, maxArgLen)
+	}
+	return out
+}
+
+// maxArgLen bounds one argument's description. The reference is more detailed
+// than a catalogue entry needs to be.
+const maxArgLen = 400
+
+func truncate(s string, n int) string {
+	if len(s) <= n {
+		return s
+	}
+	return strings.TrimSpace(s[:n]) + "…"
+}
+
+// bulletLabel returns the argument name a bullet introduces, which the reference
+// writes in backticks before a dash: "`x` — horizontal position".
+func bulletLabel(bullet string) string {
+	b := strings.TrimSpace(bullet)
+	if !strings.HasPrefix(b, "`") {
+		return ""
+	}
+	if end := strings.Index(b[1:], "`"); end >= 0 {
+		return b[1 : 1+end]
+	}
+	return ""
+}
+
+// signatureArgs lists the argument names in a signature such as
+// "image(imagorpath, x, y[, alpha[, blend_mode]])".
+func signatureArgs(signature string) []string {
+	open := strings.Index(signature, "(")
+	closeIdx := strings.LastIndex(signature, ")")
+	if open < 0 || closeIdx < open {
+		return nil
+	}
+	inner := strings.NewReplacer("[", "", "]", "").Replace(signature[open+1 : closeIdx])
+	var names []string
+	for _, part := range strings.Split(inner, ",") {
+		name := strings.TrimSpace(part)
+		if i := strings.IndexAny(name, "= "); i >= 0 {
+			name = name[:i]
+		}
+		if name != "" {
+			names = append(names, name)
+		}
+	}
+	return names
 }
 
 // parseForm extracts the filter name and accepted argument count from a
@@ -304,8 +406,8 @@ func write(path, version string, catalog map[string]spec) error {
 	fmt.Fprintf(&b, "var catalog = map[string]Spec{\n")
 	for _, name := range names {
 		s := catalog[name]
-		fmt.Fprintf(&b, "	%q: {MinArgs: %d, MaxArgs: %d, Documented: %t, Signature: %q, Description: %q},\n",
-			name, s.MinArgs, s.MaxArgs, s.Documented, s.Signature, s.Description)
+		fmt.Fprintf(&b, "	%q: {MinArgs: %d, MaxArgs: %d, Documented: %t, Signature: %q, Description: %q, Arguments: %#v},\n",
+			name, s.MinArgs, s.MaxArgs, s.Documented, s.Signature, s.Description, s.Arguments)
 	}
 	fmt.Fprintf(&b, "}\n")
 

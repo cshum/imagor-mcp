@@ -653,6 +653,9 @@ type FilterDoc struct {
 	// Description is imagor's own summary of the filter, carried from its
 	// reference so the two cannot drift apart.
 	Description string `json:"description,omitempty"`
+	// Arguments are the reference's descriptions of each argument, in signature
+	// order, which is where the accepted forms are written down.
+	Arguments []string `json:"arguments,omitempty"`
 }
 
 // ListFiltersOutput is the filter catalogue.
@@ -686,6 +689,7 @@ func (c Config) ListFiltersTool(_ context.Context, _ *mcp.CallToolRequest, in Li
 			MaxArgs:     spec.MaxArgs,
 			Documented:  spec.Documented,
 			Description: spec.Description,
+			Arguments:   spec.Arguments,
 		})
 	}
 	out.Count = len(out.Filters)

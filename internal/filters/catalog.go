@@ -41,6 +41,9 @@ type Spec struct {
 	// verbatim so the catalogue cannot drift from the documentation. Empty for a
 	// filter the reference does not document.
 	Description string
+	// Arguments are the per-argument descriptions from the reference, in
+	// signature order, which is where the accepted forms are written down.
+	Arguments []string
 }
 
 // Lookup returns the spec for a filter name, including any filter names
