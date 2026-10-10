@@ -399,17 +399,22 @@ func TestVerifyURLTool(t *testing.T) {
 		Filters []outcome `json:"filters"`
 	}
 	var out struct {
-		Mode            string    `json:"mode"`
-		Path            string    `json:"path"`
-		URL             string    `json:"url"`
-		AbsoluteURL     string    `json:"absolute_url"`
-		MetaURL         string    `json:"meta_url"`
-		MetaAbsoluteURL string    `json:"meta_absolute_url"`
-		Verified        bool      `json:"verified"`
-		ServerVersion   string    `json:"server_version"`
-		Status          int       `json:"status"`
-		Note            string    `json:"note"`
-		Results         []outcome `json:"results"`
+		Mode            string `json:"mode"`
+		Path            string `json:"path"`
+		URL             string `json:"url"`
+		AbsoluteURL     string `json:"absolute_url"`
+		MetaURL         string `json:"meta_url"`
+		MetaAbsoluteURL string `json:"meta_absolute_url"`
+		Verified        bool   `json:"verified"`
+		Server          struct {
+			Version          string `json:"version"`
+			ReportsVersion   bool   `json:"reports_version"`
+			ReportsFilters   bool   `json:"reports_filters"`
+			CatalogueVersion string `json:"catalogue_version"`
+		} `json:"server"`
+		Status  int       `json:"status"`
+		Note    string    `json:"note"`
+		Results []outcome `json:"results"`
 	}
 	args := map[string]any{
 		"image": "example.com/a.jpg", "width": 400, "height": 300, "fit_in": true,
@@ -420,7 +425,7 @@ func TestVerifyURLTool(t *testing.T) {
 	}
 
 	t.Run("the server reports outcomes", func(t *testing.T) {
-		served.Store(`{"filters":[` +
+		served.Store(`{"version":"v1.9.7","filters":[` +
 			`{"name":"image","processed":true,"filters":[` +
 			`{"name":"blur","processed":true},{"name":"rotate","processed":false}]},` +
 			`{"name":"quality","processed":true}]}`)
@@ -430,6 +435,17 @@ func TestVerifyURLTool(t *testing.T) {
 		}
 		if !out.Verified || out.Status != 200 {
 			t.Fatalf("expected a verified 200, got verified=%v status=%d note=%q", out.Verified, out.Status, out.Note)
+		}
+		// Both added fields are there, so the caller can trust what it read.
+		if !out.Server.ReportsVersion || !out.Server.ReportsFilters {
+			t.Errorf("server = %+v, want both fields reported", out.Server)
+		}
+		if out.Server.Version != out.Server.CatalogueVersion {
+			t.Errorf("server version %q and catalogue version %q should agree here",
+				out.Server.Version, out.Server.CatalogueVersion)
+		}
+		if strings.Contains(out.Note, "may differ") || strings.Contains(out.Note, "predates") {
+			t.Errorf("note %q warns about a version it matches", out.Note)
 		}
 		// Both URLs come back, and they differ: a signature covers the whole
 		// path, so the metadata URL is not derivable from the image URL.
@@ -473,11 +489,31 @@ func TestVerifyURLTool(t *testing.T) {
 		if err := callTool(t, s, "verify_imagor_url", args, &out); err != nil {
 			t.Fatalf("verify_imagor_url: %v", err)
 		}
-		if out.ServerVersion != "v1.9.6" {
-			t.Errorf("server_version = %q, want the release the server reported", out.ServerVersion)
+		if out.Server.Version != "v1.9.6" || !out.Server.ReportsVersion {
+			t.Errorf("server = %+v, want the reported release", out.Server)
 		}
 		if !strings.Contains(out.Note, "v1.9.6") || !strings.Contains(out.Note, "may differ") {
 			t.Errorf("note %q does not warn that the reference describes another release", out.Note)
+		}
+	})
+
+	t.Run("the server reports outcomes but no version", func(t *testing.T) {
+		served.Store(`{"filters":[{"name":"image","processed":true},{"name":"quality","processed":true}]}`)
+
+		if err := callTool(t, s, "verify_imagor_url", args, &out); err != nil {
+			t.Fatalf("verify_imagor_url: %v", err)
+		}
+		if out.Server.ReportsVersion {
+			t.Errorf("server = %+v, want no version reported", out.Server)
+		}
+		if !out.Server.ReportsFilters {
+			t.Errorf("server = %+v, want the filters field reported", out.Server)
+		}
+		if !strings.Contains(out.Note, "did not report a version") {
+			t.Errorf("note %q does not say the version is missing", out.Note)
+		}
+		if !strings.Contains(out.Note, out.Server.CatalogueVersion) {
+			t.Errorf("note %q does not name the release the reference describes", out.Note)
 		}
 	})
 
@@ -494,6 +530,9 @@ func TestVerifyURLTool(t *testing.T) {
 			if r.Outcome != "unknown" {
 				t.Errorf("outcome = %q, want unknown: absence is not failure", r.Outcome)
 			}
+		}
+		if out.Server.ReportsFilters {
+			t.Errorf("server = %+v, want no filters field reported", out.Server)
 		}
 		if !strings.Contains(out.Note, "unknown rather than wrong") {
 			t.Errorf("note %q does not explain the absence", out.Note)
