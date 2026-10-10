@@ -284,8 +284,14 @@ func TestValidateToolChecksNestedPaths(t *testing.T) {
 			wantWarning: "unsafe/",
 		},
 		{
-			// watermark() takes an image URL, not a path, so a filter written
-			// inside it is never run.
+			// The crop pair is a parameter, so writing it after the filters
+			// makes imagor read it as part of the image path.
+			name:        "crop written after the filters",
+			path:        "fit-in/300x300/filters:upscale()/201x65:289x99/example.com/a.jpg",
+			valid:       false,
+			wantProblem: "parameters come before filters",
+		},
+		{
 			name:        "filters inside watermark() never run",
 			path:        "filters:watermark(filters:blur(3)/example.com/logo.png,10,10,50)/example.com/a.jpg",
 			valid:       false,

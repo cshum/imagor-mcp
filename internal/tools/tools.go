@@ -506,7 +506,17 @@ var paramSegments = map[string]bool{
 // isParamSegment reports whether a segment is a parameter. A path whose image
 // begins with one had its parameters written after its filters.
 func isParamSegment(seg string) bool {
-	return paramSegments[seg] || isDimSegment(seg)
+	return paramSegments[seg] || isDimSegment(seg) || isCropSegment(seg)
+}
+
+// isCropSegment reports whether a segment is a crop pair, leftxtop:rightxbottom,
+// as in 201x65:289x99 or 0x0:0.5x1.
+func isCropSegment(seg string) bool {
+	top, bottom, ok := strings.Cut(seg, ":")
+	if !ok {
+		return false
+	}
+	return isDimSegment(top) && isDimSegment(bottom)
 }
 
 // isDimSegment reports whether a segment is a dimension or alignment pair such
