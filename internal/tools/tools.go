@@ -374,6 +374,9 @@ type VerifyOutput struct {
 	Verified bool            `json:"verified"`
 	Status   int             `json:"status" jsonschema:"the HTTP status the metadata request returned"`
 	Results  []FilterOutcome `json:"results,omitempty"`
+	// ServerVersion is the release the server reported, empty when it reported
+	// none, which means it predates the release that does.
+	ServerVersion string `json:"server_version,omitempty" jsonschema:"the imagor release the server reported, absent when it reported none"`
 }
 
 // reportedFilter mirrors the filter report a server returns in a /meta response.
@@ -465,8 +468,18 @@ func (c Config) VerifyURLTool(ctx context.Context, _ *mcp.CallToolRequest, in Ve
 		return nil, VerifyOutput{}, fmt.Errorf("the response from %s was not JSON: %w", checked, err)
 	}
 	raw, present := envelope["filters"]
+	// The server names the release that answered. Without it a client cannot
+	// tell an older server from one with nothing to report, since the field it
+	// looks for is omitted in both cases.
+	if v, ok := envelope["version"]; ok {
+		var s string
+		if err := json.Unmarshal(v, &s); err == nil {
+			out.ServerVersion = s
+		}
+	}
 	if !present {
-		out.Note = "this server did not report filter outcomes, so the result is unknown rather than wrong: " +
+		out.Note = versionNote(out.ServerVersion) +
+			"this server did not report filter outcomes, so the result is unknown rather than wrong: " +
 			"it is either an imagor older than the release that reports them, or a response replayed from result storage. " +
 			"Confirm the server version before treating this as a failure."
 		out.Results = outcomes(p.Filters, nil, OutcomeUnknown)
@@ -478,8 +491,27 @@ func (c Config) VerifyURLTool(ctx context.Context, _ *mcp.CallToolRequest, in Ve
 	}
 	out.Verified = true
 	out.Results = outcomes(p.Filters, reported, OutcomeNotReported)
-	out.Note = summarizeOutcomes(out.Results)
+	out.Note = versionNote(out.ServerVersion) + summarizeOutcomes(out.Results)
 	return nil, out, nil
+}
+
+// versionNote compares the release the server reported against the one this
+// server's catalogue describes. The catalogue is generated from a released
+// imagor, so without this a caller would trust grammar the server may not
+// implement: an unreleased fix in the reference reaches the catalogue only at
+// the next release, and a server older than the catalogue has the reverse
+// problem.
+func versionNote(server string) string {
+	switch {
+	case server == "":
+		return ""
+	case server == filtercat.ImagorVersion:
+		return ""
+	default:
+		return fmt.Sprintf(
+			"the server reports imagor %s, but this server's filter reference describes %s, so the accepted forms may differ. ",
+			server, filtercat.ImagorVersion)
+	}
 }
 
 // outcomes walks the requested filters against the reported ones. The report

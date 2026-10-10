@@ -406,6 +406,7 @@ func TestVerifyURLTool(t *testing.T) {
 		MetaURL         string    `json:"meta_url"`
 		MetaAbsoluteURL string    `json:"meta_absolute_url"`
 		Verified        bool      `json:"verified"`
+		ServerVersion   string    `json:"server_version"`
 		Status          int       `json:"status"`
 		Note            string    `json:"note"`
 		Results         []outcome `json:"results"`
@@ -463,6 +464,20 @@ func TestVerifyURLTool(t *testing.T) {
 		}
 		if !strings.Contains(out.Note, "3 applied") || !strings.Contains(out.Note, "1 recognised") {
 			t.Errorf("note %q does not summarise the result", out.Note)
+		}
+	})
+
+	t.Run("the server reports a different release", func(t *testing.T) {
+		served.Store(`{"version":"v1.9.6","filters":[{"name":"image","processed":true},{"name":"quality","processed":true}]}`)
+
+		if err := callTool(t, s, "verify_imagor_url", args, &out); err != nil {
+			t.Fatalf("verify_imagor_url: %v", err)
+		}
+		if out.ServerVersion != "v1.9.6" {
+			t.Errorf("server_version = %q, want the release the server reported", out.ServerVersion)
+		}
+		if !strings.Contains(out.Note, "v1.9.6") || !strings.Contains(out.Note, "may differ") {
+			t.Errorf("note %q does not warn that the reference describes another release", out.Note)
 		}
 	})
 
