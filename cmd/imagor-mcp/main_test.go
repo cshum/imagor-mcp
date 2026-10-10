@@ -407,8 +407,6 @@ func TestVerifyURLTool(t *testing.T) {
 		MetaAbsoluteURL string `json:"meta_absolute_url"`
 		Verified        bool   `json:"verified"`
 		Server          struct {
-			Version          string `json:"version"`
-			ReportsVersion   bool   `json:"reports_version"`
 			ReportsFilters   bool   `json:"reports_filters"`
 			CatalogueVersion string `json:"catalogue_version"`
 			RequiresImagor   string `json:"requires_imagor"`
@@ -427,7 +425,7 @@ func TestVerifyURLTool(t *testing.T) {
 	}
 
 	t.Run("the server reports outcomes", func(t *testing.T) {
-		served.Store(`{"version":"1.9.7","filters":[` +
+		served.Store(`{"filters":[` +
 			`{"name":"image","processed":true,"filters":[` +
 			`{"name":"blur","processed":true},{"name":"rotate","processed":false}]},` +
 			`{"name":"quality","processed":true}]}`)
@@ -438,20 +436,14 @@ func TestVerifyURLTool(t *testing.T) {
 		if !out.Verified || out.Status != 200 {
 			t.Fatalf("expected a verified 200, got verified=%v status=%d note=%q", out.Verified, out.Status, out.Note)
 		}
-		// Both added fields are there, so the caller can trust what it read.
-		if !out.Server.ReportsVersion || !out.Server.ReportsFilters {
-			t.Errorf("server = %+v, want both fields reported", out.Server)
-		}
 		if !out.Server.Compatible {
 			t.Errorf("server = %+v, want the server reported as compatible", out.Server)
 		}
 		if out.Server.RequiresImagor == "" {
 			t.Errorf("server = %+v, want the release this tool needs named", out.Server)
 		}
-		// The server's constant carries no v and the module version does, so the
-		// two spellings must be recognised as the same release.
-		if out.Server.Version == out.Server.CatalogueVersion {
-			t.Fatalf("fixture is unrealistic: a server does not spell its version like a module version")
+		if !out.Server.ReportsFilters {
+			t.Errorf("server = %+v, want the report field found", out.Server)
 		}
 		if strings.Contains(out.Note, "may differ") || strings.Contains(out.Note, "predates") {
 			t.Errorf("note %q warns about a version it matches", out.Note)
@@ -489,45 +481,6 @@ func TestVerifyURLTool(t *testing.T) {
 		}
 		if !strings.Contains(out.Note, "3 applied") || !strings.Contains(out.Note, "1 recognised") {
 			t.Errorf("note %q does not summarise the result", out.Note)
-		}
-	})
-
-	t.Run("the server reports a different release", func(t *testing.T) {
-		served.Store(`{"version":"v1.9.6","filters":[{"name":"image","processed":true},{"name":"quality","processed":true}]}`)
-
-		if err := callTool(t, s, "verify_imagor_url", args, &out); err != nil {
-			t.Fatalf("verify_imagor_url: %v", err)
-		}
-		if out.Server.Version != "v1.9.6" || !out.Server.ReportsVersion {
-			t.Errorf("server = %+v, want the reported release", out.Server)
-		}
-		if !strings.Contains(out.Note, "v1.9.6") || !strings.Contains(out.Note, "may differ") {
-			t.Errorf("note %q does not warn that the reference describes another release", out.Note)
-		}
-	})
-
-	t.Run("the server reports outcomes but no version", func(t *testing.T) {
-		served.Store(`{"filters":[{"name":"image","processed":true},{"name":"quality","processed":true}]}`)
-
-		if err := callTool(t, s, "verify_imagor_url", args, &out); err != nil {
-			t.Fatalf("verify_imagor_url: %v", err)
-		}
-		if out.Server.ReportsVersion {
-			t.Errorf("server = %+v, want no version reported", out.Server)
-		}
-		if !out.Server.ReportsFilters {
-			t.Errorf("server = %+v, want the filters field reported", out.Server)
-		}
-		if !strings.Contains(out.Note, "did not report a version") {
-			t.Errorf("note %q does not say the version is missing", out.Note)
-		}
-		if !strings.Contains(out.Note, "predates the release that reports one") {
-			t.Errorf("note %q does not say what the server predates", out.Note)
-		}
-		// The catalogue's release is not what the server predates: a server can
-		// be exactly that release and still predate the field.
-		if strings.Contains(out.Note, "predates "+out.Server.CatalogueVersion) {
-			t.Errorf("note %q claims the server predates the release the catalogue describes", out.Note)
 		}
 	})
 

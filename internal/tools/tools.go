@@ -394,14 +394,11 @@ type VerifyOutput struct {
 // ServerInfo is what the server's metadata said about itself, and which of the
 // fields this tool needs were there at all.
 type ServerInfo struct {
-	// Version is the release the server reported, empty when it reported none.
-	Version string `json:"version,omitempty" jsonschema:"the imagor release the server reported"`
-	// ReportsVersion is false when there was no version field, which means the
-	// server predates the release that reports one.
-	ReportsVersion bool `json:"reports_version" jsonschema:"whether the server reported the release that produced the response"`
-	// ReportsFilters is false when there was no filters field, which means the
-	// server predates the release that reports filter outcomes.
-	ReportsFilters bool `json:"reports_filters" jsonschema:"whether the server reported what it did with each filter"`
+	// ReportsFilters is whether the server returned the filter report at all.
+	// The field is always present from the release that reports outcomes, empty
+	// when there is nothing to report, so its absence means the server predates
+	// it and cannot be verified against.
+	ReportsFilters bool `json:"reports_filters" jsonschema:"whether the server reported what it did with each filter; the field is present from the release that reports outcomes, so absence means the server predates it"`
 	// CatalogueVersion is the release this server's filter reference describes,
 	// so a caller can see the two side by side.
 	CatalogueVersion string `json:"catalogue_version" jsonschema:"the imagor release this server's filter reference was generated from"`
@@ -508,15 +505,8 @@ func (c Config) VerifyURLTool(ctx context.Context, _ *mcp.CallToolRequest, in Ve
 	// report something from a server that had nothing to report.
 	out.Server.ReportsFilters = present
 	out.Server.Compatible = present
-	if v, ok := envelope["version"]; ok {
-		var s string
-		if err := json.Unmarshal(v, &s); err == nil {
-			out.Server.Version = s
-			out.Server.ReportsVersion = s != ""
-		}
-	}
 	if !present {
-		out.Note = versionNote(out.Server) + fmt.Sprintf(
+		out.Note = fmt.Sprintf(
 			"This server did not report what it did with each filter, so nothing can be verified against it. "+
 				"That needs imagor %s or later. This is not a failure: the composition may be perfectly valid, "+
 				"it simply cannot be checked here.", RequiresImagor)
@@ -529,38 +519,8 @@ func (c Config) VerifyURLTool(ctx context.Context, _ *mcp.CallToolRequest, in Ve
 	}
 	out.Verified = true
 	out.Results = outcomes(p.Filters, reported, OutcomeNotReported)
-	out.Note = versionNote(out.Server) + summarizeOutcomes(out.Results)
+	out.Note = summarizeOutcomes(out.Results)
 	return nil, out, nil
-}
-
-// versionNote compares the release the server reported against the one this
-// server's catalogue describes. The catalogue is generated from a released
-// imagor, so without this a caller would trust grammar the server may not
-// implement: a fix in the reference that is not released yet reaches the
-// catalogue only at the next release, and a server older than the catalogue has
-// the reverse problem.
-func versionNote(s ServerInfo) string {
-	switch {
-	case !s.ReportsVersion:
-		// The release that reports a version is not named, because this server
-		// has no way to know which release that is. The catalogue's release is
-		// not it: a server can be exactly the release the catalogue describes
-		// and still predate the field.
-		return "the server did not report a version, so it predates the release that reports one. "
-	case sameVersion(s.Version, s.CatalogueVersion):
-		return ""
-	default:
-		return fmt.Sprintf(
-			"the server reports imagor %s, but this server's filter reference describes %s, so the accepted forms may differ. ",
-			s.Version, s.CatalogueVersion)
-	}
-}
-
-// sameVersion compares two release strings, ignoring the leading v. A Go module
-// version carries one and the constant a server reports does not, so comparing
-// them directly reports a mismatch between two names for the same release.
-func sameVersion(a, b string) bool {
-	return strings.TrimPrefix(a, "v") == strings.TrimPrefix(b, "v")
 }
 
 // outcomes walks the requested filters against the reported ones. The report
