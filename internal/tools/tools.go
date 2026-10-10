@@ -646,10 +646,13 @@ type ListFiltersInput struct {
 // FilterDoc documents one filter.
 type FilterDoc struct {
 	Name       string `json:"name"`
-	Signature  string `json:"signature" jsonschema:"human-readable argument count, for example \"text(3 to 13 args)\""`
+	Signature  string `json:"signature" jsonschema:"imagor's documented signature, for example \\\"image(imagorpath, x, y[, alpha[, blend_mode]])\\\"; the argument count when undocumented"`
 	MinArgs    int    `json:"min_args"`
 	MaxArgs    int    `json:"max_args" jsonschema:"-1 means the signature is undocumented and the argument count is not validated"`
 	Documented bool   `json:"documented" jsonschema:"false when the filter is registered in imagor but absent from its filter reference"`
+	// Description is imagor's own summary of the filter, carried from its
+	// reference so the two cannot drift apart.
+	Description string `json:"description,omitempty"`
 }
 
 // ListFiltersOutput is the filter catalogue.
@@ -677,11 +680,12 @@ func (c Config) ListFiltersTool(_ context.Context, _ *mcp.CallToolRequest, in Li
 			continue
 		}
 		out.Filters = append(out.Filters, FilterDoc{
-			Name:       name,
-			Signature:  signatureFor(name, spec),
-			MinArgs:    spec.MinArgs,
-			MaxArgs:    spec.MaxArgs,
-			Documented: spec.Documented,
+			Name:        name,
+			Signature:   signatureFor(name, spec),
+			MinArgs:     spec.MinArgs,
+			MaxArgs:     spec.MaxArgs,
+			Documented:  spec.Documented,
+			Description: spec.Description,
 		})
 	}
 	out.Count = len(out.Filters)
@@ -693,6 +697,9 @@ func (c Config) ListFiltersTool(_ context.Context, _ *mcp.CallToolRequest, in Li
 
 // signatureFor renders a filter's accepted argument count for humans.
 func signatureFor(name string, spec filtercat.Spec) string {
+	if spec.Signature != "" {
+		return spec.Signature
+	}
 	switch {
 	case !spec.Documented || spec.MaxArgs < 0:
 		return name + "(argument count not validated)"

@@ -38,6 +38,11 @@ type spec struct {
 	MinArgs    int
 	MaxArgs    int
 	Documented bool
+	// Signature is the heading as written in the filter reference, and
+	// Description the paragraph under it, so the catalogue describes filters in
+	// imagor's own words rather than a paraphrase that can drift.
+	Signature   string
+	Description string
 }
 
 func main() {
@@ -91,24 +96,22 @@ func goList(tmpl string) (string, error) {
 
 var headingRe = regexp.MustCompile(`^###\s+(.+)$`)
 
-// parseDocs reads filter signatures from the filter reference headings.
+// parseDocs reads filter signatures and summaries from the filter reference.
 //
 // A heading may carry more than one form, as in
 // "`focal(AxB:CxD)` or `focal(X,Y)`", so every alternative is parsed and the
-// accepted range is widened to cover all of them.
+// accepted range is widened to cover all of them. The heading is kept as the
+// signature and the paragraph under it as the description, so the catalogue
+// carries imagor's own wording.
 func parseDocs(path string) (map[string]spec, error) {
 	b, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
 	out := map[string]spec{}
-	for _, line := range strings.Split(string(b), "\n") {
-		m := headingRe.FindStringSubmatch(strings.TrimRight(line, "\r"))
-		if m == nil {
-			continue
-		}
-		heading := strings.ReplaceAll(m[1], "`", "")
-		for _, form := range strings.Split(heading, " or ") {
+	for _, sec := range splitSections(string(b)) {
+		desc := firstParagraph(sec.body)
+		for _, form := range strings.Split(sec.heading, " or ") {
 			name, min, max, ok := parseForm(strings.TrimSpace(form))
 			if !ok {
 				continue
@@ -120,13 +123,71 @@ func parseDocs(path string) (map[string]spec, error) {
 				if max > prev.MaxArgs {
 					prev.MaxArgs = max
 				}
+				if prev.Description == "" {
+					prev.Description = desc
+				}
 				out[name] = prev
 				continue
 			}
-			out[name] = spec{Name: name, MinArgs: min, MaxArgs: max, Documented: true}
+			out[name] = spec{
+				Name: name, MinArgs: min, MaxArgs: max, Documented: true,
+				Signature: sec.heading, Description: desc,
+			}
 		}
 	}
 	return out, nil
+}
+
+// docsSection is one filter heading with the lines that follow it.
+type docsSection struct {
+	heading string
+	body    []string
+}
+
+// splitSections groups the filter reference by heading, so a heading can be read
+// together with the prose it introduces.
+func splitSections(text string) []docsSection {
+	var out []docsSection
+	for _, line := range strings.Split(text, "\n") {
+		line = strings.TrimRight(line, "\r")
+		if m := headingRe.FindStringSubmatch(line); m != nil {
+			out = append(out, docsSection{heading: strings.ReplaceAll(m[1], "`", "")})
+			continue
+		}
+		if len(out) > 0 {
+			out[len(out)-1].body = append(out[len(out)-1].body, line)
+		}
+	}
+	return out
+}
+
+// firstParagraph returns the summary directly under a heading. Bullet lists,
+// tables and anything past the first blank line are left out: the catalogue
+// carries a description, not the documentation. A section that opens with a
+// list or a table has no summary.
+func firstParagraph(body []string) string {
+	var b strings.Builder
+	for _, line := range body {
+		t := strings.TrimSpace(line)
+		if t == "" {
+			if b.Len() > 0 {
+				break
+			}
+			continue
+		}
+		if strings.HasPrefix(t, "-") || strings.HasPrefix(t, "|") ||
+			strings.HasPrefix(t, "<") || strings.HasPrefix(t, "#") {
+			if b.Len() == 0 {
+				continue
+			}
+			break
+		}
+		if b.Len() > 0 {
+			b.WriteString(" ")
+		}
+		b.WriteString(t)
+	}
+	return b.String()
 }
 
 // parseForm extracts the filter name and accepted argument count from a
@@ -243,7 +304,8 @@ func write(path, version string, catalog map[string]spec) error {
 	fmt.Fprintf(&b, "var catalog = map[string]Spec{\n")
 	for _, name := range names {
 		s := catalog[name]
-		fmt.Fprintf(&b, "\t%q: {MinArgs: %d, MaxArgs: %d, Documented: %t},\n", name, s.MinArgs, s.MaxArgs, s.Documented)
+		fmt.Fprintf(&b, "	%q: {MinArgs: %d, MaxArgs: %d, Documented: %t, Signature: %q, Description: %q},\n",
+			name, s.MinArgs, s.MaxArgs, s.Documented, s.Signature, s.Description)
 	}
 	fmt.Fprintf(&b, "}\n")
 

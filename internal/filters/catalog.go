@@ -33,6 +33,14 @@ type Spec struct {
 	// Documented reports whether the signature came from imagor's filter
 	// reference. Undocumented filters are name-checked only.
 	Documented bool
+	// Signature is the filter's heading in imagor's reference, for example
+	// "image(imagorpath, x, y[, alpha[, blend_mode]])". Empty for a filter the
+	// reference does not document.
+	Signature string
+	// Description is the summary imagor's reference gives the filter, carried
+	// verbatim so the catalogue cannot drift from the documentation. Empty for a
+	// filter the reference does not document.
+	Description string
 }
 
 // Lookup returns the spec for a filter name, including any filter names
