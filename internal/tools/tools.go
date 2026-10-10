@@ -887,7 +887,31 @@ type FilterDoc struct {
 	Description string `json:"description,omitempty"`
 	// Arguments are the reference's descriptions of each argument, in signature
 	// order, which is where the accepted forms are written down.
-	Arguments []string `json:"arguments,omitempty"`
+	Arguments []FilterArgument `json:"arguments,omitempty"`
+}
+
+// FilterArgument documents one argument of a filter.
+type FilterArgument struct {
+	// Name is the argument as it appears in the signature.
+	Name string `json:"name"`
+	// Lead is what the argument means.
+	Lead string `json:"lead"`
+	// Forms are the accepted forms, kept as a list because they are
+	// alternatives: a caller needs to pick one, not read them as one sentence.
+	Forms []string `json:"forms,omitempty" jsonschema:"the accepted forms, one per line of imagor's reference"`
+}
+
+// filterArguments carries the reference's argument descriptions into the tool
+// output, keeping each accepted form separate.
+func filterArguments(args []filtercat.Argument) []FilterArgument {
+	if len(args) == 0 {
+		return nil
+	}
+	out := make([]FilterArgument, 0, len(args))
+	for _, a := range args {
+		out = append(out, FilterArgument{Name: a.Name, Lead: a.Lead, Forms: a.Forms})
+	}
+	return out
 }
 
 // ListFiltersOutput is the filter catalogue.
@@ -921,7 +945,7 @@ func (c Config) ListFiltersTool(_ context.Context, _ *mcp.CallToolRequest, in Li
 			MaxArgs:     spec.MaxArgs,
 			Documented:  spec.Documented,
 			Description: spec.Description,
-			Arguments:   spec.Arguments,
+			Arguments:   filterArguments(spec.Arguments),
 		})
 	}
 	out.Count = len(out.Filters)

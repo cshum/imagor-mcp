@@ -45,7 +45,7 @@ type spec struct {
 	Description string
 	// Arguments are the per-argument descriptions from the reference, which is
 	// where the accepted forms are written down.
-	Arguments []string
+	Arguments []argument
 }
 
 func main() {
@@ -112,9 +112,11 @@ func parseDocs(path string) (map[string]spec, error) {
 		return nil, err
 	}
 	out := map[string]spec{}
+	lines := strings.Split(string(b), "\n")
+	shared := sections(lines)
 	for _, sec := range splitSections(string(b)) {
 		desc := firstParagraph(sec.body)
-		args := arguments(sec.body, signatureArgs(sec.heading))
+		args := arguments(sec.body, signatureArgs(sec.heading), shared)
 		for _, form := range strings.Split(sec.heading, " or ") {
 			name, min, max, ok := parseForm(strings.TrimSpace(form))
 			if !ok {
@@ -197,7 +199,12 @@ func firstParagraph(body []string) string {
 // arguments reads the argument descriptions under a heading. Only bullets whose
 // label matches an argument name in the signature are kept, so a section's other
 // lists (supported formats, examples) are not mistaken for grammar.
-func arguments(body []string, names []string) []string {
+//
+// The bullets under an argument are its accepted forms, and they stay separate:
+// they are alternatives, so joining them into one sentence reads as a single
+// long requirement rather than as a choice, which is exactly how a caller
+// mistakes `right-20` for an inset.
+func arguments(body []string, names []string, sections map[string][]string) []argument {
 	if len(names) == 0 {
 		return nil
 	}
@@ -205,45 +212,161 @@ func arguments(body []string, names []string) []string {
 	for _, n := range names {
 		want[n] = true
 	}
-	var out []string
-	var cur strings.Builder
+	var out []argument
+	var cur *argument
 	flush := func() {
-		if s := strings.TrimSpace(cur.String()); s != "" {
-			out = append(out, s)
+		if cur == nil {
+			return
 		}
-		cur.Reset()
+		cur.Lead = truncate(cur.Lead, maxArgLen)
+		for i, f := range cur.Forms {
+			cur.Forms[i] = truncate(f, maxArgLen)
+		}
+		out = append(out, *cur)
+		cur = nil
 	}
 	for _, line := range body {
 		trimmed := strings.TrimSpace(line)
-		if trimmed == "" {
+		if trimmed == "" || isRule(trimmed) {
 			continue
 		}
 		if strings.HasPrefix(line, "- ") {
 			flush()
-			label := bulletLabel(strings.TrimPrefix(trimmed, "- "))
+			text := strings.TrimPrefix(trimmed, "- ")
+			label := bulletLabel(text)
 			if !want[label] {
 				continue
 			}
-			cur.WriteString(strings.TrimPrefix(trimmed, "- "))
+			cur = &argument{Name: label, Lead: leadText(text, label)}
 			continue
 		}
-		// Sub-bullets carry the accepted forms, so they continue their argument.
-		if cur.Len() == 0 || strings.HasPrefix(trimmed, "<") ||
+		// Sub-bullets carry the accepted forms.
+		if cur == nil || strings.HasPrefix(trimmed, "<") ||
 			strings.HasPrefix(trimmed, "|") || strings.HasPrefix(trimmed, "#") {
 			continue
 		}
-		if strings.HasSuffix(cur.String(), ":") {
-			cur.WriteString(" ")
-		} else {
-			cur.WriteString("; ")
-		}
-		cur.WriteString(strings.TrimSpace(strings.TrimPrefix(trimmed, "-")))
+		cur.Forms = append(cur.Forms, strings.TrimSpace(strings.TrimPrefix(trimmed, "-")))
 	}
 	flush()
-	for i, s := range out {
-		out[i] = truncate(s, maxArgLen)
+	for i := range out {
+		// An argument may point at a section instead of repeating the forms, so
+		// the reference keeps one copy of a grammar several filters share. The
+		// pointer is dropped once followed: the forms carry the content, and a
+		// docs anchor means nothing to a caller reading the catalogue.
+		if a := linkedAnchor(out[i].Lead); a != "" {
+			out[i].Forms = append(out[i].Forms, sections[a]...)
+			if j := strings.LastIndex(out[i].Lead, "see ["); j >= 0 {
+				out[i].Lead = strings.TrimSpace(out[i].Lead[:j])
+			}
+		}
+		for j, f := range out[i].Forms {
+			out[i].Forms[j] = truncate(f, maxArgLen)
+		}
 	}
 	return out
+}
+
+// linkedAnchor returns the section a description points at, if it points at one.
+func linkedAnchor(s string) string {
+	i := strings.LastIndex(s, "](#")
+	if i < 0 {
+		return ""
+	}
+	rest := s[i+3:]
+	j := strings.Index(rest, ")")
+	if j < 0 {
+		return ""
+	}
+	return rest[:j]
+}
+
+// sections reads every heading's bullets, so an argument that links to a section
+// can carry that section's forms. This is what lets the reference write a shared
+// grammar once instead of once per filter that accepts it.
+func sections(lines []string) map[string][]string {
+	out := map[string][]string{}
+	anchor := ""
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmed, "#") {
+			anchor = anchorOf(trimmed)
+			continue
+		}
+		if anchor != "" && strings.HasPrefix(line, "- ") {
+			out[anchor] = append(out[anchor], strings.TrimPrefix(trimmed, "- "))
+		}
+	}
+	return out
+}
+
+// anchorOf turns a heading into the anchor a link to it uses: lower case, spaces
+// as hyphens, and the punctuation a heading carries but an anchor does not.
+func anchorOf(heading string) string {
+	h := strings.ToLower(strings.TrimSpace(strings.TrimLeft(heading, "#")))
+	h = strings.Map(func(r rune) rune {
+		switch r {
+		case '`', '(', ')', ',', '.', ':', '/', '[', ']', '\'', '’', '—', '–':
+			return -1
+		}
+		return r
+	}, h)
+	return strings.Join(strings.Fields(h), "-")
+}
+
+// argument is one argument of a filter while it is being read.
+type argument struct {
+	Name  string
+	Lead  string
+	Forms []string
+}
+
+// isRule reports whether a line is a markdown rule rather than a form. Left in,
+// a rule trims to "--" and is read as an accepted form.
+func isRule(trimmed string) bool {
+	return strings.Contains(trimmed, "-") && strings.Trim(trimmed, "-") == ""
+}
+
+// leadText drops the argument's own name from the front of its bullet, since the
+// name is carried separately and repeating it wastes the caller's attention.
+func leadText(text, label string) string {
+	for _, sep := range []string{"`" + label + "` — ", "`" + label + "` - ", "`" + label + "` —", "`" + label + "`"} {
+		if rest, ok := strings.CutPrefix(text, sep); ok {
+			if rest = strings.TrimSpace(strings.TrimPrefix(rest, "—")); rest != "" {
+				return rest
+			}
+		}
+	}
+	return text
+}
+
+// argumentsLiteral writes the catalogue entry for a filter's arguments. It is
+// written out rather than printed with %#v because the generated file is in
+// another package, and %#v would name these types as main.argument.
+func argumentsLiteral(args []argument) string {
+	if len(args) == 0 {
+		return "nil"
+	}
+	var b strings.Builder
+	b.WriteString("[]Argument{")
+	for i, a := range args {
+		if i > 0 {
+			b.WriteString(", ")
+		}
+		fmt.Fprintf(&b, "{Name: %q, Lead: %q", a.Name, a.Lead)
+		if len(a.Forms) > 0 {
+			b.WriteString(", Forms: []string{")
+			for j, f := range a.Forms {
+				if j > 0 {
+					b.WriteString(", ")
+				}
+				fmt.Fprintf(&b, "%q", f)
+			}
+			b.WriteString("}")
+		}
+		b.WriteString("}")
+	}
+	b.WriteString("}")
+	return b.String()
 }
 
 // maxArgLen bounds one argument's description. The reference is more detailed
@@ -406,8 +529,8 @@ func write(path, version string, catalog map[string]spec) error {
 	fmt.Fprintf(&b, "var catalog = map[string]Spec{\n")
 	for _, name := range names {
 		s := catalog[name]
-		fmt.Fprintf(&b, "	%q: {MinArgs: %d, MaxArgs: %d, Documented: %t, Signature: %q, Description: %q, Arguments: %#v},\n",
-			name, s.MinArgs, s.MaxArgs, s.Documented, s.Signature, s.Description, s.Arguments)
+		fmt.Fprintf(&b, "	%q: {MinArgs: %d, MaxArgs: %d, Documented: %t, Signature: %q, Description: %q, Arguments: %s},\n",
+			name, s.MinArgs, s.MaxArgs, s.Documented, s.Signature, s.Description, argumentsLiteral(s.Arguments))
 	}
 	fmt.Fprintf(&b, "}\n")
 

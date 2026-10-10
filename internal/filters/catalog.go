@@ -43,7 +43,19 @@ type Spec struct {
 	Description string
 	// Arguments are the per-argument descriptions from the reference, in
 	// signature order, which is where the accepted forms are written down.
-	Arguments []string
+	Arguments []Argument
+}
+
+// Argument is one argument of a filter, as imagor's reference writes it.
+type Argument struct {
+	// Name is the argument as it appears in the signature.
+	Name string
+	// Lead is what the argument means, without the name repeated.
+	Lead string
+	// Forms are the accepted forms, one per bullet in the reference. They are
+	// alternatives, so they stay separate: joined into one sentence they read as
+	// a single long requirement rather than as a choice.
+	Forms []string
 }
 
 // Lookup returns the spec for a filter name, including any filter names
