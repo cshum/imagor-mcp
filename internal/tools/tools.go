@@ -155,7 +155,7 @@ type TransformInput struct {
 	VFlip bool `json:"v_flip,omitempty" jsonschema:"mirror vertically"`
 	Meta  bool `json:"meta,omitempty" jsonschema:"return image metadata only, without processing the image"`
 
-	Filters []FilterInput `json:"filters,omitempty" jsonschema:"ordered filters, applied left to right"`
+	Filters []FilterInput `json:"filters,omitempty" jsonschema:"ordered filters, applied left to right. Arguments are validated against imagor's catalogue: call list_imagor_filters for a filter's signature, description and accepted argument forms. image() loads its argument as its own canvas, so positions inside it are relative to the overlay"`
 
 	ExpireUnixMillis int64 `json:"expire_unix_millis,omitempty" jsonschema:"add an expire() filter so the URL stops working after this unix-milliseconds timestamp"`
 	MaxAgeSeconds    int   `json:"max_age_seconds,omitempty" jsonschema:"add a max_age() filter limiting how long the response may be cached"`
@@ -748,14 +748,17 @@ func Register(s *mcp.Server, cfg Config) {
 		Name: "build_imagor_url",
 		Description: "Build a signed imagor image URL from typed transformation parameters. " +
 			"Requires IMAGOR_SECRET to be configured. The composition is validated before the " +
-			"URL is returned, so an invalid combination is refused rather than emitted.",
+			"URL is returned, so an invalid combination is refused rather than emitted. " +
+			"Call list_imagor_filters for each filter's signature, description and accepted " +
+			"argument forms, which are generated from imagor's own filter reference.",
 	}, cfg.BuildURLTool)
 
 	mcp.AddTool(s, &mcp.Tool{
 		Name: "build_imagor_path",
 		Description: "Build an unsigned imagor path from typed transformation parameters, for the " +
 			"caller to sign with its own secret. Use this when the MCP server should not hold " +
-			"the signing secret.",
+			"the signing secret. Call list_imagor_filters for each filter's signature, " +
+			"description and accepted argument forms.",
 	}, cfg.BuildPathTool)
 
 	mcp.AddTool(s, &mcp.Tool{
