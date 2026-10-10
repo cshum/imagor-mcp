@@ -12,6 +12,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"runtime/debug"
 	"syscall"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -19,16 +20,32 @@ import (
 	"github.com/cshum/imagor-mcp/internal/tools"
 )
 
-// version is overridden at build time with -ldflags "-X main.version=...".
-var version = "0.1.0-dev"
+// version is the release tag, injected by -ldflags "-X main.version=...".
+var version = ""
+
+// resolveVersion reports which build this is. Release binaries carry the tag in
+// version. A `go install ...@vX.Y.Z` build gets no ldflags, so it falls back to
+// the module version the toolchain records, and a working tree build to "dev".
+func resolveVersion() string {
+	if version != "" {
+		return version
+	}
+	if bi, ok := debug.ReadBuildInfo(); ok {
+		if v := bi.Main.Version; v != "" && v != "(devel)" {
+			return v
+		}
+	}
+	return "dev"
+}
 
 func main() {
+	v := resolveVersion()
 	if len(os.Args) > 1 {
 		switch os.Args[1] {
 		case "-version", "--version", "version":
-			fmt.Println(version)
+			fmt.Println(v)
 			return
-		case "-h", "--help", "help":
+		case "-h", "-help", "--help", "help":
 			fmt.Fprintf(os.Stderr, `imagor-mcp %s
 
 An MCP server exposing imagor's image pipeline as typed tools.
@@ -57,7 +74,7 @@ Example MCP client configuration:
       }
     }
   }
-`, version)
+`, v)
 			return
 		}
 	}
@@ -76,7 +93,7 @@ Example MCP client configuration:
 
 	server := mcp.NewServer(&mcp.Implementation{
 		Name:    "imagor-mcp",
-		Version: version,
+		Version: v,
 	}, nil)
 
 	tools.Register(server, cfg)

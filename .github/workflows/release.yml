@@ -1,0 +1,69 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  # A tag can point at a commit CI never saw, so the release re-runs the same
+  # checks rather than assuming the branch passed them.
+  verify:
+    uses: ./.github/workflows/ci.yml
+
+  release:
+    name: Release
+    needs: verify
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      # The server is pure Go, so every target builds from any host with no
+      # libvips and no cgo.
+      - name: Build binaries
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64 windows/arm64; do
+            os="${target%/*}"
+            arch="${target#*/}"
+            ext=""
+            [ "$os" = "windows" ] && ext=".exe"
+            out="dist/imagor-mcp_${GITHUB_REF_NAME}_${os}_${arch}${ext}"
+            echo "building $out"
+            CGO_ENABLED=0 GOOS="$os" GOARCH="$arch" \
+              go build -trimpath -ldflags "-s -w -X main.version=${GITHUB_REF_NAME}" \
+                -o "$out" ./cmd/imagor-mcp
+          done
+
+      # The tag reaches the binary through ldflags alone, so prove it arrived
+      # rather than trusting the flag string.
+      - name: Check the built binary reports the tag
+        run: |
+          set -euo pipefail
+          got="$(./dist/imagor-mcp_${GITHUB_REF_NAME}_linux_amd64 -version)"
+          echo "binary reports: $got"
+          if [ "$got" != "${GITHUB_REF_NAME}" ]; then
+            echo "::error::expected ${GITHUB_REF_NAME}, got ${got}"
+            exit 1
+          fi
+
+      - name: Checksums
+        run: |
+          cd dist
+          sha256sum * > checksums.txt
+          cat checksums.txt
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${GITHUB_REF_NAME}" dist/* --generate-notes --title "${GITHUB_REF_NAME}"
