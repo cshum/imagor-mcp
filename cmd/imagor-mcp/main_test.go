@@ -4,10 +4,14 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -322,6 +326,112 @@ func mentions(lines []string, want string) bool {
 		}
 	}
 	return false
+}
+
+// verify_imagor_url reports what the server did with each filter, including the
+// filters inside an image() path, and must not turn a server that reports nothing
+// into a failure: unknown is not wrong.
+func TestVerifyURLTool(t *testing.T) {
+	var served atomic.Value
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, served.Load().(string))
+	}))
+	defer srv.Close()
+
+	s := connect(t, map[string]string{
+		"IMAGOR_UNSAFE":   "1",
+		"IMAGOR_BASE_URL": srv.URL,
+	})
+
+	type outcome struct {
+		Name    string    `json:"name"`
+		Outcome string    `json:"outcome"`
+		Filters []outcome `json:"filters"`
+	}
+	var out struct {
+		Verified bool      `json:"verified"`
+		Status   int       `json:"status"`
+		Note     string    `json:"note"`
+		Results  []outcome `json:"results"`
+	}
+	args := map[string]any{
+		"image": "example.com/a.jpg", "width": 400, "height": 300, "fit_in": true,
+		"filters": []map[string]any{
+			{"name": "image", "args": "fit-in/100x100/filters:blur(3):rotate()/example.com/b.jpg,10,10"},
+			{"name": "quality", "args": "80"},
+		},
+	}
+
+	t.Run("the server reports outcomes", func(t *testing.T) {
+		served.Store(`{"filters":[` +
+			`{"name":"image","processed":true,"filters":[` +
+			`{"name":"blur","processed":true},{"name":"rotate","processed":false}]},` +
+			`{"name":"quality","processed":true}]}`)
+
+		if err := callTool(t, s, "verify_imagor_url", args, &out); err != nil {
+			t.Fatalf("verify_imagor_url: %v", err)
+		}
+		if !out.Verified || out.Status != 200 {
+			t.Fatalf("expected a verified 200, got verified=%v status=%d note=%q", out.Verified, out.Status, out.Note)
+		}
+		if len(out.Results) != 2 {
+			t.Fatalf("expected 2 results, got %+v", out.Results)
+		}
+		if out.Results[0].Outcome != "applied" {
+			t.Errorf("image() outcome = %q, want applied", out.Results[0].Outcome)
+		}
+		if len(out.Results[0].Filters) != 2 ||
+			out.Results[0].Filters[0].Outcome != "applied" ||
+			out.Results[0].Filters[1].Outcome != "declined" {
+			t.Errorf("nested outcomes = %+v, want blur applied and rotate declined", out.Results[0].Filters)
+		}
+		if out.Results[1].Outcome != "applied" {
+			t.Errorf("quality outcome = %q, want applied", out.Results[1].Outcome)
+		}
+		if !strings.Contains(out.Note, "3 applied") || !strings.Contains(out.Note, "1 recognised") {
+			t.Errorf("note %q does not summarise the result", out.Note)
+		}
+	})
+
+	t.Run("the server reports no outcomes", func(t *testing.T) {
+		served.Store(`{"format":"jpeg","width":400}`)
+
+		if err := callTool(t, s, "verify_imagor_url", args, &out); err != nil {
+			t.Fatalf("verify_imagor_url: %v", err)
+		}
+		if out.Verified {
+			t.Fatalf("a server with no filter report must not verify")
+		}
+		for _, r := range out.Results {
+			if r.Outcome != "unknown" {
+				t.Errorf("outcome = %q, want unknown: absence is not failure", r.Outcome)
+			}
+		}
+		if !strings.Contains(out.Note, "unknown rather than wrong") {
+			t.Errorf("note %q does not explain the absence", out.Note)
+		}
+	})
+
+	t.Run("the server errors", func(t *testing.T) {
+		served.Store(`{"message":"boom"}`)
+		srvErr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusInternalServerError)
+			_, _ = io.WriteString(w, `{"message":"boom","status":500}`)
+		}))
+		defer srvErr.Close()
+		s500 := connect(t, map[string]string{"IMAGOR_UNSAFE": "1", "IMAGOR_BASE_URL": srvErr.URL})
+
+		if err := callTool(t, s500, "verify_imagor_url", args, &out); err != nil {
+			t.Fatalf("verify_imagor_url: %v", err)
+		}
+		if out.Verified || out.Status != 500 {
+			t.Fatalf("expected verified=false status=500, got verified=%v status=%d", out.Verified, out.Status)
+		}
+		if !strings.Contains(out.Note, "500") {
+			t.Errorf("note %q does not report the status", out.Note)
+		}
+	})
 }
 
 // The grammar description must be derived from imagor's own types, so it

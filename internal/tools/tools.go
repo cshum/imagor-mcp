@@ -11,15 +11,19 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"hash"
+	"io"
+	"net/http"
 	"net/url"
 	"os"
 	"reflect"
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/cshum/imagor/imagorpath"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -331,6 +335,223 @@ func (c Config) BuildURLTool(_ context.Context, _ *mcp.CallToolRequest, in Trans
 	}
 	return nil, out, nil
 }
+
+// What the running imagor reported for one filter.
+const (
+	// OutcomeApplied means the filter ran and changed the image.
+	OutcomeApplied = "applied"
+	// OutcomeDeclined means the filter was recognised but left the image
+	// unchanged, as blur() does without a sigma.
+	OutcomeDeclined = "declined"
+	// OutcomeNotReported means the server did not mention the filter, because
+	// this processor does not handle it or the deployment disabled it.
+	OutcomeNotReported = "not_reported"
+	// OutcomeUnknown means the server did not report filter outcomes at all, so
+	// nothing can be concluded. It is not a failure.
+	OutcomeUnknown = "unknown"
+)
+
+// VerifyInput is a composition to check against a running imagor.
+type VerifyInput struct {
+	TransformInput
+}
+
+// FilterOutcome is what the server reported for one filter in the URL.
+type FilterOutcome struct {
+	Name    string `json:"name"`
+	Args    string `json:"args,omitempty"`
+	Outcome string `json:"outcome" jsonschema:"applied, declined, not_reported, or unknown when the server reports no filter outcomes"`
+	// Filters carries outcomes for a path this filter loaded, nested the way the
+	// server reports them. It is an any so the schema generator is not asked to
+	// describe a recursive type; the value written is always []FilterOutcome.
+	Filters any `json:"filters,omitempty" jsonschema:"outcomes for the filters inside a path this filter loaded, nested as the server reports them"`
+}
+
+// VerifyOutput is what the running imagor did with each filter.
+type VerifyOutput struct {
+	// Verified is false when the server did not report filter outcomes, which
+	// leaves the result unknown rather than wrong: an imagor older than the
+	// release that reports them, or a response replayed from result storage.
+	Verified bool            `json:"verified"`
+	Checked  string          `json:"checked" jsonschema:"the URL that was fetched"`
+	Status   int             `json:"status" jsonschema:"the HTTP status the server returned"`
+	Results  []FilterOutcome `json:"results,omitempty"`
+	Note     string          `json:"note,omitempty"`
+}
+
+// reportedFilter mirrors the filter report a server returns in a /meta response.
+type reportedFilter struct {
+	Name      string           `json:"name"`
+	Processed bool             `json:"processed"`
+	Filters   []reportedFilter `json:"filters"`
+}
+
+// VerifyURLTool fetches the metadata for a composition from a running imagor and
+// reports what it did with each filter, so a caller can tell a filter that
+// applied from one the server ignored.
+//
+// The report is a field on /meta, so this needs IMAGOR_BASE_URL and a way to
+// sign the request: IMAGOR_SECRET, or IMAGOR_UNSAFE for an unsafe instance.
+// A server that does not report outcomes is not a failure: every outcome comes
+// back as unknown, and Verified is false.
+func (c Config) VerifyURLTool(ctx context.Context, _ *mcp.CallToolRequest, in VerifyInput) (*mcp.CallToolResult, VerifyOutput, error) {
+	if c.BaseURL == "" {
+		return nil, VerifyOutput{}, fmt.Errorf(
+			"verification fetches the result from a running imagor, so IMAGOR_BASE_URL must be set to its origin")
+	}
+	mode, err := c.Mode()
+	if err != nil {
+		return nil, VerifyOutput{}, err
+	}
+	if mode == ModePathOut {
+		return nil, VerifyOutput{}, fmt.Errorf(
+			"this server holds no signing secret and cannot sign the metadata request; configure IMAGOR_SECRET, or IMAGOR_UNSAFE for an unsafe instance")
+	}
+	p, err := in.toParams()
+	if err != nil {
+		return nil, VerifyOutput{}, err
+	}
+	// The report is part of the metadata response, and the signature covers the
+	// whole path, so the request has to be signed with meta in it.
+	p.Meta = true
+	if err := pathgen.Validate(p); err != nil {
+		return nil, VerifyOutput{}, err
+	}
+	var url string
+	switch mode {
+	case ModeSigned:
+		signer, err := c.Signer()
+		if err != nil {
+			return nil, VerifyOutput{}, err
+		}
+		url = pathgen.BuildURL(p, signer)
+	case ModeUnsafe:
+		url = pathgen.BuildURL(p, nil)
+	}
+	checked := c.BaseURL + "/" + url
+
+	reqCtx, cancel := context.WithTimeout(ctx, verifyTimeout)
+	defer cancel()
+	req, err := http.NewRequestWithContext(reqCtx, http.MethodGet, checked, nil)
+	if err != nil {
+		return nil, VerifyOutput{}, err
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, VerifyOutput{}, fmt.Errorf("fetching %s: %w", checked, err)
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(io.LimitReader(resp.Body, maxMetaBytes))
+	if err != nil {
+		return nil, VerifyOutput{}, fmt.Errorf("reading the response from %s: %w", checked, err)
+	}
+
+	out := VerifyOutput{Checked: checked, Status: resp.StatusCode}
+	if resp.StatusCode != http.StatusOK {
+		out.Note = fmt.Sprintf("the server returned %d, so nothing could be verified; the body was %s",
+			resp.StatusCode, firstLine(body))
+		out.Results = outcomes(p.Filters, nil, OutcomeUnknown)
+		return nil, out, nil
+	}
+
+	// A missing field and an empty one mean different things: absent means this
+	// server does not report outcomes, empty means it reported none.
+	var envelope map[string]json.RawMessage
+	if err := json.Unmarshal(body, &envelope); err != nil {
+		return nil, VerifyOutput{}, fmt.Errorf("the response from %s was not JSON: %w", checked, err)
+	}
+	raw, present := envelope["filters"]
+	if !present {
+		out.Note = "this server did not report filter outcomes, so the result is unknown rather than wrong: " +
+			"it is either an imagor older than the release that reports them, or a response replayed from result storage. " +
+			"Confirm the server version before treating this as a failure."
+		out.Results = outcomes(p.Filters, nil, OutcomeUnknown)
+		return nil, out, nil
+	}
+	var reported []reportedFilter
+	if err := json.Unmarshal(raw, &reported); err != nil {
+		return nil, VerifyOutput{}, fmt.Errorf("the filters field from %s was not a list: %w", checked, err)
+	}
+	out.Verified = true
+	out.Results = outcomes(p.Filters, reported, OutcomeNotReported)
+	out.Note = summarizeOutcomes(out.Results)
+	return nil, out, nil
+}
+
+// outcomes walks the requested filters against the reported ones. The report
+// holds one entry per filter the processor handled, in URL order, so entries are
+// consumed in step: a name the report never mentions is absent rather than
+// failed, since another processor in the chain may handle it.
+func outcomes(requested []imagorpath.Filter, reported []reportedFilter, missing string) []FilterOutcome {
+	var out []FilterOutcome
+	next := 0
+	for _, f := range requested {
+		o := FilterOutcome{Name: f.Name, Args: f.Args, Outcome: missing}
+		if next < len(reported) && reported[next].Name == f.Name {
+			r := reported[next]
+			next++
+			o.Outcome = OutcomeDeclined
+			if r.Processed {
+				o.Outcome = OutcomeApplied
+			}
+			if nested, ok := nestedPathOf(f); ok && len(r.Filters) > 0 {
+				o.Filters = outcomes(imagorpath.Parse(nested).Filters, r.Filters, OutcomeNotReported)
+			}
+		}
+		out = append(out, o)
+	}
+	return out
+}
+
+// summarizeOutcomes states what was found in one line, so a caller that reads
+// only the note still gets the answer.
+func summarizeOutcomes(results []FilterOutcome) string {
+	var applied, declined, missing int
+	var walk func([]FilterOutcome)
+	walk = func(rs []FilterOutcome) {
+		for _, r := range rs {
+			switch r.Outcome {
+			case OutcomeApplied:
+				applied++
+			case OutcomeDeclined:
+				declined++
+			default:
+				missing++
+			}
+			if nested, ok := r.Filters.([]FilterOutcome); ok {
+				walk(nested)
+			}
+		}
+	}
+	walk(results)
+	switch {
+	case applied == 0 && declined == 0 && missing == 0:
+		return "no filters were requested, so there is nothing to verify"
+	case missing == 0 && declined == 0:
+		return fmt.Sprintf("all %d filter(s) applied", applied)
+	case missing == 0:
+		return fmt.Sprintf("%d applied, %d recognised but left the image unchanged", applied, declined)
+	default:
+		return fmt.Sprintf("%d applied, %d declined, %d not reported by this processor",
+			applied, declined, missing)
+	}
+}
+
+func firstLine(body []byte) string {
+	s := strings.TrimSpace(string(body))
+	if i := strings.IndexByte(s, '\n'); i >= 0 {
+		s = s[:i]
+	}
+	if len(s) > 200 {
+		s = s[:200] + "…"
+	}
+	return s
+}
+
+const (
+	verifyTimeout = 30 * time.Second
+	maxMetaBytes  = 4 << 20
+)
 
 // BuildPathTool returns the bare imagor path, with no signature or prefix.
 func (c Config) BuildPathTool(_ context.Context, _ *mcp.CallToolRequest, in TransformInput) (*mcp.CallToolResult, BuildOutput, error) {
@@ -754,6 +975,15 @@ func Register(s *mcp.Server, cfg Config) {
 	}, cfg.BuildURLTool)
 
 	mcp.AddTool(s, &mcp.Tool{
+		Name: "verify_imagor_url",
+		Description: "Fetch the result for a composition from the running imagor and report what it " +
+			"did with each filter: applied, declined, or not reported. Answers whether a URL actually " +
+			"does what it says, which the build tools cannot know on their own. Requires IMAGOR_BASE_URL. " +
+			"A server that does not report filter outcomes returns unknown for every filter and " +
+			"verified: false, which means the result is unknown rather than wrong.",
+	}, cfg.VerifyURLTool)
+
+	mcp.AddTool(s, &mcp.Tool{
 		Name: "build_imagor_path",
 		Description: "Build an unsigned imagor path from typed transformation parameters, for the " +
 			"caller to sign with its own secret. Use this when the MCP server should not hold " +
@@ -769,7 +999,8 @@ func Register(s *mcp.Server, cfg Config) {
 
 	mcp.AddTool(s, &mcp.Tool{
 		Name: "list_imagor_filters",
-		Description: "List the imagor filters this server accepts, with each filter's argument count. " +
+		Description: "List the imagor filters this server accepts, with each filter's signature, " +
+			"description and accepted argument forms, generated from imagor's own filter reference. " +
 			"imagor ignores unrecognised filters and wrong argument counts silently — the request " +
 			"returns 200 with the image unchanged — so use this to pick filters that exist instead " +
 			"of guessing names.",
