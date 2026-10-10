@@ -525,9 +525,11 @@ func (c Config) VerifyURLTool(ctx context.Context, _ *mcp.CallToolRequest, in Ve
 func versionNote(s ServerInfo) string {
 	switch {
 	case !s.ReportsVersion:
-		return fmt.Sprintf(
-			"the server did not report a version, so it predates %s, the release this server's filter reference describes. ",
-			s.CatalogueVersion)
+		// The release that reports a version is not named, because this server
+		// has no way to know which release that is. The catalogue's release is
+		// not it: a server can be exactly the release the catalogue describes
+		// and still predate the field.
+		return "the server did not report a version, so it predates the release that reports one. "
 	case s.Version == s.CatalogueVersion:
 		return ""
 	default:

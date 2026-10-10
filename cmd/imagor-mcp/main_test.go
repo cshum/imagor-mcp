@@ -512,8 +512,13 @@ func TestVerifyURLTool(t *testing.T) {
 		if !strings.Contains(out.Note, "did not report a version") {
 			t.Errorf("note %q does not say the version is missing", out.Note)
 		}
-		if !strings.Contains(out.Note, out.Server.CatalogueVersion) {
-			t.Errorf("note %q does not name the release the reference describes", out.Note)
+		if !strings.Contains(out.Note, "predates the release that reports one") {
+			t.Errorf("note %q does not say what the server predates", out.Note)
+		}
+		// The catalogue's release is not what the server predates: a server can
+		// be exactly that release and still predate the field.
+		if strings.Contains(out.Note, "predates "+out.Server.CatalogueVersion) {
+			t.Errorf("note %q claims the server predates the release the catalogue describes", out.Note)
 		}
 	})
 
