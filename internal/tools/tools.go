@@ -351,8 +351,8 @@ type ValidateInput struct {
 }
 
 // ValidateOutput reports whether the path is well formed, including the paths
-// that image() and watermark() load, which imagor parses and processes as
-// images in their own right.
+// that image() loads, which imagor parses and processes as images in their own
+// right.
 type ValidateOutput struct {
 	Valid    bool     `json:"valid" jsonschema:"whether the path is well formed and would not be silently ignored"`
 	Path     string   `json:"path" jsonschema:"the path as parsed"`
@@ -408,9 +408,9 @@ func (c Config) ValidateTool(_ context.Context, _ *mcp.CallToolRequest, in Valid
 }
 
 // checkPath reports what imagor would ignore or fail to load in a parsed path,
-// and recurses into the paths that image() and watermark() load. Those are
-// parsed with the same grammar as the outer path and processed as images, so a
-// fault inside one fails the whole request.
+// and recurses into the paths that image() loads. Those are parsed with the same
+// grammar as the outer path and processed as images, so a fault inside one fails
+// the whole request.
 func checkPath(p imagorpath.Params, depth int) (problems, warnings []string) {
 	if seg, _, ok := strings.Cut(p.Image, "/"); ok && isParamSegment(seg) {
 		problems = append(problems, fmt.Sprintf(
@@ -427,6 +427,18 @@ func checkPath(p imagorpath.Params, depth int) (problems, warnings []string) {
 
 		nested, ok := nestedPathOf(f)
 		if !ok {
+			// watermark() loads its argument as a plain image URL, so anything
+			// written as a filter inside it is never run: imagor would try to
+			// fetch the whole string as a URL.
+			if f.Name == "watermark" {
+				if arg, ok := firstArg(f); ok {
+					if nw := imagorpath.Parse(arg); len(nw.Filters) > 0 {
+						problems = append(problems, fmt.Sprintf(
+							"watermark loads %q as an image URL and runs no filters, so the %d filter(s) "+
+								"written inside it never run; image() takes a full path", arg, len(nw.Filters)))
+					}
+				}
+			}
 			continue
 		}
 		if depth >= maxNestDepth {
@@ -449,15 +461,19 @@ func checkPath(p imagorpath.Params, depth int) (problems, warnings []string) {
 	return problems, warnings
 }
 
-// nestedPathOf returns the imagor path a filter loads, if it loads one. It is
-// the filter's first argument, which may be query-escaped, or b64: encoded when
-// the URL contains characters that are awkward to keep in a path.
+// nestedPathOf returns the imagor path a filter loads, if it loads one. image()
+// is the only one: it parses its argument as a path and processes it as an image
+// in its own right. watermark() loads its argument as a plain image URL.
 func nestedPathOf(f imagorpath.Filter) (string, bool) {
-	switch f.Name {
-	case "image", "watermark":
-	default:
+	if f.Name != "image" {
 		return "", false
 	}
+	return firstArg(f)
+}
+
+// firstArg returns a filter's first argument with query escaping and b64:
+// encoding resolved, the way imagor resolves them.
+func firstArg(f imagorpath.Filter) (string, bool) {
 	args := imagorpath.SplitArgs(f.Args)
 	if len(args) == 0 {
 		return "", false

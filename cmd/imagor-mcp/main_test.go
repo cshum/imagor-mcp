@@ -283,6 +283,14 @@ func TestValidateToolChecksNestedPaths(t *testing.T) {
 			valid:       true,
 			wantWarning: "unsafe/",
 		},
+		{
+			// watermark() takes an image URL, not a path, so a filter written
+			// inside it is never run.
+			name:        "filters inside watermark() never run",
+			path:        "filters:watermark(filters:blur(3)/example.com/logo.png,10,10,50)/example.com/a.jpg",
+			valid:       false,
+			wantProblem: "runs no filters",
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			if err := callTool(t, s, "validate_imagor_path", map[string]any{"path": tc.path}, &out); err != nil {
