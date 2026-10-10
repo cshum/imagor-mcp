@@ -359,6 +359,16 @@ type FilterOutcome struct {
 	Filters any `json:"filters,omitempty" jsonschema:"outcomes for the filters inside a path this filter loaded, nested as the server reports them"`
 }
 
+// RequiresImagor is the oldest imagor release whose metadata reports what it did
+// with each filter, which is what verify_imagor_url reads. A server that does not
+// report it cannot be verified against, and saying which release introduced it is
+// more useful than reporting an absent field: a caller can act on a version.
+//
+// This is a contract, not a derived value, so it moves by hand when the fields
+// move. It is not the catalogue version, which describes the path grammar and is
+// generated from a released imagor.
+const RequiresImagor = "1.9.8"
+
 // VerifyOutput is what the running imagor did with each filter, alongside both
 // URLs for the composition: the image itself, and the metadata that was read.
 //
@@ -395,6 +405,12 @@ type ServerInfo struct {
 	// CatalogueVersion is the release this server's filter reference describes,
 	// so a caller can see the two side by side.
 	CatalogueVersion string `json:"catalogue_version" jsonschema:"the imagor release this server's filter reference was generated from"`
+	// RequiresImagor is the oldest release whose metadata reports filter
+	// outcomes. A server older than this cannot be verified against.
+	RequiresImagor string `json:"requires_imagor" jsonschema:"the oldest imagor release whose metadata reports filter outcomes, which is what this tool needs"`
+	// Compatible is whether the server reported what this tool needs. False
+	// means nothing could be verified, which is not the same as a failure.
+	Compatible bool `json:"compatible" jsonschema:"whether the server reported the fields this tool needs"`
 }
 
 // reportedFilter mirrors the filter report a server returns in a /meta response.
@@ -454,7 +470,7 @@ func (c Config) VerifyURLTool(ctx context.Context, _ *mcp.CallToolRequest, in Ve
 	checked := c.BaseURL + "/" + metaURL
 	out.AbsoluteURL = c.BaseURL + "/" + imageURL
 	out.MetaAbsoluteURL = checked
-	out.Server = ServerInfo{CatalogueVersion: filtercat.ImagorVersion}
+	out.Server = ServerInfo{CatalogueVersion: filtercat.ImagorVersion, RequiresImagor: RequiresImagor}
 
 	reqCtx, cancel := context.WithTimeout(ctx, verifyTimeout)
 	defer cancel()
@@ -491,6 +507,7 @@ func (c Config) VerifyURLTool(ctx context.Context, _ *mcp.CallToolRequest, in Ve
 	// an empty one read the same, so a caller cannot tell a server that does not
 	// report something from a server that had nothing to report.
 	out.Server.ReportsFilters = present
+	out.Server.Compatible = present
 	if v, ok := envelope["version"]; ok {
 		var s string
 		if err := json.Unmarshal(v, &s); err == nil {
@@ -499,10 +516,10 @@ func (c Config) VerifyURLTool(ctx context.Context, _ *mcp.CallToolRequest, in Ve
 		}
 	}
 	if !present {
-		out.Note = versionNote(out.Server) +
-			"this server did not report filter outcomes, so the result is unknown rather than wrong: " +
-			"it is either an imagor older than the release that reports them, or a response replayed from result storage. " +
-			"Confirm the server version before treating this as a failure."
+		out.Note = versionNote(out.Server) + fmt.Sprintf(
+			"This server did not report what it did with each filter, so nothing can be verified against it. "+
+				"That needs imagor %s or later. This is not a failure: the composition may be perfectly valid, "+
+				"it simply cannot be checked here.", RequiresImagor)
 		out.Results = outcomes(p.Filters, nil, OutcomeUnknown)
 		return nil, out, nil
 	}
@@ -530,13 +547,20 @@ func versionNote(s ServerInfo) string {
 		// not it: a server can be exactly the release the catalogue describes
 		// and still predate the field.
 		return "the server did not report a version, so it predates the release that reports one. "
-	case s.Version == s.CatalogueVersion:
+	case sameVersion(s.Version, s.CatalogueVersion):
 		return ""
 	default:
 		return fmt.Sprintf(
 			"the server reports imagor %s, but this server's filter reference describes %s, so the accepted forms may differ. ",
 			s.Version, s.CatalogueVersion)
 	}
+}
+
+// sameVersion compares two release strings, ignoring the leading v. A Go module
+// version carries one and the constant a server reports does not, so comparing
+// them directly reports a mismatch between two names for the same release.
+func sameVersion(a, b string) bool {
+	return strings.TrimPrefix(a, "v") == strings.TrimPrefix(b, "v")
 }
 
 // outcomes walks the requested filters against the reported ones. The report

@@ -411,6 +411,8 @@ func TestVerifyURLTool(t *testing.T) {
 			ReportsVersion   bool   `json:"reports_version"`
 			ReportsFilters   bool   `json:"reports_filters"`
 			CatalogueVersion string `json:"catalogue_version"`
+			RequiresImagor   string `json:"requires_imagor"`
+			Compatible       bool   `json:"compatible"`
 		} `json:"server"`
 		Status  int       `json:"status"`
 		Note    string    `json:"note"`
@@ -425,7 +427,7 @@ func TestVerifyURLTool(t *testing.T) {
 	}
 
 	t.Run("the server reports outcomes", func(t *testing.T) {
-		served.Store(`{"version":"v1.9.7","filters":[` +
+		served.Store(`{"version":"1.9.7","filters":[` +
 			`{"name":"image","processed":true,"filters":[` +
 			`{"name":"blur","processed":true},{"name":"rotate","processed":false}]},` +
 			`{"name":"quality","processed":true}]}`)
@@ -440,9 +442,16 @@ func TestVerifyURLTool(t *testing.T) {
 		if !out.Server.ReportsVersion || !out.Server.ReportsFilters {
 			t.Errorf("server = %+v, want both fields reported", out.Server)
 		}
-		if out.Server.Version != out.Server.CatalogueVersion {
-			t.Errorf("server version %q and catalogue version %q should agree here",
-				out.Server.Version, out.Server.CatalogueVersion)
+		if !out.Server.Compatible {
+			t.Errorf("server = %+v, want the server reported as compatible", out.Server)
+		}
+		if out.Server.RequiresImagor == "" {
+			t.Errorf("server = %+v, want the release this tool needs named", out.Server)
+		}
+		// The server's constant carries no v and the module version does, so the
+		// two spellings must be recognised as the same release.
+		if out.Server.Version == out.Server.CatalogueVersion {
+			t.Fatalf("fixture is unrealistic: a server does not spell its version like a module version")
 		}
 		if strings.Contains(out.Note, "may differ") || strings.Contains(out.Note, "predates") {
 			t.Errorf("note %q warns about a version it matches", out.Note)
@@ -539,8 +548,14 @@ func TestVerifyURLTool(t *testing.T) {
 		if out.Server.ReportsFilters {
 			t.Errorf("server = %+v, want no filters field reported", out.Server)
 		}
-		if !strings.Contains(out.Note, "unknown rather than wrong") {
-			t.Errorf("note %q does not explain the absence", out.Note)
+		if !strings.Contains(out.Note, out.Server.RequiresImagor) {
+			t.Errorf("note %q does not name the release this tool needs", out.Note)
+		}
+		if !strings.Contains(out.Note, "not a failure") {
+			t.Errorf("note %q does not say absence is not failure", out.Note)
+		}
+		if out.Server.Compatible {
+			t.Errorf("server = %+v, want the server reported as incompatible", out.Server)
 		}
 	})
 
