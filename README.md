@@ -46,12 +46,12 @@ fallback between them.
 |---|---|---|
 | **signed** | `IMAGOR_SECRET` set | `<signature>/<path>` — production |
 | **unsafe** | `IMAGOR_UNSAFE=1` | `unsafe/<path>` — development only |
-| **path_out** | neither set | the bare `<path>`, for the caller to sign |
 
-**Setting both `IMAGOR_SECRET` and `IMAGOR_UNSAFE` is refused at startup.** They
-state opposite intentions, and silently picking one is how an unsigned
-deployment reaches production. The server never falls back to unsigned URLs on
-its own.
+**Setting both `IMAGOR_SECRET` and `IMAGOR_UNSAFE` is refused at startup**, and so
+is setting neither. They state opposite intentions, and silently picking one — or
+silently running without either — is how an unsigned deployment reaches
+production. The server produces signed or unsafe paths, so it needs to know
+which; it never falls back to unsigned URLs on its own.
 
 ## Configuration
 
@@ -90,7 +90,7 @@ The server speaks MCP over stdio, so nothing listens on a port.
 
 | Tool | Purpose |
 |---|---|
-| `build_imagor_url` | Build a request path ready to send to imagor, signed or `unsafe/` as configured. Refused in path-out mode. |
+| `build_imagor_url` | Build a request path ready to send to imagor, signed or `unsafe/` as configured. |
 | `build_imagor_path` | Build an **unsigned** path for the caller to sign. Use when the MCP server should not hold the secret. |
 | `validate_imagor_path` | Parse a path, report whether it round-trips unchanged, and summarize the transformation. |
 | `list_imagor_filters` | List the accepted filters with their argument counts, optionally filtered by name. |
@@ -105,8 +105,9 @@ There are no invented parameters and no generic "sign this string" tool.
 the signing secret for the same reason any backend service does: to mint valid
 URLs. Trust the component; do not trust the agent using it.
 
-- **No secret = path-out mode.** The safest deployment gives the server no
-  secret at all and signs in the calling application.
+- **A mode is required.** The server signs, or emits `unsafe/` paths, so it
+  refuses to start without `IMAGOR_SECRET` or `IMAGOR_UNSAFE`. It does not run as
+  a pass-through that holds no credential.
 - **Unsafe mode is opt-in and loud.** It warns on stderr at startup, and
   `describe_imagor` reports it as a limitation at runtime. The target imagor
   must itself be running with `IMAGOR_UNSAFE=1`.

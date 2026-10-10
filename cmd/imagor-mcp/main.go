@@ -55,7 +55,7 @@ Usage:
   imagor-mcp version    print the version
 
 Environment:
-  IMAGOR_SECRET            signing secret. Unset means path-out only.
+  IMAGOR_SECRET            signing secret, required unless IMAGOR_UNSAFE is set
   IMAGOR_SIGNER_TYPE       sha1 (default), sha256 or sha512
   IMAGOR_SIGNER_TRUNCATE   signature length in characters
   IMAGOR_BASE_URL          optional imagor origin, reported in tool output

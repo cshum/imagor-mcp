@@ -20,6 +20,10 @@ import (
 
 var binPath string
 
+// unsafeEnv selects a mode for tests that do not care which one. The server
+// refuses to start without a mode, so there is no default to fall back on.
+var unsafeEnv = map[string]string{"IMAGOR_UNSAFE": "1"}
+
 func TestMain(m *testing.M) {
 	dir, err := os.MkdirTemp("", "imagor-mcp-test")
 	if err != nil {
@@ -87,7 +91,7 @@ type toolError struct{ msg string }
 func (e *toolError) Error() string { return e.msg }
 
 func TestToolsAreRegisteredWithSchemas(t *testing.T) {
-	s := connect(t, nil)
+	s := connect(t, unsafeEnv)
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -151,7 +155,7 @@ func TestBuildURLMatchesVerifiedValue(t *testing.T) {
 }
 
 func TestPathOutModeWithoutSecret(t *testing.T) {
-	s := connect(t, nil)
+	s := connect(t, unsafeEnv)
 
 	var out struct {
 		URL    string `json:"url"`
@@ -168,21 +172,34 @@ func TestPathOutModeWithoutSecret(t *testing.T) {
 		t.Fatalf("build_imagor_path: %v", err)
 	}
 	if out.Signed || out.URL != "" {
-		t.Errorf("path-out mode must not sign: %+v", out)
+		t.Errorf("build_imagor_path must not sign or return a request URL: %+v", out)
 	}
 	if out.Note == "" {
 		t.Error("expected a note explaining the unsigned result")
 	}
 }
 
-func TestSignedURLRefusedWithoutSecret(t *testing.T) {
-	s := connect(t, nil)
-	err := callTool(t, s, "build_imagor_url", map[string]any{
+// Unsafe mode must never produce a signature: the server signs only when it holds
+// a secret, and a mode is required, so there is no unsigned-with-secret state.
+func TestUnsafeModeEmitsNoSignature(t *testing.T) {
+	s := connect(t, unsafeEnv)
+
+	var out struct {
+		Mode   string `json:"mode"`
+		URL    string `json:"url"`
+		Signed bool   `json:"signed"`
+	}
+	if err := callTool(t, s, "build_imagor_url", map[string]any{
 		"image": "example.com/a.jpg",
 		"width": 100,
-	}, &struct{}{})
-	if err == nil {
-		t.Fatal("expected build_imagor_url to refuse when no secret is configured")
+	}, &out); err != nil {
+		t.Fatalf("build_imagor_url: %v", err)
+	}
+	if out.Mode != "unsafe" || out.Signed {
+		t.Errorf("mode=%q signed=%v, want unsafe and unsigned", out.Mode, out.Signed)
+	}
+	if !strings.HasPrefix(out.URL, "unsafe/") {
+		t.Errorf("url %q does not carry the unsafe prefix", out.URL)
 	}
 }
 
@@ -208,7 +225,7 @@ func TestInvalidCompositionRefused(t *testing.T) {
 }
 
 func TestValidateTool(t *testing.T) {
-	s := connect(t, nil)
+	s := connect(t, unsafeEnv)
 
 	var out struct {
 		Valid    bool     `json:"valid"`
@@ -235,7 +252,7 @@ func TestValidateTool(t *testing.T) {
 // validator has to reach it. The first case is the one imagor answers with a DNS
 // failure, and it reported valid:true until this check existed.
 func TestValidateToolChecksNestedPaths(t *testing.T) {
-	s := connect(t, nil)
+	s := connect(t, unsafeEnv)
 
 	var out struct {
 		Valid    bool     `json:"valid"`
@@ -314,6 +331,38 @@ func TestValidateToolChecksNestedPaths(t *testing.T) {
 			}
 			if tc.wantWarning != "" && !mentions(out.Warnings, tc.wantWarning) {
 				t.Errorf("warnings %v do not mention %q", out.Warnings, tc.wantWarning)
+			}
+		})
+	}
+}
+
+// The server produces signed or unsafe paths, so it must refuse to start without
+// a mode rather than come up in a state where its tools cannot produce a URL.
+func TestServerRequiresAMode(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		env  []string
+		want string
+	}{
+		{"neither set", []string{"IMAGOR_SECRET=", "IMAGOR_UNSAFE="}, "no mode selected"},
+		{"both set", []string{"IMAGOR_SECRET=s3cret", "IMAGOR_UNSAFE=1"}, "IMAGOR_SECRET"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			cmd := exec.Command(binPath)
+			cmd.Env = append(os.Environ(),
+				"IMAGOR_SECRET=", "IMAGOR_UNSAFE=", "IMAGOR_SIGNER_TYPE=",
+				"IMAGOR_SIGNER_TRUNCATE=", "IMAGOR_BASE_URL=", "IMAGOR_MCP_EXTRA_FILTERS=")
+			cmd.Env = append(cmd.Env, tc.env...)
+
+			out, err := cmd.CombinedOutput()
+			if err == nil {
+				t.Fatalf("the server started with %s; output: %s", tc.name, out)
+			}
+			if !strings.Contains(string(out), tc.want) {
+				t.Errorf("the failure does not explain itself, want %q in: %s", tc.want, out)
+			}
+			if !strings.Contains(string(out), "IMAGOR_UNSAFE") {
+				t.Errorf("the failure does not name the environment variables: %s", out)
 			}
 		})
 	}
@@ -460,7 +509,7 @@ func TestVerifyURLTool(t *testing.T) {
 // The grammar description must be derived from imagor's own types, so it
 // cannot drift from what the tools actually build.
 func TestDescribeReflectsImagorParams(t *testing.T) {
-	s := connect(t, nil)
+	s := connect(t, unsafeEnv)
 
 	var out struct {
 		PathParams []struct {
@@ -723,7 +772,7 @@ func TestLegitimateFiltersStillAccepted(t *testing.T) {
 }
 
 func TestListFiltersTool(t *testing.T) {
-	s := connect(t, nil)
+	s := connect(t, unsafeEnv)
 
 	var out struct {
 		ImagorVersion string `json:"imagor_version"`
@@ -759,7 +808,7 @@ func TestListFiltersTool(t *testing.T) {
 }
 
 func TestListFiltersFiltersByName(t *testing.T) {
-	s := connect(t, nil)
+	s := connect(t, unsafeEnv)
 
 	var out struct {
 		Count   int `json:"count"`
