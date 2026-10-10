@@ -367,16 +367,21 @@ type FilterOutcome struct {
 	Filters any `json:"filters,omitempty" jsonschema:"outcomes for the filters inside a path this filter loaded, nested as the server reports them"`
 }
 
-// VerifyOutput is what the running imagor did with each filter.
+// VerifyOutput is what the running imagor did with each filter, alongside both
+// URLs for the composition: the image itself, and the metadata that was read.
+//
+// The two carry different signatures, because a signature covers the whole path
+// including the meta segment, so neither URL can be derived from the other.
 type VerifyOutput struct {
+	BuildOutput
+	MetaURL         string `json:"meta_url,omitempty" jsonschema:"the request path for the metadata that was read; its signature differs from the image URL because the signature covers the whole path"`
+	MetaAbsoluteURL string `json:"meta_absolute_url,omitempty" jsonschema:"the full metadata URL that was fetched, present only when IMAGOR_BASE_URL is configured"`
 	// Verified is false when the server did not report filter outcomes, which
 	// leaves the result unknown rather than wrong: an imagor older than the
 	// release that reports them, or a response replayed from result storage.
 	Verified bool            `json:"verified"`
-	Checked  string          `json:"checked" jsonschema:"the URL that was fetched"`
-	Status   int             `json:"status" jsonschema:"the HTTP status the server returned"`
+	Status   int             `json:"status" jsonschema:"the HTTP status the metadata request returned"`
 	Results  []FilterOutcome `json:"results,omitempty"`
-	Note     string          `json:"note,omitempty"`
 }
 
 // reportedFilter mirrors the filter report a server returns in a /meta response.
@@ -411,24 +416,35 @@ func (c Config) VerifyURLTool(ctx context.Context, _ *mcp.CallToolRequest, in Ve
 	if err != nil {
 		return nil, VerifyOutput{}, err
 	}
-	// The report is part of the metadata response, and the signature covers the
-	// whole path, so the request has to be signed with meta in it.
-	p.Meta = true
 	if err := pathgen.Validate(p); err != nil {
 		return nil, VerifyOutput{}, err
 	}
-	var url string
-	switch mode {
-	case ModeSigned:
-		signer, err := c.Signer()
-		if err != nil {
+	var signer imagorpath.Signer
+	if mode == ModeSigned {
+		if signer, err = c.Signer(); err != nil {
 			return nil, VerifyOutput{}, err
 		}
-		url = pathgen.BuildURL(p, signer)
-	case ModeUnsafe:
-		url = pathgen.BuildURL(p, nil)
 	}
-	checked := c.BaseURL + "/" + url
+	// The report is part of the metadata response, and a signature covers the
+	// whole path, so the metadata request needs its own signature with meta in
+	// the path. It cannot be derived from the image URL.
+	imageURL := pathgen.BuildURL(p, signer)
+	metaParams := p
+	metaParams.Meta = true
+	metaURL := pathgen.BuildURL(metaParams, signer)
+
+	out := VerifyOutput{
+		BuildOutput: BuildOutput{
+			Mode:   string(mode),
+			Path:   pathgen.Build(p),
+			URL:    imageURL,
+			Signed: mode == ModeSigned,
+		},
+		MetaURL: metaURL,
+	}
+	checked := c.BaseURL + "/" + metaURL
+	out.AbsoluteURL = c.BaseURL + "/" + imageURL
+	out.MetaAbsoluteURL = checked
 
 	reqCtx, cancel := context.WithTimeout(ctx, verifyTimeout)
 	defer cancel()
@@ -446,7 +462,7 @@ func (c Config) VerifyURLTool(ctx context.Context, _ *mcp.CallToolRequest, in Ve
 		return nil, VerifyOutput{}, fmt.Errorf("reading the response from %s: %w", checked, err)
 	}
 
-	out := VerifyOutput{Checked: checked, Status: resp.StatusCode}
+	out.Status = resp.StatusCode
 	if resp.StatusCode != http.StatusOK {
 		out.Note = fmt.Sprintf("the server returned %d, so nothing could be verified; the body was %s",
 			resp.StatusCode, firstLine(body))

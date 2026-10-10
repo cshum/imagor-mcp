@@ -350,10 +350,16 @@ func TestVerifyURLTool(t *testing.T) {
 		Filters []outcome `json:"filters"`
 	}
 	var out struct {
-		Verified bool      `json:"verified"`
-		Status   int       `json:"status"`
-		Note     string    `json:"note"`
-		Results  []outcome `json:"results"`
+		Mode            string    `json:"mode"`
+		Path            string    `json:"path"`
+		URL             string    `json:"url"`
+		AbsoluteURL     string    `json:"absolute_url"`
+		MetaURL         string    `json:"meta_url"`
+		MetaAbsoluteURL string    `json:"meta_absolute_url"`
+		Verified        bool      `json:"verified"`
+		Status          int       `json:"status"`
+		Note            string    `json:"note"`
+		Results         []outcome `json:"results"`
 	}
 	args := map[string]any{
 		"image": "example.com/a.jpg", "width": 400, "height": 300, "fit_in": true,
@@ -374,6 +380,23 @@ func TestVerifyURLTool(t *testing.T) {
 		}
 		if !out.Verified || out.Status != 200 {
 			t.Fatalf("expected a verified 200, got verified=%v status=%d note=%q", out.Verified, out.Status, out.Note)
+		}
+		// Both URLs come back, and they differ: a signature covers the whole
+		// path, so the metadata URL is not derivable from the image URL.
+		if out.URL == "" || out.MetaURL == "" {
+			t.Fatalf("expected both URLs, got url=%q meta_url=%q", out.URL, out.MetaURL)
+		}
+		if out.URL == out.MetaURL {
+			t.Errorf("the image URL and the metadata URL are the same, so one of them is wrong")
+		}
+		if !strings.Contains(out.MetaURL, "/meta/") {
+			t.Errorf("meta_url %q does not address the metadata", out.MetaURL)
+		}
+		if strings.Contains(out.URL, "/meta/") {
+			t.Errorf("url %q addresses metadata rather than the image", out.URL)
+		}
+		if !strings.HasSuffix(out.AbsoluteURL, out.URL) || !strings.HasSuffix(out.MetaAbsoluteURL, out.MetaURL) {
+			t.Errorf("absolute URLs do not match their paths: %q / %q", out.AbsoluteURL, out.MetaAbsoluteURL)
 		}
 		if len(out.Results) != 2 {
 			t.Fatalf("expected 2 results, got %+v", out.Results)
