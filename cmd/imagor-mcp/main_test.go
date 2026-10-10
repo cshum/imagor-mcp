@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"os"
 	"os/exec"
@@ -223,6 +224,90 @@ func TestValidateTool(t *testing.T) {
 	if !strings.Contains(out.Summary, "500x500") || !strings.Contains(out.Summary, "fill") {
 		t.Errorf("summary missing detail: %q", out.Summary)
 	}
+}
+
+// A path nested in image() is parsed with the same grammar as the outer path and
+// loaded as an image, so a fault inside it fails the whole request. The
+// validator has to reach it. The first case is the one imagor answers with a DNS
+// failure, and it reported valid:true until this check existed.
+func TestValidateToolChecksNestedPaths(t *testing.T) {
+	s := connect(t, nil)
+
+	var out struct {
+		Valid    bool     `json:"valid"`
+		Problems []string `json:"problems"`
+		Warnings []string `json:"warnings"`
+	}
+
+	const ref = "image-cache.goxip.com/banner-w500.jpg"
+	encoded := base64.RawURLEncoding.EncodeToString([]byte("example.com/a,b.jpg"))
+
+	for _, tc := range []struct {
+		name        string
+		path        string
+		valid       bool
+		wantProblem string
+		wantWarning string
+	}{
+		{
+			name:        "filters before parameters in a nested path",
+			path:        "fit-in/400x300/filters:image(filters:crop(0,0,0.5,1)/fit-in/300x300/" + ref + ",20,20)/color:white",
+			valid:       false,
+			wantProblem: "parameters come before filters",
+		},
+		{
+			name:  "parameters before filters in a nested path",
+			path:  "fit-in/400x300/filters:image(fit-in/300x300/filters:crop(0,0,0.5,1)/" + ref + ",20,20)/color:white",
+			valid: true,
+		},
+		{
+			name:        "unknown filter name",
+			path:        "400x400/filters:frmt(jpeg)/example.com/a.jpg",
+			valid:       false,
+			wantProblem: "unknown filter",
+		},
+		{
+			name:        "unknown filter inside a nested path",
+			path:        "filters:image(fit-in/100x100/filters:frmt(jpeg)/example.com/a.jpg,10,10)/color:white",
+			valid:       false,
+			wantProblem: "unknown filter",
+		},
+		{
+			name:  "b64 encoded nested url with a comma",
+			path:  "filters:image(b64:" + encoded + ",10,10)/color:white",
+			valid: true,
+		},
+		{
+			name:        "unsafe prefix is not part of the path",
+			path:        "unsafe/fit-in/100x100/example.com/a.jpg",
+			valid:       true,
+			wantWarning: "unsafe/",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			if err := callTool(t, s, "validate_imagor_path", map[string]any{"path": tc.path}, &out); err != nil {
+				t.Fatalf("validate_imagor_path: %v", err)
+			}
+			if out.Valid != tc.valid {
+				t.Fatalf("valid = %v, want %v; problems = %v", out.Valid, tc.valid, out.Problems)
+			}
+			if tc.wantProblem != "" && !mentions(out.Problems, tc.wantProblem) {
+				t.Errorf("problems %v do not mention %q", out.Problems, tc.wantProblem)
+			}
+			if tc.wantWarning != "" && !mentions(out.Warnings, tc.wantWarning) {
+				t.Errorf("warnings %v do not mention %q", out.Warnings, tc.wantWarning)
+			}
+		})
+	}
+}
+
+func mentions(lines []string, want string) bool {
+	for _, l := range lines {
+		if strings.Contains(l, want) {
+			return true
+		}
+	}
+	return false
 }
 
 // The grammar description must be derived from imagor's own types, so it

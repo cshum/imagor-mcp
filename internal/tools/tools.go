@@ -10,9 +10,11 @@ import (
 	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"hash"
+	"net/url"
 	"os"
 	"reflect"
 	"sort"
@@ -348,21 +350,39 @@ type ValidateInput struct {
 	Path string `json:"path" jsonschema:"an imagor path to validate, without a leading slash and without any signature prefix"`
 }
 
-// ValidateOutput reports whether the path survives a parse/regenerate round trip.
+// ValidateOutput reports whether the path is well formed, including the paths
+// that image() and watermark() load, which imagor parses and processes as
+// images in their own right.
 type ValidateOutput struct {
-	Valid    bool     `json:"valid" jsonschema:"whether the path round-trips unchanged"`
+	Valid    bool     `json:"valid" jsonschema:"whether the path is well formed and would not be silently ignored"`
 	Path     string   `json:"path" jsonschema:"the path as parsed"`
 	Rebuilt  string   `json:"rebuilt" jsonschema:"the path regenerated from the parsed parameters"`
 	Stable   bool     `json:"stable" jsonschema:"whether regenerating the parsed path reproduces the input exactly"`
-	Problems []string `json:"problems,omitempty" jsonschema:"human-readable differences found"`
+	Problems []string `json:"problems,omitempty" jsonschema:"reasons imagor would ignore this path or fail to load it"`
+	Warnings []string `json:"warnings,omitempty" jsonschema:"things imagor accepts but may not act on"`
 	Summary  string   `json:"summary" jsonschema:"a short description of the parsed transformation"`
 }
 
+// maxNestDepth bounds recursion: an image() argument is an imagor path, which
+// may itself contain image() filters.
+const maxNestDepth = 8
+
 // ValidateTool parses a path and reports whether it is well formed.
+//
+// Everything reported here comes from the path alone, because a log is not a
+// reliable signal in production: imagor's own parser, the filter catalogue, and
+// the grammar of the paths that filters load.
 func (c Config) ValidateTool(_ context.Context, _ *mcp.CallToolRequest, in ValidateInput) (*mcp.CallToolResult, ValidateOutput, error) {
 	path := strings.TrimPrefix(strings.TrimSpace(in.Path), "/")
 	if path == "" {
 		return nil, ValidateOutput{}, fmt.Errorf("path is required")
+	}
+	var notes []string
+	// unsafe/ selects the mode at the server rather than describing an
+	// operation, so it is not part of the path and does not survive a round trip.
+	if rest, ok := strings.CutPrefix(path, "unsafe/"); ok {
+		path = rest
+		notes = append(notes, `the leading "unsafe/" selects the server mode and is not part of the path; validated without it`)
 	}
 	p := imagorpath.Parse(path)
 	rebuilt := pathgen.Build(p)
@@ -375,14 +395,121 @@ func (c Config) ValidateTool(_ context.Context, _ *mcp.CallToolRequest, in Valid
 		Summary: summarize(p),
 	}
 	if !out.Stable {
-		out.Valid = false
 		out.Problems = append(out.Problems, fmt.Sprintf("regenerating the parsed path produced %q, which differs from the input", rebuilt))
 	}
 	if err := pathgen.Validate(p); err != nil {
-		out.Valid = false
 		out.Problems = append(out.Problems, err.Error())
 	}
+	problems, warnings := checkPath(p, 0)
+	out.Problems = append(out.Problems, problems...)
+	out.Warnings = append(notes, warnings...)
+	out.Valid = len(out.Problems) == 0
 	return nil, out, nil
+}
+
+// checkPath reports what imagor would ignore or fail to load in a parsed path,
+// and recurses into the paths that image() and watermark() load. Those are
+// parsed with the same grammar as the outer path and processed as images, so a
+// fault inside one fails the whole request.
+func checkPath(p imagorpath.Params, depth int) (problems, warnings []string) {
+	if seg, _, ok := strings.Cut(p.Image, "/"); ok && isParamSegment(seg) {
+		problems = append(problems, fmt.Sprintf(
+			"the image is read as %q, whose first segment %q is a parameter: parameters come before "+
+				"filters, so imagor would try to load this as a URL and fail", p.Image, seg))
+	}
+	for _, f := range p.Filters {
+		switch outcome, msg := filtercat.Check(f.Name, f.Args); outcome {
+		case filtercat.Rejected:
+			problems = append(problems, msg)
+		case filtercat.Warned:
+			warnings = append(warnings, msg)
+		}
+
+		nested, ok := nestedPathOf(f)
+		if !ok {
+			continue
+		}
+		if depth >= maxNestDepth {
+			problems = append(problems, fmt.Sprintf("filter %q nests deeper than %d levels", f.Name, maxNestDepth))
+			continue
+		}
+		np := imagorpath.Parse(nested)
+		if np.Image == "" {
+			problems = append(problems, fmt.Sprintf("filter %q loads %q, which names no image", f.Name, nested))
+			continue
+		}
+		subProblems, subWarnings := checkPath(np, depth+1)
+		for _, s := range subProblems {
+			problems = append(problems, fmt.Sprintf("%s loads %q: %s", f.Name, nested, s))
+		}
+		for _, s := range subWarnings {
+			warnings = append(warnings, fmt.Sprintf("%s loads %q: %s", f.Name, nested, s))
+		}
+	}
+	return problems, warnings
+}
+
+// nestedPathOf returns the imagor path a filter loads, if it loads one. It is
+// the filter's first argument, which may be query-escaped, or b64: encoded when
+// the URL contains characters that are awkward to keep in a path.
+func nestedPathOf(f imagorpath.Filter) (string, bool) {
+	switch f.Name {
+	case "image", "watermark":
+	default:
+		return "", false
+	}
+	args := imagorpath.SplitArgs(f.Args)
+	if len(args) == 0 {
+		return "", false
+	}
+	arg := args[0]
+	if unescaped, err := url.QueryUnescape(arg); err == nil {
+		arg = unescaped
+	}
+	if encoded, ok := strings.CutPrefix(arg, "b64:"); ok {
+		// imagor keeps the literal value when decoding fails.
+		if raw, err := base64.RawURLEncoding.DecodeString(encoded); err == nil {
+			arg = string(raw)
+		}
+	}
+	if arg == "" || arg == "none" {
+		return "", false
+	}
+	return arg, true
+}
+
+// paramSegments are the path segments imagor reads as parameters rather than as
+// the start of an image reference.
+var paramSegments = map[string]bool{
+	"fit-in": true, "stretch": true, "full-fit-in": true, "adaptive-fit-in": true,
+	"smart": true, "meta": true, "trim": true,
+	"left": true, "right": true, "top": true, "bottom": true, "center": true,
+	"top-left": true, "bottom-right": true,
+}
+
+// isParamSegment reports whether a segment is a parameter. A path whose image
+// begins with one had its parameters written after its filters.
+func isParamSegment(seg string) bool {
+	return paramSegments[seg] || isDimSegment(seg)
+}
+
+// isDimSegment reports whether a segment is a dimension or alignment pair such
+// as 300x300, 300x, x300 or 0.5x0.5.
+func isDimSegment(seg string) bool {
+	left, right, ok := strings.Cut(seg, "x")
+	if !ok || (left == "" && right == "") {
+		return false
+	}
+	return isNumber(left) && isNumber(right)
+}
+
+func isNumber(s string) bool {
+	for _, r := range s {
+		if (r < '0' || r > '9') && r != '.' {
+			return false
+		}
+	}
+	return true
 }
 
 func summarize(p imagorpath.Params) string {
