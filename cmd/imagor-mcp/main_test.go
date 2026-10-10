@@ -702,6 +702,44 @@ func TestInventedFilterIsRefusedByTool(t *testing.T) {
 	}
 }
 
+// The two crops run in opposite orders, and the difference is not visible in the
+// response. Measured on a 500x262 source: fit-in/240x210 returns 240x126, and
+// adding crop(0,0,120,90) returns 120x90, the resize discarded.
+func TestCropFilterDiscardsTheResizeWarning(t *testing.T) {
+	s := connect(t, unsafeEnv)
+
+	var out struct {
+		Warnings []string `json:"warnings"`
+	}
+	if err := callTool(t, s, "build_imagor_url", map[string]any{
+		"image": "example.com/a.jpg", "width": 240, "height": 210, "fit_in": true,
+		"filters": []map[string]any{{"name": "crop", "args": "0,0,120,90"}},
+	}, &out); err != nil {
+		t.Fatalf("build_imagor_url: %v", err)
+	}
+	if len(out.Warnings) == 0 {
+		t.Fatal("expected a warning that the dimensions are discarded")
+	}
+	if !strings.Contains(out.Warnings[0], "crop path parameters") {
+		t.Errorf("the warning should point at the path crop, got %q", out.Warnings[0])
+	}
+
+	// The path crop is the other order and is what a caller usually means, so it
+	// must not warn.
+	var quiet struct {
+		Warnings []string `json:"warnings"`
+	}
+	if err := callTool(t, s, "build_imagor_url", map[string]any{
+		"image": "example.com/a.jpg", "width": 240, "height": 210,
+		"crop_right": 120, "crop_bottom": 90,
+	}, &quiet); err != nil {
+		t.Fatalf("build_imagor_url: %v", err)
+	}
+	if len(quiet.Warnings) != 0 {
+		t.Errorf("the path crop should not warn, got %v", quiet.Warnings)
+	}
+}
+
 // Excess arguments warn rather than refuse. Measured on imagor v1.9.7,
 // grayscale(1) still applies while blur(1,2,3) is ignored, so refusing both
 // blocked a filter that works. The warning carries the uncertainty instead.

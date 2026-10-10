@@ -260,27 +260,43 @@ func filterWarnings(p imagorpath.Params) []string {
 	return warnings
 }
 
-// compositionWarnings reports combinations that pass validation but will not do
-// what the caller expects. Argument-count checking cannot catch these, because
-// each filter involved is individually well formed.
+// compositionWarnings reports compositions that are valid but will not do what
+// was intended. Each is a case where imagor answers 200 and the caller cannot
+// tell from the response that something was discarded.
 func compositionWarnings(p imagorpath.Params) []string {
-	if !imagorpath.HasFilter(p, "quality") {
-		return nil
+	var out []string
+	if imagorpath.HasFilter(p, "quality") && !hasLossyFormat(p) {
+		out = append(out,
+			"quality() only affects lossy output formats. No lossy format() filter is present, so the "+
+				"result depends on the client's Accept header and may be lossless PNG, in which case "+
+				"quality has no effect. Add format(jpeg), format(webp) or format(avif) to be certain.")
 	}
+	// The two crops run in opposite orders. The filter crops after the resize,
+	// so asking for dimensions alongside it throws the resize away and the
+	// output is the crop's size. The path crop is the other order: it takes a
+	// region of the source and the dimensions then scale what is left.
+	if imagorpath.HasFilter(p, "crop") && (p.Width > 0 || p.Height > 0) {
+		out = append(out,
+			"crop() runs after the resize, so the requested dimensions are discarded and the output is "+
+				"the crop's size. To crop the source and then scale it, use the crop path parameters "+
+				"(crop_left, crop_top, crop_right, crop_bottom) instead of the filter.")
+	}
+	return out
+}
+
+// hasLossyFormat reports whether the filters ask for a format that loses detail,
+// which is what makes quality() meaningful.
+func hasLossyFormat(p imagorpath.Params) bool {
 	for _, f := range p.Filters {
 		if f.Name != "format" {
 			continue
 		}
 		switch strings.ToLower(strings.TrimSpace(f.Args)) {
 		case "jpeg", "jpg", "webp", "avif", "heif":
-			return nil // a lossy format is requested, so quality applies
+			return true
 		}
 	}
-	return []string{
-		"quality() only affects lossy output formats. No lossy format() filter is present, so the " +
-			"result depends on the client's Accept header and may be lossless PNG, in which case " +
-			"quality has no effect. Add format(jpeg), format(webp) or format(avif) to be certain.",
-	}
+	return false
 }
 
 // build validates the composition and renders it in the configured mode.
