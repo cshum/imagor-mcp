@@ -1,6 +1,6 @@
 {
   "name": "quote",
-  "note": "A pull quote with attribution. Bannerbear ships several of these.",
+  "note": "A pull quote with attribution, a common editorial layout.",
   "canvas": [
     1200,
     628
@@ -12,7 +12,7 @@
       "kind": "text",
       "text": "“",
       "x": "60",
-      "y": "20",
+      "y": "44",
       "font": "serif",
       "color": "3b82f6",
       "size": 180

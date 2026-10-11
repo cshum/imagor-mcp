@@ -1,6 +1,6 @@
 {
   "name": "Quote card",
-  "source": "Bannerbear's daily quote automation (quote, background_image)",
+  "source": "A daily quote card: a quote over a background image (quote, background_image)",
   "canvas": {
     "width": 1200,
     "height": 630,
@@ -30,7 +30,7 @@
       "kind": "text",
       "text": "“",
       "x": "60",
-      "y": "20",
+      "y": "44",
       "font": "serif",
       "color": "3b82f6",
       "size": 160
@@ -60,8 +60,10 @@
     }
   ],
   "values": {
-    "quote": "",
+    "quote": "The same bytes in, the same bytes out.",
     "attribution": "",
-    "background_image": "http://localhost:8198/src_life.png"
+    "background_image": "http://localhost:8198/src_life.png",
+    "who": "Adrian Shum",
+    "role": "imagor"
   }
 }

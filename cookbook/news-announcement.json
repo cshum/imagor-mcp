@@ -1,6 +1,6 @@
 {
   "name": "News announcement with quote",
-  "source": "Bannerbear's news announcement template",
+  "source": "A news announcement: kicker, headline, quote, attribution",
   "canvas": {
     "width": 1200,
     "height": 630,
@@ -56,15 +56,15 @@
       "kind": "text",
       "text": "{{source}}",
       "x": "70",
-      "y": "full-80",
+      "y": "full-110",
       "font": "sans-22",
       "color": "64748b"
     }
   ],
   "values": {
-    "kicker": "",
-    "headline": "",
-    "quote": "",
-    "source": ""
+    "kicker": "MARKETS",
+    "headline": "Intrecciato leather, back in stock",
+    "quote": "The same bag, made the same way, for nineteen years.",
+    "source": "Hong Kong, October 2026"
   }
 }

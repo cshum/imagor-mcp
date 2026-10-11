@@ -251,7 +251,7 @@ used 1530. There is no percentage font size. Size the text per canvas with
 
 `cookbook/` holds ready-made recipes for the formats that come up most: an
 announcement card, a pull quote, a testimonial, a product, an event, and a tip,
-plus the ones Bannerbear's own library is best known for. Each is a complete
+plus the share cards that blog, product and quote automation usually need. Each is a complete
 `render_template` payload, so the fastest way to a result is to take the closest
 one, change the values, and render it.
 

@@ -1,6 +1,6 @@
 {
   "name": "Blog OG image",
-  "source": "Bannerbear's Next.js guide (title, author, date, author_photo, cover)",
+  "source": "A blog share card: title, author, date, author photo, cover",
   "canvas": {
     "width": 1200,
     "height": 630,
@@ -58,10 +58,11 @@
     }
   ],
   "values": {
-    "title": "",
+    "title": "Deterministic image pipelines",
     "date": "",
-    "author": "",
+    "author": "Adrian Shum",
     "author_photo": "http://localhost:8198/src_p1.png",
-    "cover": "http://localhost:8198/src_life.png"
+    "cover": "http://localhost:8198/src_life.png",
+    "subtitle": "From libvips primitives to signed URLs"
   }
 }

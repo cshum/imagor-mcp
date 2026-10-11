@@ -1,6 +1,6 @@
 {
   "name": "Product OG image",
-  "source": "Bannerbear's Shopify guide (title, price, collection, featured_image, logo)",
+  "source": "A product share card: title, price, collection, featured image, logo",
   "canvas": {
     "width": 1200,
     "height": 630,
@@ -58,9 +58,11 @@
   ],
   "values": {
     "title": "",
-    "price": "",
+    "price": "HKD$18500",
     "collection": "",
     "featured_image": "http://localhost:8198/src_p1.png",
-    "logo": "http://localhost:8198/src_p1.png"
+    "logo": "http://localhost:8198/src_p1.png",
+    "name": "Intrecciato 19 shoulder bag",
+    "cta": "Free delivery"
   }
 }
