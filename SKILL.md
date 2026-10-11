@@ -118,6 +118,46 @@ Text is drawn at absolute canvas coordinates, so a label under a tile is placed
 at the tile's x. The nested-path form in the section above is for when the x is
 not known in advance or the label should follow the overlay's own width.
 
+## What the tools will not tell you
+
+Learned by building composites and measuring them against a reference. Each of
+these is invisible in a `200` response and obvious only in the finished image.
+
+- **Set the output format first.** JPEG artefacts across a flat background
+  dominate every measurement of a composite; adding `format(png)` was the single
+  largest improvement in one measured run, larger than any placement fix. Do it
+  before tuning anything else.
+- **`x` is the left edge.** A 0–1 float is a fraction of canvas width used as the
+  left edge, so `0.5` starts the text at the middle of the canvas rather than
+  centring a box on it. Alignment is the `text()` argument that centres, not `x`.
+- **`y` is the top of the text box**, not a baseline. Text is placed to the pixel
+  and the request still returns `200` when it is a few pixels out.
+- **Font names take hyphens for spaces**: `Palatino-63` means Palatino at 63.
+- **A wordmark no font matches is better drawn one letter per call.** A whole
+  string rendered in the nearest font can be worse than leaving the space blank;
+  placing each letter at its own x is what makes a logo land.
+- **Text a crop cut off has to be redrawn**, and per glyph when the font is
+  wrong for it. Prices are the usual case.
+- **Inside a nested path, dimensions come before the source**: `134x12/color:efefeb`
+  works, `color:efefeb/134x12` is a `400`.
+- **Sources inside `image()` need a full URL.** A bare filename is a `404`, even
+  when the same name works as the top-level image.
+- **A strip no source covers can be painted flat**: `image(311x35/color:f1f2ee,1096,600)`
+  is a rectangle, and it is often the cheapest way to repair a background.
+
+### Resize and crop are not interchangeable
+
+- **A plain `WxH` is already a cover-crop, and always from the centre.** Use it
+  for sizing. It takes a little off both sides and can never aim at the one edge
+  that is wrong.
+- **`crop()` is the only mode that aims.** It is what removes an unwanted sliver
+  on a known side — measured at 0.2% residual against 4.5% for every resize mode.
+- **`fit-in` does not crop at all**; it letterboxes, so it keeps the sliver and
+  adds bars.
+- **`trim()` only removes a uniform border.** On a product sitting on a panel it
+  is a no-op, returning byte-identical output. Do not reach for it to clean an edge.
+- **`focal` lands where a centre crop lands** unless the subject is off-centre.
+
 ## Working method
 
 1. `describe_imagor` once, for the grammar this server targets.

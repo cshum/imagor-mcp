@@ -901,6 +901,18 @@ type DescribeOutput struct {
 	Limitations   []string   `json:"limitations"`
 }
 
+// SkillOutput carries the composition skill.
+type SkillOutput struct {
+	Skill string `json:"skill"`
+}
+
+// SkillTool returns the composition skill. The server also serves it as a
+// resource, but a host that reads only tools/list never sees a resource, and
+// that host is the one that most needs this.
+func (c Config) SkillTool(_ context.Context, _ *mcp.CallToolRequest, _ any) (*mcp.CallToolResult, SkillOutput, error) {
+	return nil, SkillOutput{Skill: imagormcp.Skill}, nil
+}
+
 // DescribeTool reports the supported grammar and the server's signing mode.
 //
 // The parameter list is reflected from imagor's own Params type, so it cannot
@@ -1066,6 +1078,7 @@ func Register(s *mcp.Server, cfg Config) {
 			"Requires IMAGOR_SECRET to be configured. The composition is validated before the " +
 			"URL is returned, so an invalid combination is refused rather than emitted. " +
 			"Call list_imagor_filters for each filter's signature, description and accepted " +
+			"forms, and read get_imagor_skill before composing anything. " +
 			"argument forms, which are generated from imagor's own filter reference.",
 	}, cfg.BuildURLTool)
 
@@ -1108,6 +1121,13 @@ func Register(s *mcp.Server, cfg Config) {
 		Description: "Describe the imagor path grammar this server targets, including the parameters " +
 			"reflected from imagor's own path type and the current signing mode.",
 	}, cfg.DescribeTool)
+
+	mcp.AddTool(s, &mcp.Tool{
+		Name: "get_imagor_skill",
+		Description: "Read this before composing anything. The order a path is written in, how " +
+			"overlays and text are placed, what the resize modes actually do, and the things a " +
+			"200 response will not tell you.",
+	}, cfg.SkillTool)
 
 	// The skill travels with the server. A client that only reads tools/list
 	// never sees it, and it carries what a tool description cannot: the order a

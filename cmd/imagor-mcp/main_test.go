@@ -359,6 +359,29 @@ func TestServerServesTheSkill(t *testing.T) {
 		t.Fatalf("the skill is not offered as a resource: %+v", list.Resources)
 	}
 
+	// A host that reads only tools/list never sees a resource, and that host is
+	// the one that most needs the skill. It has to be reachable as a tool too.
+	tools, err := s.ListTools(ctx, nil)
+	if err != nil {
+		t.Fatalf("tools/list: %v", err)
+	}
+	var skillTool bool
+	for _, tool := range tools.Tools {
+		if tool.Name == "get_imagor_skill" {
+			skillTool = true
+		}
+	}
+	if !skillTool {
+		t.Fatal("get_imagor_skill is not offered, so a tools-only client cannot reach the skill")
+	}
+	call, err := s.CallTool(ctx, &mcp.CallToolParams{Name: "get_imagor_skill", Arguments: map[string]any{}})
+	if err != nil {
+		t.Fatalf("get_imagor_skill: %v", err)
+	}
+	if len(call.Content) == 0 {
+		t.Fatal("get_imagor_skill returned nothing")
+	}
+
 	read, err := s.ReadResource(ctx, &mcp.ReadResourceParams{URI: "imagor-mcp://skill"})
 	if err != nil {
 		t.Fatalf("resources/read: %v", err)
