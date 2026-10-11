@@ -82,10 +82,14 @@ func (c Config) RenderTemplateTool(ctx context.Context, _ *mcp.CallToolRequest, 
 
 	filters := make(imagorpath.Filters, 0, len(in.Slots))
 	resolved := make([]ResolvedSlot, 0, len(in.Slots))
+	var missing []string
 
 	for _, slot := range in.Slots {
 		text := substitute(slot.Text, in.Values)
 		source := substitute(slot.Image, in.Values)
+		for _, n := range append(unfilled(slot.Text, in.Values), unfilled(slot.Image, in.Values)...) {
+			missing = append(missing, fmt.Sprintf("%s.%s", slot.Name, n))
+		}
 		switch slot.Kind {
 		case "text":
 			if strings.TrimSpace(text) == "" {
@@ -104,6 +108,11 @@ func (c Config) RenderTemplateTool(ctx context.Context, _ *mcp.CallToolRequest, 
 			if font == "" {
 				font = "sans"
 			}
+			// A font argument carries one size. A slot may name one in its font
+			// ("sans-bold-22") or ask for one with size, but the size that is
+			// chosen here is the one that goes in - otherwise the argument ends
+			// up with two, and "sans-28-48" is not a font.
+			font = stripFontSize(font)
 			size, lines, detail := slot.Size, 0, ""
 			if boxH > 0 {
 				// Fitting needs a real box, so the box is resolved per canvas.
@@ -195,8 +204,14 @@ func (c Config) RenderTemplateTool(ctx context.Context, _ *mcp.CallToolRequest, 
 	if c.BaseURL != "" {
 		out.AbsoluteURL = c.BaseURL + "/" + out.URL
 	}
-	if w := compositionWarnings(p); len(w) > 0 {
-		out.Note = strings.Join(w, "; ")
+	notes := compositionWarnings(p)
+	if len(missing) > 0 {
+		notes = append(notes, fmt.Sprintf(
+			"these placeholders had no value: %s. An image slot left unfilled is a nested source "+
+				"that cannot be fetched, and the render will fail.", strings.Join(missing, ", ")))
+	}
+	if len(notes) > 0 {
+		out.Note = strings.Join(notes, "; ")
 	}
 	return nil, out, nil
 }
@@ -299,6 +314,40 @@ func (c Config) position(v string, dimension int) (string, error) {
 		return "", err
 	}
 	return strconv.Itoa(n), nil
+}
+
+// stripFontSize removes a trailing -NN from a font name, so a fitted slot does
+// not end up with two sizes in one argument.
+func stripFontSize(font string) string {
+	if i := strings.LastIndex(font, "-"); i > 0 {
+		if _, err := strconv.Atoi(font[i+1:]); err == nil {
+			return font[:i]
+		}
+	}
+	return font
+}
+
+// unfilled reports placeholders that no value supplied. An image slot left as
+// {{cover}} is a nested source that cannot be fetched, so the render 404s - worth
+// saying before it does.
+func unfilled(text string, values map[string]string) []string {
+	var out []string
+	for {
+		i := strings.Index(text, "{{")
+		if i < 0 {
+			break
+		}
+		j := strings.Index(text[i:], "}}")
+		if j < 0 {
+			break
+		}
+		name := text[i+2 : i+j]
+		if _, ok := values[name]; !ok {
+			out = append(out, name)
+		}
+		text = text[i+j+2:]
+	}
+	return out
 }
 
 // substitute fills {{name}} placeholders from values.

@@ -62,6 +62,6 @@
   "values": {
     "quote": "",
     "attribution": "",
-    "background_image": ""
+    "background_image": "http://localhost:8198/src_life.png"
   }
 }

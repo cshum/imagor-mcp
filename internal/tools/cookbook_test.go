@@ -5,10 +5,14 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
 )
+
+// doubledSize matches a font argument carrying two sizes, e.g. sans-28-48.
+var doubledSize = regexp.MustCompile(`[a-z]+-\d{2,3}-\d{2,3}`)
 
 // cookbookFile is one recipe: a layout, its default values, and a note saying
 // what it is for.
@@ -68,6 +72,14 @@ func TestCookbookRendersAtEverySize(t *testing.T) {
 			if out.Path == "" {
 				t.Errorf("%s at %dx%d: no path", recipe.Name, size[0], size[1])
 				continue
+			}
+			// A font argument carries one size. A slot that names a size and
+			// also gives a height must have the named one replaced, not have a
+			// second appended: "sans-28-48" is not a font, and imagor answers
+			// it with a 404.
+			if m := doubledSize.FindString(out.Path); m != "" {
+				t.Errorf("%s at %dx%d: the path carries two sizes in one font (%q)",
+					recipe.Name, size[0], size[1], m)
 			}
 			// Everything that resolved has to be inside the frame. A slot that
 			// lands outside is the failure this whole loop keeps finding, and it

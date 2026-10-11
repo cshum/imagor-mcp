@@ -61,7 +61,7 @@
     "title": "",
     "date": "",
     "author": "",
-    "author_photo": "",
-    "cover": ""
+    "author_photo": "http://localhost:8198/src_p1.png",
+    "cover": "http://localhost:8198/src_life.png"
   }
 }

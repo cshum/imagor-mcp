@@ -60,7 +60,7 @@
     "title": "",
     "price": "",
     "collection": "",
-    "featured_image": "",
-    "logo": ""
+    "featured_image": "http://localhost:8198/src_p1.png",
+    "logo": "http://localhost:8198/src_p1.png"
   }
 }
