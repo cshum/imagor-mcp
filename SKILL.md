@@ -247,6 +247,37 @@ canvas - at 1080x1080 the fitted title used 960 of 1080px where at 1600x900 it
 used 1530. There is no percentage font size. Size the text per canvas with
 `fit_text`, or accept that it will not scale with the frame.
 
+## Templates
+
+`render_template` renders a layout at a canvas size, so a layout is written once
+and served at any size. Geometry is written the way imagor writes it, so `full`
+and `full-N` work in any slot, and a text slot given a height is **fitted against
+the box its geometry resolves to** — which is what makes the type adapt, since a
+font size on its own is absolute.
+
+```json
+{
+  "canvas_width": 1200, "canvas_height": 630, "background": "color:1a1a2e",
+  "slots": [
+    {"name":"bar","kind":"rect","image":"color:3b82f6","x":"0","y":"0",
+     "width":"12","height":"full"},
+    {"name":"eyebrow","kind":"text","text":"{{eyebrow}}","x":"40","y":"40",
+     "font":"sans-bold-22","color":"3b82f6"},
+    {"name":"title","kind":"text","text":"{{title}}","x":"40","y":"140",
+     "width":"full-80","height":"220","font":"serif","color":"ffffff",
+     "align":"low","max_size":84,"min_size":24},
+    {"name":"author","kind":"text","text":"{{author}}","x":"40","y":"full-70",
+     "font":"sans-24","color":"888888"}
+  ],
+  "values": {"eyebrow":"ENGINEERING","title":"…","author":"Adrian Shum"}
+}
+```
+
+Measured on that template at three canvas sizes: **serif-84, serif-76, serif-84**,
+with the box following the canvas each time and every element inside the frame.
+The slot list is applied in order, so later slots draw over earlier ones, and
+values fill `{{placeholders}}` in both text and image fields.
+
 ## When imagor refuses to serve
 
 The server and the imagor it points at must agree on how a request is authorised.

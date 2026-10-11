@@ -1208,6 +1208,16 @@ func Register(s *mcp.Server, cfg Config) {
 	}, cfg.FitTextTool)
 
 	mcp.AddTool(s, &mcp.Tool{
+		Name: "render_template",
+		Description: "Render a layout at a given canvas size. Geometry is written the way imagor " +
+			"writes it, so slots can be positioned and sized relative to the canvas with full and " +
+			"full-N, and one template then serves several sizes. A text slot given a height is fitted " +
+			"with fit_text against the box its geometry resolves to, because a font size is absolute " +
+			"and would otherwise be relatively smaller on a larger canvas. Values fill {{placeholders}}. " +
+			"Returns the path, the URL, and what each slot resolved to.",
+	}, cfg.RenderTemplateTool)
+
+	mcp.AddTool(s, &mcp.Tool{
 		Name: "get_imagor_skill",
 		Description: "Read this before composing anything. The order a path is written in, how " +
 			"overlays and text are placed, what the resize modes actually do, and the things a " +

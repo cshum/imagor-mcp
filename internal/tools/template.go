@@ -1,0 +1,261 @@
+package tools
+
+import (
+	"context"
+	"fmt"
+	"strconv"
+	"strings"
+
+	"github.com/cshum/imagor-mcp/internal/pathgen"
+	"github.com/cshum/imagor/imagorpath"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
+)
+
+// TemplateSlot is one element of a template.
+//
+// Geometry is written the way imagor writes it, so `full`, `f`, `full-N` and
+// `f-N` all work: a slot can be positioned and sized relative to the canvas and
+// the same template then serves several canvas sizes. A text slot with both a
+// width and a height is fitted, which is what keeps a long title from
+// overflowing the frame it was written for.
+type TemplateSlot struct {
+	Name    string `json:"name" jsonschema:"a label for this slot, used in the resolved output"`
+	Kind    string `json:"kind" jsonschema:"text, image or rect"`
+	Text    string `json:"text,omitempty" jsonschema:"for text: the string, which may contain {{values}}"`
+	Image   string `json:"image,omitempty" jsonschema:"for image or rect: a source URL, or color:RRGGBB for a rect"`
+	X       string `json:"x" jsonschema:"horizontal position: pixels, or full-N / f-N relative to the canvas"`
+	Y       string `json:"y" jsonschema:"vertical position: pixels, or full-N / f-N relative to the canvas"`
+	Width   string `json:"width,omitempty" jsonschema:"for text: the box width, which sets the wrap and the fitting; pixels or full-N. For image: the overlay width"`
+	Height  string `json:"height,omitempty" jsonschema:"for text: the box height, which is what the text is fitted into. For image: the overlay height"`
+	Font    string `json:"font,omitempty" jsonschema:"for text: font family without a size, for example serif; the size is chosen by fitting when a height is given"`
+	Size    int    `json:"size,omitempty" jsonschema:"for text: a fixed size, used only when no height is given so the slot is not fitted"`
+	Color   string `json:"color,omitempty" jsonschema:"text colour, or overlay colour for an image slot"`
+	Align   string `json:"align,omitempty" jsonschema:"text alignment within the box: low, center or high"`
+	MaxSize int    `json:"max_size,omitempty" jsonschema:"for fitted text: the largest size to try"`
+	MinSize int    `json:"min_size,omitempty" jsonschema:"for fitted text: the smallest size to accept"`
+}
+
+// TemplateInput is a layout plus the values to fill it with.
+type TemplateInput struct {
+	CanvasWidth  int               `json:"canvas_width" jsonschema:"canvas width in pixels"`
+	CanvasHeight int               `json:"canvas_height" jsonschema:"canvas height in pixels"`
+	Background   string            `json:"background,omitempty" jsonschema:"canvas background, for example color:1a1a2e; defaults to color:white"`
+	Slots        []TemplateSlot    `json:"slots" jsonschema:"the elements, applied in order, so later slots draw over earlier ones"`
+	Values       map[string]string `json:"values,omitempty" jsonschema:"values for {{placeholders}} in slot text and image fields"`
+}
+
+// ResolvedSlot reports what a slot became, so a caller can see the choices the
+// template made rather than only the URL.
+type ResolvedSlot struct {
+	Name   string `json:"name"`
+	Detail string `json:"detail"`
+}
+
+// TemplateOutput is the rendered path, and what each slot resolved to.
+type TemplateOutput struct {
+	Path        string         `json:"path"`
+	URL         string         `json:"url,omitempty"`
+	AbsoluteURL string         `json:"absolute_url,omitempty"`
+	Signed      bool           `json:"signed"`
+	Mode        string         `json:"mode"`
+	Resolved    []ResolvedSlot `json:"resolved"`
+	Note        string         `json:"note,omitempty"`
+}
+
+// RenderTemplateTool renders a template at a given canvas size.
+//
+// The point is that a layout is written once and rendered at any size: geometry
+// is relative to the canvas, so the same template serves 1200x630 and 1080x1080.
+// Type is the exception - a font size is absolute - so a text slot with a height
+// is fitted against the box that geometry resolves to, per canvas.
+func (c Config) RenderTemplateTool(ctx context.Context, _ *mcp.CallToolRequest, in TemplateInput) (*mcp.CallToolResult, TemplateOutput, error) {
+	if in.CanvasWidth <= 0 || in.CanvasHeight <= 0 {
+		return nil, TemplateOutput{}, fmt.Errorf("a template needs canvas_width and canvas_height in pixels")
+	}
+	if len(in.Slots) == 0 {
+		return nil, TemplateOutput{}, fmt.Errorf("a template needs at least one slot")
+	}
+	background := in.Background
+	if background == "" {
+		background = "color:white"
+	}
+
+	filters := make(imagorpath.Filters, 0, len(in.Slots))
+	resolved := make([]ResolvedSlot, 0, len(in.Slots))
+
+	for _, slot := range in.Slots {
+		text := substitute(slot.Text, in.Values)
+		source := substitute(slot.Image, in.Values)
+		switch slot.Kind {
+		case "text":
+			if strings.TrimSpace(text) == "" {
+				resolved = append(resolved, ResolvedSlot{Name: slot.Name, Detail: "skipped: no text"})
+				continue
+			}
+			boxW, err := c.resolve(slot.Width, in.CanvasWidth, 0)
+			if err != nil {
+				return nil, TemplateOutput{}, fmt.Errorf("slot %q width: %w", slot.Name, err)
+			}
+			boxH, err := c.resolve(slot.Height, in.CanvasHeight, 0)
+			if err != nil {
+				return nil, TemplateOutput{}, fmt.Errorf("slot %q height: %w", slot.Name, err)
+			}
+			font := slot.Font
+			if font == "" {
+				font = "sans"
+			}
+			size, lines, detail := slot.Size, 0, ""
+			if boxH > 0 {
+				// Fitting needs a real box, so the box is resolved per canvas.
+				// This is the step that keeps type legible as the frame grows.
+				fitted, err := c.fitForTemplate(ctx, text, boxW, boxH, font, slot)
+				if err != nil {
+					return nil, TemplateOutput{}, fmt.Errorf("slot %q: %w", slot.Name, err)
+				}
+				size, lines = fitted.Size, fitted.Lines
+				detail = fmt.Sprintf(" (fitted, %d line(s))", lines)
+			}
+			if size <= 0 {
+				size = 48
+			}
+			fontArg := fmt.Sprintf("%s-%d", font, size)
+			// The tail of the argument, in imagor's order: colour, alpha,
+			// blend mode, wrap width, align, justify, wrap mode, spacing.
+			args := fmt.Sprintf("%s,%s,%s,%s", pos(slot.X, "0"), pos(slot.Y, "0"), fontArg, orDefault(slot.Color, "000000"))
+			if boxW > 0 {
+				align := orDefault(slot.Align, "low")
+				args += fmt.Sprintf(",0,normal,%d,%s,normal,word", boxW, align)
+			}
+			filters = append(filters, imagorpath.Filter{Name: "text", Args: textArgs(text, args)})
+			resolved = append(resolved, ResolvedSlot{
+				Name:   slot.Name,
+				Detail: fmt.Sprintf("text at %s,%s %s, box %dx%d%s", pos(slot.X, "0"), pos(slot.Y, "0"), fontArg, boxW, boxH, detail),
+			})
+		case "image", "rect":
+			if source == "" {
+				resolved = append(resolved, ResolvedSlot{Name: slot.Name, Detail: "skipped: no source"})
+				continue
+			}
+			inner := source
+			if w := strings.TrimSpace(slot.Width); w != "" {
+				h := orDefault(slot.Height, w)
+				inner = w + "x" + h + "/" + source
+			}
+			filters = append(filters, imagorpath.Filter{
+				Name: "image",
+				Args: fmt.Sprintf("%s,%s,%s", inner, pos(slot.X, "0"), pos(slot.Y, "0")),
+			})
+			resolved = append(resolved, ResolvedSlot{
+				Name:   slot.Name,
+				Detail: fmt.Sprintf("%s at %s,%s sized %sx%s", slot.Kind, pos(slot.X, "0"), pos(slot.Y, "0"), orDefault(slot.Width, "auto"), orDefault(slot.Height, "auto")),
+			})
+		default:
+			return nil, TemplateOutput{}, fmt.Errorf("slot %q has kind %q; use text, image or rect", slot.Name, slot.Kind)
+		}
+	}
+
+	p := imagorpath.Params{
+		Image:   background,
+		Width:   in.CanvasWidth,
+		Height:  in.CanvasHeight,
+		Filters: filters,
+	}
+	mode, err := c.Mode()
+	if err != nil {
+		return nil, TemplateOutput{}, err
+	}
+	out := TemplateOutput{Mode: string(mode), Path: pathgen.Build(p), Resolved: resolved}
+	switch mode {
+	case ModeSigned:
+		signer, err := c.Signer()
+		if err != nil {
+			return nil, TemplateOutput{}, err
+		}
+		out.URL = pathgen.BuildURL(p, signer)
+		out.Signed = true
+	case ModeUnsafe:
+		out.URL = pathgen.BuildURL(p, nil)
+	}
+	if c.BaseURL != "" {
+		out.AbsoluteURL = c.BaseURL + "/" + out.URL
+	}
+	if w := compositionWarnings(p); len(w) > 0 {
+		out.Note = strings.Join(w, "; ")
+	}
+	return nil, out, nil
+}
+
+// fitForTemplate runs the same search fit_text does, for a slot's box.
+func (c Config) fitForTemplate(ctx context.Context, text string, boxW, boxH int, font string, slot TemplateSlot) (FitTextOutput, error) {
+	in := FitTextInput{
+		Text: text, BoxWidth: boxW, BoxHeight: boxH, Font: font,
+		MaxSize: orDefaultInt(slot.MaxSize, 96), MinSize: orDefaultInt(slot.MinSize, 16),
+		Color: slot.Color,
+	}
+	_, out, err := c.FitTextTool(ctx, nil, in)
+	return out, err
+}
+
+// resolve turns a geometry value into pixels. Anything without a `full` prefix
+// is already pixels; `full`, `f`, `full-N` and `f-N` are measured against the
+// canvas dimension, which is what makes a template portable between sizes.
+func (c Config) resolve(v string, dimension, fallback int) (int, error) {
+	v = strings.TrimSpace(v)
+	if v == "" {
+		return fallback, nil
+	}
+	if !strings.HasPrefix(v, "full") && !strings.HasPrefix(v, "f") {
+		n, err := strconv.Atoi(v)
+		if err != nil {
+			return 0, fmt.Errorf("%q is not pixels and not full or full-N", v)
+		}
+		return n, nil
+	}
+	rest := strings.TrimPrefix(strings.TrimPrefix(v, "full"), "f")
+	if rest == "" {
+		return dimension, nil
+	}
+	if !strings.HasPrefix(rest, "-") {
+		return 0, fmt.Errorf("%q is not a form this understands; use full or full-N", v)
+	}
+	n, err := strconv.Atoi(strings.TrimPrefix(rest, "-"))
+	if err != nil {
+		return 0, fmt.Errorf("%q has an offset that is not a number", v)
+	}
+	if n > dimension {
+		return 0, fmt.Errorf("%q takes %d off a %dpx canvas, which leaves nothing", v, n, dimension)
+	}
+	return dimension - n, nil
+}
+
+// substitute fills {{name}} placeholders from values.
+func substitute(s string, values map[string]string) string {
+	if s == "" || len(values) == 0 {
+		return s
+	}
+	for k, v := range values {
+		s = strings.ReplaceAll(s, "{{"+k+"}}", v)
+	}
+	return s
+}
+
+func pos(v, fallback string) string {
+	if strings.TrimSpace(v) == "" {
+		return fallback
+	}
+	return strings.TrimSpace(v)
+}
+
+func orDefault(v, fallback string) string {
+	if strings.TrimSpace(v) == "" {
+		return fallback
+	}
+	return strings.TrimSpace(v)
+}
+
+func orDefaultInt(v, fallback int) int {
+	if v <= 0 {
+		return fallback
+	}
+	return v
+}
