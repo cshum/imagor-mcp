@@ -141,7 +141,11 @@ these is invisible in a `200` response and obvious only in the finished image.
 - **To centre under something narrower than the canvas, make the parent that
   width.** `center` resolves against the parent, so a group sized to a whole tile
   centres the label on the tile; size the group to the product and it centres
-  under the product.
+  under the product. Measured on one product label: a group sized to the product
+  landed 0px out, a measured absolute placement 17px out, and a guessed one 64px
+  out. Sizing the parent correctly beats measuring the text.
+- **A nested canvas can be placed anywhere**, so a group is not confined to the
+  origin, and a label inside it needs no x at all.
 - **`y` is the top of the text box**, not a baseline. Text is placed to the pixel
   and the request still returns `200` when it is a few pixels out.
 - **Font names take hyphens for spaces**: `Palatino-63` means Palatino at 63.
