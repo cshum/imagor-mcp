@@ -26,7 +26,7 @@
       "y": "3p",
       "font": "serif",
       "color": "111111",
-      "size": 54
+      "size": 62
     },
     {
       "name": "c1r1_img",
@@ -34,15 +34,15 @@
       "image": "http://localhost:8198/src_p1.png",
       "x": "42p",
       "y": "6p",
-      "width": "17p",
-      "height": "32p"
+      "width": "14p",
+      "height": "28p"
     },
     {
       "name": "c1r1_name",
       "kind": "text",
       "text": "{{c1r1_name}}",
       "x": "42p",
-      "y": "6p+34p",
+      "y": "6p+30p",
       "width": "17p",
       "height": "8p",
       "font": "sans-21",
@@ -55,7 +55,7 @@
       "kind": "text",
       "text": "{{c1r1_price}}",
       "x": "42p",
-      "y": "6p+41p",
+      "y": "6p+36p",
       "font": "sans-bold-26",
       "color": "111111"
     },
@@ -65,15 +65,15 @@
       "image": "http://localhost:8198/src_p2.png",
       "x": "61p",
       "y": "6p",
-      "width": "17p",
-      "height": "32p"
+      "width": "14p",
+      "height": "28p"
     },
     {
       "name": "c2r1_name",
       "kind": "text",
       "text": "{{c2r1_name}}",
       "x": "61p",
-      "y": "6p+34p",
+      "y": "6p+30p",
       "width": "17p",
       "height": "8p",
       "font": "sans-21",
@@ -86,7 +86,7 @@
       "kind": "text",
       "text": "{{c2r1_price}}",
       "x": "61p",
-      "y": "6p+41p",
+      "y": "6p+36p",
       "font": "sans-bold-26",
       "color": "111111"
     },
@@ -96,15 +96,15 @@
       "image": "http://localhost:8198/src_p3.png",
       "x": "80p",
       "y": "6p",
-      "width": "17p",
-      "height": "32p"
+      "width": "14p",
+      "height": "28p"
     },
     {
       "name": "c3r1_name",
       "kind": "text",
       "text": "{{c3r1_name}}",
       "x": "80p",
-      "y": "6p+34p",
+      "y": "6p+30p",
       "width": "17p",
       "height": "8p",
       "font": "sans-21",
@@ -117,7 +117,7 @@
       "kind": "text",
       "text": "{{c3r1_price}}",
       "x": "80p",
-      "y": "6p+41p",
+      "y": "6p+36p",
       "font": "sans-bold-26",
       "color": "111111"
     },
@@ -127,15 +127,15 @@
       "image": "http://localhost:8198/src_p4.png",
       "x": "42p",
       "y": "52p",
-      "width": "17p",
-      "height": "32p"
+      "width": "14p",
+      "height": "28p"
     },
     {
       "name": "c1r2_name",
       "kind": "text",
       "text": "{{c1r2_name}}",
       "x": "42p",
-      "y": "52p+34p",
+      "y": "52p+30p",
       "width": "17p",
       "height": "8p",
       "font": "sans-21",
@@ -148,7 +148,7 @@
       "kind": "text",
       "text": "{{c1r2_price}}",
       "x": "42p",
-      "y": "52p+41p",
+      "y": "52p+36p",
       "font": "sans-bold-26",
       "color": "111111"
     },
@@ -158,15 +158,15 @@
       "image": "http://localhost:8198/src_p5.png",
       "x": "61p",
       "y": "52p",
-      "width": "17p",
-      "height": "32p"
+      "width": "14p",
+      "height": "28p"
     },
     {
       "name": "c2r2_name",
       "kind": "text",
       "text": "{{c2r2_name}}",
       "x": "61p",
-      "y": "52p+34p",
+      "y": "52p+30p",
       "width": "17p",
       "height": "8p",
       "font": "sans-21",
@@ -179,7 +179,7 @@
       "kind": "text",
       "text": "{{c2r2_price}}",
       "x": "61p",
-      "y": "52p+41p",
+      "y": "52p+36p",
       "font": "sans-bold-26",
       "color": "111111"
     },
@@ -189,15 +189,15 @@
       "image": "http://localhost:8198/src_p1.png",
       "x": "80p",
       "y": "52p",
-      "width": "17p",
-      "height": "32p"
+      "width": "14p",
+      "height": "28p"
     },
     {
       "name": "c3r2_name",
       "kind": "text",
       "text": "{{c3r2_name}}",
       "x": "80p",
-      "y": "52p+34p",
+      "y": "52p+30p",
       "width": "17p",
       "height": "8p",
       "font": "sans-21",
@@ -210,7 +210,7 @@
       "kind": "text",
       "text": "{{c3r2_price}}",
       "x": "80p",
-      "y": "52p+41p",
+      "y": "52p+36p",
       "font": "sans-bold-26",
       "color": "111111"
     }
