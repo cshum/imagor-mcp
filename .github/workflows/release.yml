@@ -57,6 +57,15 @@ jobs:
             exit 1
           fi
 
+      # An MCP bundle is what a host installs in one click, and the registry's
+      # mcpb entry points at a release asset - so the bundle has to ride with the
+      # release rather than being built by hand.
+      - name: Set up Node
+        uses: actions/setup-node@v4
+
+      - name: Build the MCP bundle
+        run: ./mcpb/build.sh "${GITHUB_REF_NAME}" dist
+
       - name: Checksums
         run: |
           cd dist
