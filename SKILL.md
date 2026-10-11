@@ -247,6 +247,21 @@ canvas - at 1080x1080 the fitted title used 960 of 1080px where at 1600x900 it
 used 1530. There is no percentage font size. Size the text per canvas with
 `fit_text`, or accept that it will not scale with the frame.
 
+## Nested sources
+
+`image()` and `watermark()` take a source that is itself a path or URL, and a URL
+carries `?` and `,` without meaning anything by them. Written raw into `args`,
+a `?` ends the path the signature covers (**403**) and a `,` splits the argument
+list (**404**) — both measured. Put the source in the `source` field instead of
+`args`, and it is encoded when it needs to be:
+
+```json
+{"name":"image","source":"https://cdn.example.com/a,b.png?v=2","args":"600x600,60,60"}
+```
+
+The same reasoning as `text`: the argument is data, not syntax, so it does not
+belong in a string that is parsed for syntax.
+
 ## Templates
 
 `render_template` renders a layout at a canvas size, so a layout is written once

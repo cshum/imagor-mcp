@@ -159,6 +159,23 @@ func (c Config) Signer() (imagorpath.Signer, error) {
 // refused as a signature mismatch. base64url keeps the text out of the path
 // entirely. Pango then receives the decoded string as markup, so markup
 // characters are escaped first.
+// sourceArgs builds the argument string for a filter whose first argument is a
+// nested source. imagor reads a ? as the start of the query string and a , as the
+// next argument, so a source carrying either is encoded rather than written raw.
+func sourceArgs(source, tail string) string {
+	if source == "" {
+		return tail
+	}
+	encoded := source
+	if strings.ContainsAny(source, "?,") {
+		encoded = "b64:" + base64.RawURLEncoding.EncodeToString([]byte(source))
+	}
+	if tail == "" {
+		return encoded
+	}
+	return encoded + "," + tail
+}
+
 func textArgs(text, tail string) string {
 	if text == "" {
 		return tail
@@ -178,6 +195,11 @@ type FilterInput struct {
 	// Text is for text() only, and exists because a title is the one argument
 	// that cannot safely travel as a comma-separated string.
 	Text string `json:"text,omitempty" jsonschema:"for text() only: the string to render. Prefer this to args whenever the text comes from data, because a comma in it truncates the string silently with a 200 response and a question mark changes the path a signature covers"`
+	// Source is for image() and watermark(), whose first argument is a nested
+	// path or URL. A ? in it ends the path the signature covers, and a , splits
+	// the argument list: measured, a URL with a ? gave 403 and one with a ,
+	// gave 404. Both go through b64 here.
+	Source string `json:"source,omitempty" jsonschema:"for image() and watermark(): the nested source, a path or URL. Prefer this to args whenever the source is a URL that may contain ? or , - written raw those give 403 and 404"`
 }
 
 // TransformInput describes an image transformation. Every field maps onto a
@@ -265,7 +287,7 @@ func (in TransformInput) toParams() (imagorpath.Params, error) {
 		if outcome, msg := filtercat.Check(name, f.Args); outcome == filtercat.Rejected {
 			return imagorpath.Params{}, errors.New(msg)
 		}
-		filters = append(filters, imagorpath.Filter{Name: name, Args: textArgs(f.Text, f.Args)})
+		filters = append(filters, imagorpath.Filter{Name: name, Args: textArgs(f.Text, sourceArgs(f.Source, f.Args))})
 	}
 	if in.MaxAgeSeconds > 0 {
 		filters = append(filters, imagorpath.Filter{Name: "max_age", Args: strconv.Itoa(in.MaxAgeSeconds)})

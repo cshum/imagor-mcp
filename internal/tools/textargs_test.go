@@ -70,3 +70,23 @@ func TestTextArgsLeavesAPreEncodedArgument(t *testing.T) {
 		t.Errorf("the tail was not preserved: %s", got)
 	}
 }
+
+// A nested source is the one argument that is a URL, and a URL can carry a ? or
+// a , without meaning to. Measured on a real server: written raw those gave 403
+// and 404; encoded they render.
+func TestSourceArgsEncodesWhatWouldBreakThePath(t *testing.T) {
+	for _, tc := range []struct {
+		source, tail, want string
+	}{
+		{"", "600x600,60,60", "600x600,60,60"},
+		{"http://host/plain.png", "60,60", "http://host/plain.png,60,60"},
+		{"http://host/a.png?v=2", "60,60", "b64:aHR0cDovL2hvc3QvYS5wbmc_dj0y,60,60"},
+		{"http://host/a,b.png", "", "b64:aHR0cDovL2hvc3QvYSxiLnBuZw"},
+		{"http://host/a,b.png?v=2", "60,60", "b64:aHR0cDovL2hvc3QvYSxiLnBuZz92PTI,60,60"},
+	} {
+		got := sourceArgs(tc.source, tc.tail)
+		if got != tc.want {
+			t.Errorf("sourceArgs(%q, %q) = %q, want %q", tc.source, tc.tail, got, tc.want)
+		}
+	}
+}
