@@ -150,11 +150,22 @@ these is invisible in a `200` response and obvious only in the finished image.
   and the request still returns `200` when it is a few pixels out.
 - **Font names take hyphens for spaces**: `Palatino-63` means Palatino at 63.
 - **A font that is not installed falls back silently**, usually to sans, and the
-  request still returns `200`. If the face you asked for looks wrong, ask for the
-  generic family (`serif`, `sans`, `monospace`) instead of guessing a name.
-- **A wordmark no font matches is better drawn one letter per call.** A whole
-  string rendered in the nearest font can be worse than leaving the space blank;
-  placing each letter at its own x is what makes a logo land.
+  request still returns `200`. Measured on one host, these serif names all fell
+  back: `Times`, `Times-New-Roman`, `Hoefler-Text`, `New-York`, `Big-Caslon`,
+  `Rockwell`. These resolved: `serif`, `Palatino`, `Baskerville`, `Bodoni-72`,
+  `Didot`, `Georgia`, `Cochin`, `Charter`, `PT-Serif`. `Palatino` matched a
+  reference wordmark best. Expect only one usable sans face as well: `Helvetica`,
+  `Arial` and `Roboto` all resolved to the same fallback, which caps how close
+  sans text can get.
+- **A wordmark is usually letter-spaced, so draw it one glyph per call.** A logo
+  with tracking cannot be reproduced by one `text()`: measured on a reference
+  wordmark, the gaps ran about 8px wider than the font's own spacing, and
+  single-call attempts came out worse than leaving the space blank. Measuring
+  each glyph's centre and placing thirteen separate calls reached 90% ink overlap.
+- **When the sources are exact crops, the whole residual is text.** Image regions
+  matched bit-exactly, so every point of difference was glyph shape. Measure the
+  text bands separately from the image regions, or you will tune placement
+  against a number that placement cannot move.
 - **Text a crop cut off has to be redrawn**, and per glyph when the font is
   wrong for it. Prices are the usual case.
 - **Inside a nested path, dimensions come before the source**: `134x12/color:efefeb`
