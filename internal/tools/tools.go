@@ -149,10 +149,35 @@ func (c Config) Signer() (imagorpath.Signer, error) {
 	return imagorpath.NewHMACSigner(alg, c.Truncate, c.Secret), nil
 }
 
+// textArgs builds the argument string for a filter, encoding a text() argument
+// when one was given separately.
+//
+// A text argument travels in the path, where a comma separates arguments and a
+// question mark starts a query string. A real title containing either does not
+// survive: a comma truncates it and imagor renders nothing while still returning
+// 200, and a question mark changes the path a signature covers, so the request is
+// refused as a signature mismatch. base64url keeps the text out of the path
+// entirely. Pango then receives the decoded string as markup, so markup
+// characters are escaped first.
+func textArgs(text, tail string) string {
+	if text == "" {
+		return tail
+	}
+	escaped := strings.NewReplacer("&", "&amp;", "<", "&lt;", ">", "&gt;").Replace(text)
+	encoded := "b64:" + base64.RawURLEncoding.EncodeToString([]byte(escaped))
+	if tail == "" {
+		return encoded
+	}
+	return encoded + "," + tail
+}
+
 // FilterInput is one imagor filter and its arguments.
 type FilterInput struct {
 	Name string `json:"name" jsonschema:"filter name, for example fill, format, quality, blur, rotate, invert, watermark, text, image, max_age"`
 	Args string `json:"args,omitempty" jsonschema:"comma-separated arguments for the filter, for example \"white\" for fill, \"jpeg\" for format, \"80\" for quality. Omit for filters that take none."`
+	// Text is for text() only, and exists because a title is the one argument
+	// that cannot safely travel as a comma-separated string.
+	Text string `json:"text,omitempty" jsonschema:"for text() only: the string to render. Prefer this to args whenever the text comes from data, because a comma in it truncates the string silently with a 200 response and a question mark changes the path a signature covers"`
 }
 
 // TransformInput describes an image transformation. Every field maps onto a
@@ -240,7 +265,7 @@ func (in TransformInput) toParams() (imagorpath.Params, error) {
 		if outcome, msg := filtercat.Check(name, f.Args); outcome == filtercat.Rejected {
 			return imagorpath.Params{}, errors.New(msg)
 		}
-		filters = append(filters, imagorpath.Filter{Name: name, Args: f.Args})
+		filters = append(filters, imagorpath.Filter{Name: name, Args: textArgs(f.Text, f.Args)})
 	}
 	if in.MaxAgeSeconds > 0 {
 		filters = append(filters, imagorpath.Filter{Name: "max_age", Args: strconv.Itoa(in.MaxAgeSeconds)})

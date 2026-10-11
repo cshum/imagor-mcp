@@ -181,10 +181,15 @@ these is invisible in a `200` response and obvious only in the finished image.
   is a rectangle, and it is often the cheapest way to repair a background. Stacking a
   colour rectangle behind an inset photo is also how a border is drawn, and it keeps
   the canvas size under your control.
-- **Send text through `b64:` when it may contain punctuation.** A comma separates
-  filter arguments, so a bare one truncates the string; `b64:` takes the whole
-  thing. Pango then reads the decoded string as markup, so escape `&`, `<` and
-  `>` as `&amp;`, `&lt;` and `&gt;` or the render fails with *invalid markup*.
+- **Text that comes from data goes in the `text` field, not `args`.** A title
+  containing a comma truncates: imagor renders nothing and still returns `200`.
+  One containing `?` changes the path a signature covers, so the request comes
+  back as a signature mismatch. Both look like something other than a text
+  problem. The `text` field is encoded as base64url with markup characters
+  escaped, which handles commas, `?`, `&` and angle brackets together. If you
+  build the argument by hand instead, send it through `b64:` yourself, and escape
+  `&`, `<` and `>` as `&amp;`, `&lt;` and `&gt;` or the render fails with
+  *invalid markup*.
 - **`padding(color, N)` is a border in one filter** — but it grows the output, a
   300px image becoming 340px at `padding(x,20)`. The same padding is also a path
   parameter, written as negative dimensions, which keeps the canvas size fixed.
