@@ -14,6 +14,10 @@ import (
 // doubledSize matches a font argument carrying two sizes, e.g. sans-28-48.
 var doubledSize = regexp.MustCompile(`[a-z]+-\d{2,3}-\d{2,3}`)
 
+// aFraction matches a geometry form that belongs to the template layer and not
+// to imagor. Anything reaching the path is a render that will 404.
+var aFraction = regexp.MustCompile(`\b(half|third|quarter|h|t|q)(x|-|/|,|$)`)
+
 // cookbookFile is one recipe: a layout, its default values, and a note saying
 // what it is for.
 type cookbookFile struct {
@@ -79,6 +83,12 @@ func TestCookbookRendersAtEverySize(t *testing.T) {
 			// it with a 404.
 			if m := doubledSize.FindString(out.Path); m != "" {
 				t.Errorf("%s at %dx%d: the path carries two sizes in one font (%q)",
+					recipe.Name, size[0], size[1], m)
+			}
+			// A fraction is the template layer's own form. imagor has none, so
+			// one reaching the path is a 404 waiting to happen.
+			if m := aFraction.FindString(out.Path); m != "" {
+				t.Errorf("%s at %dx%d: a fraction (%q) reached the path; imagor has no such form",
 					recipe.Name, size[0], size[1], m)
 			}
 			// Everything that resolved has to be inside the frame. A slot that

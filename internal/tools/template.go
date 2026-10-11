@@ -156,7 +156,18 @@ func (c Config) RenderTemplateTool(ctx context.Context, _ *mcp.CallToolRequest, 
 			inner := source
 			if w := strings.TrimSpace(slot.Width); w != "" {
 				h := orDefault(slot.Height, w)
-				inner = w + "x" + h + "/" + source
+				// The nested path is imagor's own dimension segment, which has
+				// no fractions. A slot written with half or third has to be
+				// turned into pixels here, or the render 404s.
+				iw, err := c.resolve(w, in.CanvasWidth, 0)
+				if err != nil {
+					return nil, TemplateOutput{}, fmt.Errorf("slot %q width: %w", slot.Name, err)
+				}
+				ih, err := c.resolve(h, in.CanvasHeight, 0)
+				if err != nil {
+					return nil, TemplateOutput{}, fmt.Errorf("slot %q height: %w", slot.Name, err)
+				}
+				inner = fmt.Sprintf("%dx%d/%s", iw, ih, source)
 			}
 			sx, err := c.position(slot.X, in.CanvasWidth)
 			if err != nil {
