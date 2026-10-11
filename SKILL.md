@@ -138,14 +138,19 @@ these is invisible in a `200` response and obvious only in the finished image.
   left with a `200` and no warning. There is no way to shift a centre.
 - **A negative `x` sets the box's right edge**, so `-300` on an 800px canvas ends
   the text at 500. It is not a leftward offset.
-- **To centre under something narrower than the canvas, make the parent that
-  width.** `center` resolves against the parent, so a group sized to a whole tile
-  centres the label on the tile; size the group to the product and it centres
-  under the product. Measured on one product label: a group sized to the product
-  landed 0px out, a measured absolute placement 17px out, and a guessed one 64px
-  out. Sizing the parent correctly beats measuring the text.
-- **A nested canvas can be placed anywhere**, so a group is not confined to the
-  origin, and a label inside it needs no x at all.
+- **`center` resolves against the parent, so a group can centre its contents — but
+  only if the canvas can hold them.** A group's canvas is the resized source, so
+  sizing it to anything other than the source's own size resizes the image. A
+  nested canvas can be placed anywhere, and a label inside one needs no x.
+- **Weigh that against what it costs the image.** Measured on one product tile:
+  placing the product and label directly kept the product region at 2.1 mean
+  difference and put the label 17px off; wrapping them in a group sized to hold
+  the label centred the label exactly but pushed the product to 39.7, because the
+  source was resized to fit. A group sized exactly to the source preserved the
+  product at 2.1 and could not hold a label below it. **Centring and image
+  fidelity pull against each other unless the source already includes the space
+  the label needs** — so either capture sources with their label band, or place
+  text absolutely and measure it.
 - **`y` is the top of the text box**, not a baseline. Text is placed to the pixel
   and the request still returns `200` when it is a few pixels out.
 - **Font names take hyphens for spaces**: `Palatino-63` means Palatino at 63.
