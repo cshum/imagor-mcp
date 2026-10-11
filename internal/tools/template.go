@@ -117,8 +117,17 @@ func (c Config) RenderTemplateTool(ctx context.Context, _ *mcp.CallToolRequest, 
 			// ("sans-bold-22") or ask for one with size, but the size that is
 			// chosen here is the one that goes in - otherwise the argument ends
 			// up with two, and "sans-28-48" is not a font.
-			font = stripFontSize(font)
+			//
+			// The order of preference is size, then the font's own, then the
+			// default. Taking the font's own matters: a slot that writes
+			// "sans-bold-11" and nothing else means 11, and reading that as the
+			// default 48 renders it four times too large.
+			fontFamily, fontSize := splitFontName(font)
+			font = fontFamily
 			size, lines, detail := slot.Size, 0, ""
+			if size <= 0 {
+				size = fontSize
+			}
 			if boxH > 0 {
 				// Fitting needs a real box, so the box is resolved per canvas.
 				// This is the step that keeps type legible as the frame grows.
@@ -393,15 +402,15 @@ func (c Config) position(v string, dimension int) (string, error) {
 	return strconv.Itoa(n), nil
 }
 
-// stripFontSize removes a trailing -NN from a font name, so a fitted slot does
-// not end up with two sizes in one argument.
-func stripFontSize(font string) string {
+// splitFontName separates a font argument into its family and the size it names,
+// if any. "sans-bold-22" is sans-bold at 22; "serif" is serif at no size.
+func splitFontName(font string) (string, int) {
 	if i := strings.LastIndex(font, "-"); i > 0 {
-		if _, err := strconv.Atoi(font[i+1:]); err == nil {
-			return font[:i]
+		if n, err := strconv.Atoi(font[i+1:]); err == nil {
+			return font[:i], n
 		}
 	}
-	return font
+	return font, 0
 }
 
 // unfilled reports placeholders that no value supplied. An image slot left as
