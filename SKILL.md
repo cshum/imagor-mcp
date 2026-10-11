@@ -226,6 +226,27 @@ not tune a whole composition and guess which part moved.
 - Measure the region you changed, not just the whole image: a whole-image number
   hides a label that is 40px out, because most of the canvas did not move.
 
+## Responsive compositions
+
+A nested path can inherit its parent's dimensions, so one composition can serve
+several canvas sizes instead of being pinned to one. In any dimension segment,
+`full` or `f` means the parent's dimension, and `full-NNN` means that minus NNN
+pixels.
+
+- `fullxfull` (or `fxf`) — the overlay fills the parent canvas
+- `fit-in/full-40xfull-40/PHOTO` — inset 40px on every side, fitted within
+- `12xfull/color:3b82f6` — a 12px accent bar at full height, at any canvas size
+- `full-80` as a `text()` wrap width — the text wraps to the canvas it lands on
+
+Measured: the same composition rendered at 1200x630, 1080x1080 and 1600x900 put
+the accent bar at columns 0-11 and inset the photo by exactly 40px in all three.
+
+**Sizes adapt; type does not.** A font size is in pixels and a text position is
+absolute, so the same composition renders relatively smaller type on a larger
+canvas - at 1080x1080 the fitted title used 960 of 1080px where at 1600x900 it
+used 1530. There is no percentage font size. Size the text per canvas with
+`fit_text`, or accept that it will not scale with the frame.
+
 ## When imagor refuses to serve
 
 The server and the imagor it points at must agree on how a request is authorised.
