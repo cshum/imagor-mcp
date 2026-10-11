@@ -133,6 +133,9 @@ these is invisible in a `200` response and obvious only in the finished image.
 - **`y` is the top of the text box**, not a baseline. Text is placed to the pixel
   and the request still returns `200` when it is a few pixels out.
 - **Font names take hyphens for spaces**: `Palatino-63` means Palatino at 63.
+- **A font that is not installed falls back silently**, usually to sans, and the
+  request still returns `200`. If the face you asked for looks wrong, ask for the
+  generic family (`serif`, `sans`, `monospace`) instead of guessing a name.
 - **A wordmark no font matches is better drawn one letter per call.** A whole
   string rendered in the nearest font can be worse than leaving the space blank;
   placing each letter at its own x is what makes a logo land.
