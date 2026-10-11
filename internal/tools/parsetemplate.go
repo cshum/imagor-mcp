@@ -2,7 +2,6 @@ package tools
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 	"strconv"
 	"strings"
@@ -110,12 +109,12 @@ func (c Config) slotFromFilter(f imagorpath.Filter) (TemplateSlot, bool) {
 			dims := rest[:i]
 			// a source carrying ? or , was encoded on the way in, and has to be
 			// decoded on the way back or the round trip is not stable
-			slot.Image = decodeText(rest[i+1:])
+			slot.Image = decodeTextValue(rest[i+1:])
 			if w, h, ok := splitDims(dims); ok {
 				slot.Width, slot.Height = w, h
 			}
 		} else {
-			slot.Image = decodeText(rest)
+			slot.Image = decodeTextValue(rest)
 		}
 		if strings.HasPrefix(slot.Image, "color:") {
 			slot.Kind = "rect"
@@ -128,7 +127,7 @@ func (c Config) slotFromFilter(f imagorpath.Filter) (TemplateSlot, bool) {
 		}
 		slot := TemplateSlot{
 			Name: "text", Kind: "text",
-			Text: decodeText(args[0]),
+			Text: decodeTextValue(args[0]),
 			X:    args[1], Y: args[2],
 		}
 		slot.Font, slot.Size = splitFont(args[3])
@@ -153,7 +152,7 @@ func (c Config) slotFromFilter(f imagorpath.Filter) (TemplateSlot, bool) {
 		}
 		slot := TemplateSlot{
 			Name: "label", Kind: "text",
-			Text: decodeText(args[0]),
+			Text: decodeTextValue(args[0]),
 			X:    args[1], Y: args[2],
 		}
 		if size, err := strconv.Atoi(args[3]); err == nil {
@@ -165,18 +164,6 @@ func (c Config) slotFromFilter(f imagorpath.Filter) (TemplateSlot, bool) {
 		return slot, true
 	}
 	return TemplateSlot{}, false
-}
-
-// decodeText undoes what textArgs did: a b64: prefix and Pango escaping.
-func decodeText(v string) string {
-	if !strings.HasPrefix(v, "b64:") {
-		return v
-	}
-	raw, err := base64.RawURLEncoding.DecodeString(strings.TrimPrefix(v, "b64:"))
-	if err != nil {
-		return v
-	}
-	return strings.NewReplacer("&amp;", "&", "&lt;", "<", "&gt;", ">").Replace(string(raw))
 }
 
 // splitFont separates a font argument into a family and a size, if it carries one.

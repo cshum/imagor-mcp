@@ -160,16 +160,13 @@ func (c Config) Signer() (imagorpath.Signer, error) {
 // entirely. Pango then receives the decoded string as markup, so markup
 // characters are escaped first.
 // sourceArgs builds the argument string for a filter whose first argument is a
-// nested source. imagor reads a ? as the start of the query string and a , as the
-// next argument, so a source carrying either is encoded rather than written raw.
+// nested source. The encoding rules live in encoding.go, alongside the ones the
+// template layer uses, so both encode a value the same way.
 func sourceArgs(source, tail string) string {
 	if source == "" {
 		return tail
 	}
-	encoded := source
-	if strings.ContainsAny(source, "?,") {
-		encoded = "b64:" + base64.RawURLEncoding.EncodeToString([]byte(source))
-	}
+	encoded := encodeSourceValue(source)
 	if tail == "" {
 		return encoded
 	}
@@ -180,8 +177,7 @@ func textArgs(text, tail string) string {
 	if text == "" {
 		return tail
 	}
-	escaped := strings.NewReplacer("&", "&amp;", "<", "&lt;", ">", "&gt;").Replace(text)
-	encoded := "b64:" + base64.RawURLEncoding.EncodeToString([]byte(escaped))
+	encoded := encodeTextValue(text)
 	if tail == "" {
 		return encoded
 	}

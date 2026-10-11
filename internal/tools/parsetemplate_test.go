@@ -237,8 +237,8 @@ func TestDecodeTextAndSplitHelpers(t *testing.T) {
 		{"b64:Jmx0O3gmZ3Q7", "<x>"},                      // the escaping is undone, not kept
 		{"b64:not!valid!base64", "b64:not!valid!base64"}, // left alone rather than mangled
 	} {
-		if got := decodeText(tc.in); got != tc.want {
-			t.Errorf("decodeText(%q) = %q, want %q", tc.in, got, tc.want)
+		if got := decodeTextValue(tc.in); got != tc.want {
+			t.Errorf("decodeTextValue(%q) = %q, want %q", tc.in, got, tc.want)
 		}
 	}
 	for _, tc := range []struct {

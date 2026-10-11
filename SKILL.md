@@ -308,6 +308,30 @@ percentage such as `20p`, a float `0`–`1`, or an alignment such as `center` or
 `bottom-40` — and remember a position is the **top-left of the box**, so an
 alignment offset moves *past* the edge while a negative number insets from it.
 
+## When a value has to be encoded
+
+Two different rules, on purpose, and both matter when a value comes from data.
+
+**Text takes a whitelist.** Only `[A-Za-z0-9_-]` is left alone; anything else is
+encoded, and markup characters are escaped as well because the renderer reads
+Pango markup in a text argument. A whitelist is right here because the input is
+arbitrary — a title, a product name, a field from someone's database.
+
+**A source takes a character set, plus reserved words.** A source is nearly always
+a path or URL, which legitimately contains `/`, `:`, `.` and `=`, so a whitelist
+there would encode every real source and make every path opaque. Encoded are:
+
+- any of **space `?` `#` `&` `(` `)` `,`** — each changes how the path is read
+- a source **beginning with `trim/`, `meta/`, `fit-in/`, `stretch/`, `top/`,
+  `left/`, `right/`, `bottom/`, `center/` or `smart/`** — imagor reads those as a
+  command, not as the start of a source
+
+Neither rule needs a guess about what a value contains: put text in the `text`
+field and a source in the `source` field, and both are handled.
+
+These match the converter in imagor-studio (`server/internal/imagortemplate`), so
+a path either project builds means the same thing.
+
 ## Nested sources
 
 `image()` and `watermark()` take a source that is itself a path or URL, and a URL
