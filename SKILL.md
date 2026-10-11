@@ -247,6 +247,21 @@ canvas - at 1080x1080 the fitted title used 960 of 1080px where at 1600x900 it
 used 1530. There is no percentage font size. Size the text per canvas with
 `fit_text`, or accept that it will not scale with the frame.
 
+## Installing it
+
+`mcpb/` builds an MCP bundle: a zip holding `manifest.json` and the server
+binaries, which a host installs in one click. MCPB has a **binary** server type
+and prefers static linking, so a Go server needs no runtime and no container.
+
+```
+./mcpb/build.sh          # stamps the version from the tag, or the short hash
+```
+
+The manifest declares the settings the server needs — the imagor base URL, and
+whether the server is unsafe or signed — so the host can ask for them at install
+time rather than making the user write JSON. `IMAGOR_SECRET` is marked sensitive
+and never travels through the tool surface.
+
 ## Editing a path you already have
 
 `parse_template` reads an imagor path back into a template, so a composition you

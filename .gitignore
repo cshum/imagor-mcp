@@ -8,3 +8,6 @@ coverage.txt
 
 # stray binaries from `go build ./...`
 /spike
+
+# built MCP bundles
+*.mcpb

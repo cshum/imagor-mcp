@@ -1,0 +1,66 @@
+{
+  "$schema": "https://raw.githubusercontent.com/anthropics/mcpb/main/schemas/mcpb-manifest-v0.4.schema.json",
+  "manifest_version": "0.4",
+  "name": "imagor-mcp",
+  "version": "0.0.0",
+  "description": "Build and verify imagor image URLs, and render layouts at any canvas size, from an MCP client.",
+  "author": {
+    "name": "Adrian Shum"
+  },
+  "homepage": "https://github.com/cshum/imagor-mcp",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cshum/imagor-mcp"
+  },
+  "license": "Apache-2.0",
+  "server": {
+    "type": "binary",
+    "entry_point": "server/imagor-mcp",
+    "mcp_config": {
+      "command": "server/imagor-mcp",
+      "args": [],
+      "env": {
+        "IMAGOR_BASE_URL": "${user_config.imagor_base_url}",
+        "IMAGOR_UNSAFE": "${user_config.imagor_unsafe}",
+        "IMAGOR_SECRET": "${user_config.imagor_secret}",
+        "IMAGOR_SIGNER_TYPE": "${user_config.imagor_signer_type}"
+      },
+      "platform_overrides": {
+        "win32": {
+          "command": "server/imagor-mcp.exe"
+        }
+      }
+    }
+  },
+  "user_config": {
+    "imagor_base_url": {
+      "type": "string",
+      "title": "imagor base URL",
+      "description": "The imagor server these tools build URLs for, for example http://localhost:8000",
+      "default": "http://localhost:8000",
+      "required": true
+    },
+    "imagor_unsafe": {
+      "type": "string",
+      "title": "IMAGOR_UNSAFE",
+      "description": "Set to 1 when the imagor server runs in unsafe mode. Leave empty when it is signed.",
+      "default": ""
+    },
+    "imagor_secret": {
+      "type": "string",
+      "title": "IMAGOR_SECRET",
+      "description": "The signing secret, when the imagor server is signed. Must match the server's own secret and signer settings.",
+      "sensitive": true,
+      "default": ""
+    },
+    "imagor_signer_type": {
+      "type": "string",
+      "title": "IMAGOR_SIGNER_TYPE",
+      "description": "sha1, sha256 or sha512. Must match the imagor server, and defaults to sha1 as the server does.",
+      "default": "sha1"
+    }
+  },
+  "compatibility": {
+    "platforms": ["darwin", "linux", "win32"]
+  }
+}
