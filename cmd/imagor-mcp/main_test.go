@@ -389,10 +389,17 @@ func TestServerServesTheSkill(t *testing.T) {
 	if len(read.Contents) != 1 || read.Contents[0].Text == "" {
 		t.Fatalf("the skill resource is empty: %+v", read.Contents)
 	}
-	for _, want := range []string{"Parameters first", "Everything after `filters:`", "fit-in"} {
+	// The point is that the whole skill arrives, and that it arrives intact -
+	// not that any particular sentence survived. Checking prose would have made
+	// this test fail on every rewrite, including one that only shortened it, so
+	// it checks the section headings and the facts that must be in it.
+	for _, want := range []string{"## Order in a path", "filters:", "fit-in", "verify_imagor_url"} {
 		if !strings.Contains(read.Contents[0].Text, want) {
 			t.Errorf("the served skill does not mention %q", want)
 		}
+	}
+	if n := len(strings.Fields(read.Contents[0].Text)); n < 800 {
+		t.Errorf("the served skill is only %d words; it looks truncated", n)
 	}
 }
 
