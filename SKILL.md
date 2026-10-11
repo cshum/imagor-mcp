@@ -130,6 +130,10 @@ these is invisible in a `200` response and obvious only in the finished image.
 - **`x` is the left edge.** A 0–1 float is a fraction of canvas width used as the
   left edge, so `0.5` starts the text at the middle of the canvas rather than
   centring a box on it. Alignment is the `text()` argument that centres, not `x`.
+- **`center` as an `x` has the same meaning**, and it does not change inside a
+  nested path: it puts the left edge at the centre of that canvas. A group does
+  not give you free centring — measured, a grouped `center` label landed 50px out
+  where a measured absolute placement was 17px out.
 - **`y` is the top of the text box**, not a baseline. Text is placed to the pixel
   and the request still returns `200` when it is a few pixels out.
 - **Font names take hyphens for spaces**: `Palatino-63` means Palatino at 63.
