@@ -31,6 +31,7 @@ type TemplateSlot struct {
 	Size    int    `json:"size,omitempty" jsonschema:"for text: a fixed size, used only when no height is given so the slot is not fitted"`
 	Color   string `json:"color,omitempty" jsonschema:"text colour, or overlay colour for an image slot"`
 	Align   string `json:"align,omitempty" jsonschema:"text alignment within the box: low, center or high"`
+	Fit     bool   `json:"fit,omitempty" jsonschema:"for image: fit the whole image inside the box rather than filling it, which keeps the aspect ratio instead of stretching"`
 	MaxSize int    `json:"max_size,omitempty" jsonschema:"for fitted text: the largest size to try"`
 	MinSize int    `json:"min_size,omitempty" jsonschema:"for fitted text: the smallest size to accept"`
 }
@@ -168,6 +169,11 @@ func (c Config) RenderTemplateTool(ctx context.Context, _ *mcp.CallToolRequest, 
 					return nil, TemplateOutput{}, fmt.Errorf("slot %q height: %w", slot.Name, err)
 				}
 				inner = fmt.Sprintf("%dx%d/%s", iw, ih, source)
+				if slot.Fit {
+					// fit-in comes before the dimensions, and a nested path has
+					// to end with its source
+					inner = fmt.Sprintf("fit-in/%dx%d/%s", iw, ih, source)
+				}
 			}
 			sx, err := c.position(slot.X, in.CanvasWidth)
 			if err != nil {
@@ -246,23 +252,27 @@ func (c Config) resolve(v string, dimension, fallback int) (int, error) {
 	if v == "" {
 		return fallback, nil
 	}
-	if _, _, isFraction := splitFraction(v); !isFraction {
+	// The base decides the value and any offset adjusts it, in one place, so
+	// every form takes an offset the same way.
+	base, rest := splitBase(v)
+	switch {
+	case base == "":
 		n, err := strconv.Atoi(v)
 		if err != nil {
-			return 0, fmt.Errorf("%q is not pixels and not full, full-N, half, third or quarter", v)
+			return 0, fmt.Errorf(
+				"%q is not pixels, full, full-N, a fraction such as half, or a percentage such as 38p", v)
 		}
 		return n, nil
-	}
-	// Fractions come first, because a layout that wants half the canvas should
-	// not have to know how wide the canvas is. imagor has no fraction form, so
-	// this is the layer that can offer one.
-	base, rest, ok := splitFraction(v)
-	if !ok {
-		return 0, fmt.Errorf("%q is not a form this understands; use pixels, full, full-N, half, third or quarter, each optionally minus pixels", v)
+	case strings.HasSuffix(base, "p"):
+		pct, err := strconv.Atoi(strings.TrimSuffix(base, "p"))
+		if err != nil {
+			return 0, fmt.Errorf("%q ends in p but is not a percentage", v)
+		}
+		return applyOffset(dimension*pct/100, dimension, rest, v)
 	}
 	value := dimension
 	switch base {
-	case "", "full", "f":
+	case "full", "f":
 	case "half", "h":
 		value = dimension / 2
 	case "third", "t":
@@ -270,39 +280,64 @@ func (c Config) resolve(v string, dimension, fallback int) (int, error) {
 	case "quarter", "q":
 		value = dimension / 4
 	default:
-		return 0, fmt.Errorf("%q is not a fraction this knows; use half, third or quarter", v)
+		return 0, fmt.Errorf("%q is not a form this knows; use full, half, third, quarter or a percentage such as 38p", v)
 	}
+	return applyOffset(value, dimension, rest, v)
+}
+
+// splitBase separates a base form from a trailing -N or +N offset.
+//
+// imagor's dimension segment has full and full-N but no fraction and no
+// percentage, so those are this layer's own and have to be turned into pixels
+// before a path is built. A value this does not recognise comes back as no base,
+// which leaves a plain number a plain number.
+func splitBase(v string) (base, rest string) {
+	for _, name := range []string{"full", "f", "half", "h", "third", "t", "quarter", "q"} {
+		if v == name {
+			return name, ""
+		}
+		if strings.HasPrefix(v, name+"-") || strings.HasPrefix(v, name+"+") {
+			return name, v[len(name):]
+		}
+	}
+	if i := strings.IndexAny(v, "+-"); i > 0 && strings.HasSuffix(v[:i], "p") {
+		return v[:i], v[i:]
+	}
+	if strings.HasSuffix(v, "p") {
+		return v, ""
+	}
+	return "", ""
+}
+
+// applyOffset applies a -N or +N suffix, refusing one that leaves nothing.
+func applyOffset(value, dimension int, rest, original string) (int, error) {
 	rest = strings.TrimSpace(rest)
 	if rest == "" {
 		return value, nil
 	}
 	if !strings.HasPrefix(rest, "-") && !strings.HasPrefix(rest, "+") {
-		return 0, fmt.Errorf("%q is not a form this understands; an offset is written -N or +N", v)
+		return 0, fmt.Errorf("%q is not a form this understands; an offset is written -N or +N", original)
 	}
 	n, err := strconv.Atoi(rest[1:])
 	if err != nil {
-		return 0, fmt.Errorf("%q has an offset that is not a number", v)
+		// a percentage offset, e.g. 6p+34p - a fraction of the same dimension,
+		// which is what a layout means when it says "a third down, and then on"
+		if !strings.HasSuffix(rest[1:], "p") {
+			return 0, fmt.Errorf("%q has an offset that is neither pixels nor a percentage", original)
+		}
+		pct, perr := strconv.Atoi(rest[1 : len(rest)-1])
+		if perr != nil {
+			return 0, fmt.Errorf("%q has an offset that is neither pixels nor a percentage", original)
+		}
+		n = dimension * pct / 100
 	}
 	if rest[0] == '-' {
 		if n > value {
-			return 0, fmt.Errorf("%q takes %d off %d, which leaves nothing", v, n, value)
+			return 0, fmt.Errorf("%q takes %d off %d, which leaves nothing", original, n, value)
 		}
 		return value - n, nil
 	}
 	return value + n, nil
-}
-
-// splitFraction separates a fraction or full prefix from a trailing -N offset.
-func splitFraction(v string) (base, rest string, ok bool) {
-	for _, name := range []string{"full", "f", "half", "h", "third", "t", "quarter", "q"} {
-		if v == name {
-			return name, "", true
-		}
-		if strings.HasPrefix(v, name+"-") || strings.HasPrefix(v, name+"+") {
-			return name, v[len(name):], true
-		}
-	}
-	return "", "", false
 }
 
 // position resolves a slot's x or y into something imagor will place correctly.
@@ -317,7 +352,9 @@ func (c Config) position(v string, dimension int) (string, error) {
 	if v == "" {
 		return "0", nil
 	}
-	if _, _, isFraction := splitFraction(v); !isFraction {
+	if base, _ := splitBase(v); base == "" {
+		// pixels, center, top, bottom, right, left and their offsets are imagor's
+		// own position forms and pass through untouched
 		return v, nil
 	}
 	n, err := c.resolve(v, dimension, 0)

@@ -1,0 +1,233 @@
+{
+  "name": "Product grid banner",
+  "source": "A hero photo beside a product grid, three across and two down",
+  "note": "The shape used for a product drop or a gift guide: a full-height lifestyle photo on the left, then a grid of items on white. Each cell is an image, a two-line name and a bold price, and every position is against the canvas, so the same recipe holds at any size.",
+  "canvas": [
+    1800,
+    942
+  ],
+  "background": "color:ffffff",
+  "slots": [
+    {
+      "name": "hero",
+      "kind": "image",
+      "image": "http://localhost:8198/src_life.png",
+      "x": "0",
+      "y": "0",
+      "width": "38p",
+      "height": "full",
+      "fit": true
+    },
+    {
+      "name": "mark",
+      "kind": "text",
+      "text": "{{mark}}",
+      "x": "center",
+      "y": "3p",
+      "font": "serif",
+      "color": "111111",
+      "size": 54
+    },
+    {
+      "name": "c1r1_img",
+      "kind": "image",
+      "image": "http://localhost:8198/src_p1.png",
+      "x": "42p",
+      "y": "6p",
+      "width": "17p",
+      "height": "32p"
+    },
+    {
+      "name": "c1r1_name",
+      "kind": "text",
+      "text": "{{c1r1_name}}",
+      "x": "42p",
+      "y": "6p+34p",
+      "width": "17p",
+      "height": "8p",
+      "font": "sans-21",
+      "color": "9a9a9a",
+      "max_size": 21,
+      "min_size": 13
+    },
+    {
+      "name": "c1r1_price",
+      "kind": "text",
+      "text": "{{c1r1_price}}",
+      "x": "42p",
+      "y": "6p+41p",
+      "font": "sans-bold-26",
+      "color": "111111"
+    },
+    {
+      "name": "c2r1_img",
+      "kind": "image",
+      "image": "http://localhost:8198/src_p2.png",
+      "x": "61p",
+      "y": "6p",
+      "width": "17p",
+      "height": "32p"
+    },
+    {
+      "name": "c2r1_name",
+      "kind": "text",
+      "text": "{{c2r1_name}}",
+      "x": "61p",
+      "y": "6p+34p",
+      "width": "17p",
+      "height": "8p",
+      "font": "sans-21",
+      "color": "9a9a9a",
+      "max_size": 21,
+      "min_size": 13
+    },
+    {
+      "name": "c2r1_price",
+      "kind": "text",
+      "text": "{{c2r1_price}}",
+      "x": "61p",
+      "y": "6p+41p",
+      "font": "sans-bold-26",
+      "color": "111111"
+    },
+    {
+      "name": "c3r1_img",
+      "kind": "image",
+      "image": "http://localhost:8198/src_p3.png",
+      "x": "80p",
+      "y": "6p",
+      "width": "17p",
+      "height": "32p"
+    },
+    {
+      "name": "c3r1_name",
+      "kind": "text",
+      "text": "{{c3r1_name}}",
+      "x": "80p",
+      "y": "6p+34p",
+      "width": "17p",
+      "height": "8p",
+      "font": "sans-21",
+      "color": "9a9a9a",
+      "max_size": 21,
+      "min_size": 13
+    },
+    {
+      "name": "c3r1_price",
+      "kind": "text",
+      "text": "{{c3r1_price}}",
+      "x": "80p",
+      "y": "6p+41p",
+      "font": "sans-bold-26",
+      "color": "111111"
+    },
+    {
+      "name": "c1r2_img",
+      "kind": "image",
+      "image": "http://localhost:8198/src_p4.png",
+      "x": "42p",
+      "y": "52p",
+      "width": "17p",
+      "height": "32p"
+    },
+    {
+      "name": "c1r2_name",
+      "kind": "text",
+      "text": "{{c1r2_name}}",
+      "x": "42p",
+      "y": "52p+34p",
+      "width": "17p",
+      "height": "8p",
+      "font": "sans-21",
+      "color": "9a9a9a",
+      "max_size": 21,
+      "min_size": 13
+    },
+    {
+      "name": "c1r2_price",
+      "kind": "text",
+      "text": "{{c1r2_price}}",
+      "x": "42p",
+      "y": "52p+41p",
+      "font": "sans-bold-26",
+      "color": "111111"
+    },
+    {
+      "name": "c2r2_img",
+      "kind": "image",
+      "image": "http://localhost:8198/src_p5.png",
+      "x": "61p",
+      "y": "52p",
+      "width": "17p",
+      "height": "32p"
+    },
+    {
+      "name": "c2r2_name",
+      "kind": "text",
+      "text": "{{c2r2_name}}",
+      "x": "61p",
+      "y": "52p+34p",
+      "width": "17p",
+      "height": "8p",
+      "font": "sans-21",
+      "color": "9a9a9a",
+      "max_size": 21,
+      "min_size": 13
+    },
+    {
+      "name": "c2r2_price",
+      "kind": "text",
+      "text": "{{c2r2_price}}",
+      "x": "61p",
+      "y": "52p+41p",
+      "font": "sans-bold-26",
+      "color": "111111"
+    },
+    {
+      "name": "c3r2_img",
+      "kind": "image",
+      "image": "http://localhost:8198/src_p1.png",
+      "x": "80p",
+      "y": "52p",
+      "width": "17p",
+      "height": "32p"
+    },
+    {
+      "name": "c3r2_name",
+      "kind": "text",
+      "text": "{{c3r2_name}}",
+      "x": "80p",
+      "y": "52p+34p",
+      "width": "17p",
+      "height": "8p",
+      "font": "sans-21",
+      "color": "9a9a9a",
+      "max_size": 21,
+      "min_size": 13
+    },
+    {
+      "name": "c3r2_price",
+      "kind": "text",
+      "text": "{{c3r2_price}}",
+      "x": "80p",
+      "y": "52p+41p",
+      "font": "sans-bold-26",
+      "color": "111111"
+    }
+  ],
+  "values": {
+    "mark": "MAISON",
+    "c1r1_name": "Padded shoulder bag",
+    "c1r1_price": "HKD$7000",
+    "c2r1_name": "Coated-canvas messenger bag",
+    "c2r1_price": "HKD$11540",
+    "c3r1_name": "Leather messenger bag",
+    "c3r1_price": "HKD$12875",
+    "c1r2_name": "Debossed leather messenger bag",
+    "c1r2_price": "HKD$13625",
+    "c2r2_name": "Logo-embossed leather tote bag",
+    "c2r2_price": "HKD$15170",
+    "c3r2_name": "Small structured top-handle bag",
+    "c3r2_price": "HKD$8200"
+  }
+}

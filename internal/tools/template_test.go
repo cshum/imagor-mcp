@@ -34,6 +34,17 @@ func TestResolveGeometryAgainstTheCanvas(t *testing.T) {
 		{"halfway", 1200, 0, false},  // not a form at all
 		{"half+40", 1200, 640, true}, // an offset either way
 		{"half-2000", 1200, 0, false},
+		// percentages: imagor has none for a dimension, only for a position
+		{"38p", 1800, 684, true},
+		{"50p", 1200, 600, true},
+		{"100p", 1200, 1200, true},
+		{"p", 1200, 0, false},
+		{"weightp", 1200, 0, false},
+		// an offset may itself be a percentage of the same dimension
+		{"6p+34p", 942, 376, true},
+		{"50p+34p", 942, 791, true},
+		{"half+10p", 942, 565, true},
+		{"38p", 1800, 684, true},
 	} {
 		got, err := c.resolve(tc.in, tc.dim, 0)
 		if tc.ok && err != nil {
