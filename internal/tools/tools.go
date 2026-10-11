@@ -1174,6 +1174,15 @@ func Register(s *mcp.Server, cfg Config) {
 	}, cfg.DescribeTool)
 
 	mcp.AddTool(s, &mcp.Tool{
+		Name: "fit_text",
+		Description: "Find the largest font size at which a string still fits a box. imagor wraps " +
+			"text but never shrinks it, so a template that suits a short title silently overflows on " +
+			"a longer one. This renders the text on a transparent canvas at candidate sizes, measures " +
+			"the ink, and searches for the largest size that fits. Pass the returned font argument " +
+			"straight to text(). Requires IMAGOR_BASE_URL.",
+	}, cfg.FitTextTool)
+
+	mcp.AddTool(s, &mcp.Tool{
 		Name: "get_imagor_skill",
 		Description: "Read this before composing anything. The order a path is written in, how " +
 			"overlays and text are placed, what the resize modes actually do, and the things a " +

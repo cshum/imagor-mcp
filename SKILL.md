@@ -178,7 +178,22 @@ these is invisible in a `200` response and obvious only in the finished image.
 - **Sources inside `image()` need a full URL.** A bare filename is a `404`, even
   when the same name works as the top-level image.
 - **A strip no source covers can be painted flat**: `image(311x35/color:f1f2ee,1096,600)`
-  is a rectangle, and it is often the cheapest way to repair a background.
+  is a rectangle, and it is often the cheapest way to repair a background. Stacking a
+  colour rectangle behind an inset photo is also how a border is drawn, and it keeps
+  the canvas size under your control.
+- **Send text through `b64:` when it may contain punctuation.** A comma separates
+  filter arguments, so a bare one truncates the string; `b64:` takes the whole
+  thing. Pango then reads the decoded string as markup, so escape `&`, `<` and
+  `>` as `&amp;`, `&lt;` and `&gt;` or the render fails with *invalid markup*.
+- **`padding(color, N)` is a border in one filter** — but it grows the output, a
+  300px image becoming 340px at `padding(x,20)`. The same padding is also a path
+  parameter, written as negative dimensions, which keeps the canvas size fixed.
+- **`round_corner` takes pixels, not a ratio.** `round_corner(0.5)` is a half-pixel
+  radius and renders square. A circle is `round_corner(r,r,background)` where `r`
+  is half the width, and the colour matters: leave it out and the corners come
+  back black.
+- **`smart` is a crop mode**, like `fit-in`, for content-aware framing of a photo
+  with a subject. It composes with `round_corner` for a circular avatar.
 
 ### Resize and crop are not interchangeable
 
