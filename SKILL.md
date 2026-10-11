@@ -259,12 +259,20 @@ template JSON ──render_template──> path ──render──> image
      └──────────── parse_template ◄──── path ◄────────┘
 ```
 
-**The geometry comes back absolute.** A path records the numbers a template
-resolved to, not the forms it was written in: `38p` is already `684` by the time a
-path exists, and nothing in the path says so. A template read back from a path
-therefore renders identically and edits cleanly, but it will not adapt to another
-canvas size the way a hand-written one does. If that matters, rewrite the numbers
-as forms after reading it.
+**Which forms survive, and which do not.** A form imagor can express is still a
+form here: `full` and `full-80` come back unchanged, because the dimension segment
+has them and there is no reason to write the pixel instead.
+
+A form imagor lacks has become a number, and a path cannot carry it:
+
+| written | comes back as | why |
+|---|---|---|
+| `full`, `full-80` | `full`, `full-80` | imagor has the form |
+| `half`, `third` | `471`, `314` | imagor has no fraction |
+| `38p` | `684` | imagor has no percentage |
+| a text slot with a height | the size fitting chose | the choice is made before a path exists |
+
+Rewrite those as forms if the template has to adapt to another canvas size.
 
 A path and a URL both work, signed or not. The text is decoded from `b64:`, and so
 is a source that was encoded because it carried `?` or `,`.

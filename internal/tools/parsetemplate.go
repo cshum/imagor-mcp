@@ -82,10 +82,11 @@ func (c Config) ParseTemplateTool(_ context.Context, _ *mcp.CallToolRequest, in 
 		return nil, ParseTemplateOutput{}, fmt.Errorf("no slots found in that path; it has no image(), text() or rect filters to read")
 	}
 	out.Note = fmt.Sprintf(
-		"read from a path, so the geometry is absolute: %dx%d. A path records the numbers a template "+
-			"resolved to and not the forms it was written in, so a relative value such as 38p or full-80 "+
-			"has already become a number here. It renders identically and edits cleanly, but it will not "+
-			"adapt to another canvas size.", p.Width, p.Height)
+		"read from a path, %dx%d. A form imagor can express is still a form here: full and full-80 "+
+			"survive, because the dimension segment has them. A form it lacks has become a number - a "+
+			"fraction such as half, a percentage such as 38p, and the size fitting chose for a text slot, "+
+			"none of which a path can carry. Rewrite those as forms if the template has to adapt to "+
+			"another canvas size.", p.Width, p.Height)
 	return nil, out, nil
 }
 

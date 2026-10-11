@@ -102,6 +102,10 @@ func (c Config) RenderTemplateTool(ctx context.Context, _ *mcp.CallToolRequest, 
 			if err != nil {
 				return nil, TemplateOutput{}, fmt.Errorf("slot %q width: %w", slot.Name, err)
 			}
+			boxWs, err := c.dimensionValue(slot.Width, in.CanvasWidth)
+			if err != nil {
+				return nil, TemplateOutput{}, fmt.Errorf("slot %q width: %w", slot.Name, err)
+			}
 			boxH, err := c.resolve(slot.Height, in.CanvasHeight, 0)
 			if err != nil {
 				return nil, TemplateOutput{}, fmt.Errorf("slot %q height: %w", slot.Name, err)
@@ -143,7 +147,7 @@ func (c Config) RenderTemplateTool(ctx context.Context, _ *mcp.CallToolRequest, 
 			args := fmt.Sprintf("%s,%s,%s,%s", sx, sy, fontArg, orDefault(slot.Color, "000000"))
 			if boxW > 0 {
 				align := orDefault(slot.Align, "low")
-				args += fmt.Sprintf(",0,normal,%d,%s,normal,word", boxW, align)
+				args += fmt.Sprintf(",0,normal,%s,%s,normal,word", boxWs, align)
 			}
 			filters = append(filters, imagorpath.Filter{Name: "text", Args: textArgs(text, args)})
 			resolved = append(resolved, ResolvedSlot{
@@ -167,19 +171,19 @@ func (c Config) RenderTemplateTool(ctx context.Context, _ *mcp.CallToolRequest, 
 				// The nested path is imagor's own dimension segment, which has
 				// no fractions. A slot written with half or third has to be
 				// turned into pixels here, or the render 404s.
-				iw, err := c.resolve(w, in.CanvasWidth, 0)
+				iw, err := c.dimensionValue(w, in.CanvasWidth)
 				if err != nil {
 					return nil, TemplateOutput{}, fmt.Errorf("slot %q width: %w", slot.Name, err)
 				}
-				ih, err := c.resolve(h, in.CanvasHeight, 0)
+				ih, err := c.dimensionValue(h, in.CanvasHeight)
 				if err != nil {
 					return nil, TemplateOutput{}, fmt.Errorf("slot %q height: %w", slot.Name, err)
 				}
-				inner = fmt.Sprintf("%dx%d/%s", iw, ih, source)
+				inner = fmt.Sprintf("%sx%s/%s", iw, ih, source)
 				if slot.Fit {
 					// fit-in comes before the dimensions, and a nested path has
 					// to end with its source
-					inner = fmt.Sprintf("fit-in/%dx%d/%s", iw, ih, source)
+					inner = fmt.Sprintf("fit-in/%sx%s/%s", iw, ih, source)
 				}
 			}
 			sx, err := c.position(slot.X, in.CanvasWidth)
@@ -290,6 +294,27 @@ func (c Config) resolve(v string, dimension, fallback int) (int, error) {
 		return 0, fmt.Errorf("%q is not a form this knows; use full, half, third, quarter or a percentage such as 38p", v)
 	}
 	return applyOffset(value, dimension, rest, v)
+}
+
+// dimensionValue resolves a slot's size, but leaves a form imagor can express.
+//
+// imagor's dimension segment has full and full-N, so there is no reason to throw
+// that away and write a pixel: keeping it means a path still says what it meant,
+// and parse_template can hand it back unchanged. A fraction or a percentage has
+// no imagor equivalent, so those are resolved here.
+func (c Config) dimensionValue(v string, dimension int) (string, error) {
+	v = strings.TrimSpace(v)
+	if v == "" {
+		return "", nil
+	}
+	if base, _ := splitBase(v); base == "full" || base == "f" {
+		return v, nil
+	}
+	n, err := c.resolve(v, dimension, 0)
+	if err != nil {
+		return "", err
+	}
+	return strconv.Itoa(n), nil
 }
 
 // splitBase separates a base form from a trailing -N or +N offset.

@@ -140,10 +140,10 @@ func TestParseTemplateRecoversEachPart(t *testing.T) {
 		t.Fatalf("read %d slots, want 2", len(back.Slots))
 	}
 	img, txt := back.Slots[0], back.Slots[1]
-	// the canvas is 1200x630, so full has already become 630 by the time a path
-	// exists - that is what "the geometry comes back absolute" means
+	// full is a form imagor has, so it survives to the path and comes back as
+	// itself - there is no reason to write the pixel and lose the meaning
 	if img.Kind != "image" || !img.Fit || img.Image != "http://example.com/a.png" ||
-		img.X != "0" || img.Y != "0" || img.Width != "400" || img.Height != "630" {
+		img.X != "0" || img.Y != "0" || img.Width != "400" || img.Height != "full" {
 		t.Errorf("the image slot came back wrong: %+v", img)
 	}
 	// and the fitted size is recorded in the path, so it comes back as a number
