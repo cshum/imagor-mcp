@@ -1077,9 +1077,11 @@ func Register(s *mcp.Server, cfg Config) {
 		Description: "Build a signed imagor image URL from typed transformation parameters. " +
 			"Requires IMAGOR_SECRET to be configured. The composition is validated before the " +
 			"URL is returned, so an invalid combination is refused rather than emitted. " +
-			"Call list_imagor_filters for each filter's signature, description and accepted " +
-			"forms, and read get_imagor_skill before composing anything. " +
-			"argument forms, which are generated from imagor's own filter reference.",
+			"Read get_imagor_skill before composing anything, and call list_imagor_filters for each " +
+			"filter's signature, description and accepted argument forms, which are generated " +
+			"from imagor's own filter reference. Build and verify in a loop: a request returns " +
+			"200 whether or not a filter did anything, so call verify_imagor_url on the result " +
+			"rather than assuming it worked.",
 	}, cfg.BuildURLTool)
 
 	mcp.AddTool(s, &mcp.Tool{
@@ -1090,15 +1092,18 @@ func Register(s *mcp.Server, cfg Config) {
 			"build tools cannot know on their own. Takes the same typed parameters as " +
 			"build_imagor_url, not a URL. Requires IMAGOR_BASE_URL. " +
 			"A server that does not report filter outcomes returns unknown for every filter and " +
-			"verified: false, which means the result is unknown rather than wrong.",
+			"verified: false, which means the result is unknown rather than wrong. Compare the " +
+			"reported dimensions and outcomes against what you intended, and fetch the result to " +
+			"compare it against your reference: a composition can succeed and still be wrong.",
 	}, cfg.VerifyURLTool)
 
 	mcp.AddTool(s, &mcp.Tool{
 		Name: "build_imagor_path",
 		Description: "Build an unsigned imagor path from typed transformation parameters, for the " +
 			"caller to sign with its own secret. Use this when the MCP server should not hold " +
-			"the signing secret. Call list_imagor_filters for each filter's signature, " +
-			"description and accepted argument forms.",
+			"the signing secret. Read get_imagor_skill before composing anything, and call " +
+			"list_imagor_filters for each filter's signature, description and accepted " +
+			"argument forms.",
 	}, cfg.BuildPathTool)
 
 	mcp.AddTool(s, &mcp.Tool{

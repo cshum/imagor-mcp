@@ -158,6 +158,19 @@ these is invisible in a `200` response and obvious only in the finished image.
   is a no-op, returning byte-identical output. Do not reach for it to clean an edge.
 - **`focal` lands where a centre crop lands** unless the subject is off-centre.
 
+## Placing text is a search, not a calculation
+
+Text lands wherever the font's own metrics put it, and nothing reports those. Do
+not tune a whole composition and guess which part moved.
+
+- Render **one glyph** on its own, fetch it, and find the ink. That is where the
+  pen starts for that font at that size.
+- Two or three probes give you the offset for a whole label. One measured run
+  placed a wordmark letter by letter this way after a single string came out
+  worse than blank.
+- Measure the region you changed, not just the whole image: a whole-image number
+  hides a label that is 40px out, because most of the canvas did not move.
+
 ## Working method
 
 1. `describe_imagor` once, for the grammar this server targets.
@@ -175,3 +188,6 @@ these is invisible in a `200` response and obvious only in the finished image.
 5. To composite, build small pieces first and check each: one product tile, then
    the grid, then the whole banner. A wrong number in a nested path is much
    harder to see in the finished image than in the piece.
+6. Measure what you rendered against what you intended, numerically. A `200` and
+   a plausible-looking image are not evidence; a mean difference over the region
+   you changed is.
