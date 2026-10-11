@@ -1,0 +1,137 @@
+---
+name: imagor-composition
+description: Use when composing or debugging an imagor URL with imagor-mcp — building a composite image, placing an overlay or text, cropping and scaling, or working out why a filter did nothing.
+---
+
+# Composing imagor URLs with imagor-mcp
+
+The tools construct and validate paths. `verify_imagor_url` runs one and reports
+what the server did with each filter, which is the only way to know a
+composition worked: imagor answers `200` with the image unchanged when a filter
+does not apply.
+
+## Order in a path
+
+Parameters first, then filters, then the image:
+
+```
+{trim}/{crop}/{fit-in}/{WxH}/{halign}{valign}/{filters}/{image}
+```
+
+**Everything after `filters:` is read as the image.** A parameter written after
+the filters becomes part of the image name, and the request fails to load. This
+holds inside nested paths too.
+
+## Two crops, opposite orders
+
+| written as | order | output |
+|---|---|---|
+| `0x0:120x90/240x210/IMAGE` | crops the source, then scales | 240×210 |
+| `240x210/filters:crop(0,0,120,90)/IMAGE` | resizes, then crops | 120×90 |
+
+The filter discards the resize. To take a region and scale it — the usual
+intent — use the crop parameters. `verify_imagor_url` warns when a `crop()`
+filter is combined with dimensions.
+
+Coordinates are pixels, or floats `0.0`–`1.0` for a fraction of the dimension.
+
+The crop parameters are four flat fields, not a nested object:
+
+```json
+{"crop_left": 201, "crop_top": 65, "crop_right": 289, "crop_bottom": 99}
+```
+
+## Scaling
+
+- `fit-in/WxH` fits inside the box and **does not upscale**. To enlarge, add
+  `filters:upscale()`.
+- `WxH` without `fit-in` fills the box, cropping the overflow.
+- `stretch/WxH` ignores the aspect ratio.
+
+## Overlays and text
+
+`image(path, x, y[, alpha[, blend_mode]])` composites a processed image, and its
+path is a full imagor path, so it nests. `text(text, x, y, font, color)` draws a
+label.
+
+Positions are relative to the **current canvas**. Inside a nested path that is
+the overlay, not the parent — so a label centred under a product belongs in the
+nested path, where `center` means the overlay:
+
+```
+fit-in/200x260/filters:fill(white)
+  :image({crop}/fit-in/190x170/filters:upscale()/{IMAGE},center,10)
+  :text({NAME},center,196,sans%2016,888888)
+  /color:white
+```
+
+Accepted positions, on both axes:
+
+- A number: from the left or top. **Negative: from the right or bottom**, i.e.
+  an inset of that many pixels.
+- `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`, `center`, optionally with an
+  offset. `right-20` moves **past** the right edge, the opposite direction to
+  `-20`, so it can clip off the canvas.
+- `Np` or a float `0.0`–`1.0` for a percentage of the canvas.
+- `repeat` tiles.
+
+`full` or `f` in a nested dimension inherits the parent: `fullxfull`,
+`fit-in/full-20xfull-20`.
+
+## Nested path order
+
+Inside `image()` and `watermark()` the path is a normal path, so the same rule
+applies: crop and dimensions before `filters:`. `image()` is the one to reach for
+— `watermark()` is the older, narrower form.
+
+## Colors and awkward URLs
+
+`color:white` is a canvas with no source. `b64:` prefixes a base64url-encoded
+image URL when it contains characters that are awkward in a path.
+
+`image()` separates its arguments with commas, so a path inside it must not
+contain one: a `fill(rgb(1,2,3))` would end the argument early. Encode such a
+path with `b64:`.
+
+## A whole composition
+
+A banner built from a `color:` canvas, a cropped panel, four product tiles and
+their labels. Overlays are placed at absolute canvas coordinates; each tile's
+height follows its crop's aspect ratio, so `fit-in` to a common box gives a
+consistent grid:
+
+```json
+{
+  "image": "color:white", "width": 1200, "height": 640,
+  "filters": [
+    {"name": "image", "args": "0x0:194x262/440x640/PHOTO,0,0"},
+    {"name": "text",  "args": "PRADA,540,20,sans-bold-48,000000"},
+    {"name": "image", "args": "201x65:289x99/fit-in/190x170/filters:upscale()/PHOTO,540,100"},
+    {"name": "image", "args": "414x20:488x98/fit-in/190x170/filters:upscale()/PHOTO,860,100"},
+    {"name": "text",  "args": "leather%20shoulder%20bag,540,290,sans-16,888888"},
+    {"name": "text",  "args": "HKD$29900,540,316,sans-bold-24,000000"}
+  ]
+}
+```
+
+Text is drawn at absolute canvas coordinates, so a label under a tile is placed
+at the tile's x. The nested-path form in the section above is for when the x is
+not known in advance or the label should follow the overlay's own width.
+
+## Working method
+
+1. `describe_imagor` once, for the grammar this server targets.
+2. `list_imagor_filters` before using a filter you have not used here: it carries
+   imagor's own signature, description and accepted forms.
+3. `build_imagor_url` refuses invalid compositions, so a refusal is a mistake
+   worth fixing rather than working around.
+4. `verify_imagor_url` the result, passing the same typed parameters you built
+   from — it takes parameters, not a URL. It reports each filter's outcome and
+   the dimensions the server produced, which is how you catch a composition that
+   ran but came out the wrong size. `applied` means it ran; `declined` means it
+   was recognised and did nothing, which is what `blur()` with no sigma does;
+   `not_reported` means this processor does not handle it or the deployment
+   disabled it. Absence is not failure.
+5. To composite, build small pieces first and check each: one product tile, then
+   the grid, then the whole banner. A wrong number in a nested path is much
+   harder to see in the finished image than in the piece.

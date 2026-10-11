@@ -400,6 +400,12 @@ type VerifyOutput struct {
 	Verified bool            `json:"verified"`
 	Status   int             `json:"status" jsonschema:"the HTTP status the metadata request returned"`
 	Results  []FilterOutcome `json:"results,omitempty"`
+	// Width and Height are the dimensions the server reported for the result.
+	// Without them a caller can check that the filters ran but not that the
+	// image came out the size it intended, which is what a composition mistake
+	// usually changes.
+	Width  int `json:"width,omitempty" jsonschema:"the result width the server reported, 0 when it reported none"`
+	Height int `json:"height,omitempty" jsonschema:"the result height the server reported, 0 when it reported none"`
 	// Server records which of the fields this tool depends on the server
 	// actually returned. Without it a caller cannot tell a server that does not
 	// report something from a server that had nothing to report, since an
@@ -521,6 +527,12 @@ func (c Config) VerifyURLTool(ctx context.Context, _ *mcp.CallToolRequest, in Ve
 	// report something from a server that had nothing to report.
 	out.Server.ReportsFilters = present
 	out.Server.Compatible = present
+	if v, ok := envelope["width"]; ok {
+		_ = json.Unmarshal(v, &out.Width)
+	}
+	if v, ok := envelope["height"]; ok {
+		_ = json.Unmarshal(v, &out.Height)
+	}
 	if !present {
 		out.Note = fmt.Sprintf(
 			"This server did not report what it did with each filter, so nothing can be verified against it. "+
@@ -1059,8 +1071,10 @@ func Register(s *mcp.Server, cfg Config) {
 	mcp.AddTool(s, &mcp.Tool{
 		Name: "verify_imagor_url",
 		Description: "Fetch the result for a composition from the running imagor and report what it " +
-			"did with each filter: applied, declined, or not reported. Answers whether a URL actually " +
-			"does what it says, which the build tools cannot know on their own. Requires IMAGOR_BASE_URL. " +
+			"did with each filter: applied, declined, or not reported, plus the dimensions the " +
+			"server reported. Answers whether a composition actually does what it says, which the " +
+			"build tools cannot know on their own. Takes the same typed parameters as " +
+			"build_imagor_url, not a URL. Requires IMAGOR_BASE_URL. " +
 			"A server that does not report filter outcomes returns unknown for every filter and " +
 			"verified: false, which means the result is unknown rather than wrong.",
 	}, cfg.VerifyURLTool)

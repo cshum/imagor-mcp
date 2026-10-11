@@ -406,6 +406,8 @@ func TestVerifyURLTool(t *testing.T) {
 		MetaURL         string `json:"meta_url"`
 		MetaAbsoluteURL string `json:"meta_absolute_url"`
 		Verified        bool   `json:"verified"`
+		Width           int    `json:"width"`
+		Height          int    `json:"height"`
 		Server          struct {
 			ReportsFilters   bool   `json:"reports_filters"`
 			CatalogueVersion string `json:"catalogue_version"`
@@ -425,7 +427,7 @@ func TestVerifyURLTool(t *testing.T) {
 	}
 
 	t.Run("the server reports outcomes", func(t *testing.T) {
-		served.Store(`{"filters":[` +
+		served.Store(`{"width":400,"height":300,"filters":[` +
 			`{"name":"image","processed":true,"filters":[` +
 			`{"name":"blur","processed":true},{"name":"rotate","processed":false}]},` +
 			`{"name":"quality","processed":true}]}`)
@@ -444,6 +446,11 @@ func TestVerifyURLTool(t *testing.T) {
 		}
 		if !out.Server.ReportsFilters {
 			t.Errorf("server = %+v, want the report field found", out.Server)
+		}
+		// A composition can run cleanly and still come out the wrong size, so the
+		// dimensions the server reported have to come back with it.
+		if out.Width != 400 || out.Height != 300 {
+			t.Errorf("dimensions = %dx%d, want the 400x300 the server reported", out.Width, out.Height)
 		}
 		if strings.Contains(out.Note, "may differ") || strings.Contains(out.Note, "predates") {
 			t.Errorf("note %q warns about a version it matches", out.Note)
