@@ -194,12 +194,12 @@ type FilterInput struct {
 	Args string `json:"args,omitempty" jsonschema:"comma-separated arguments for the filter, for example \"white\" for fill, \"jpeg\" for format, \"80\" for quality. Omit for filters that take none."`
 	// Text is for text() only, and exists because a title is the one argument
 	// that cannot safely travel as a comma-separated string.
-	Text string `json:"text,omitempty" jsonschema:"for text() only: the string to render. Prefer this to args whenever the text comes from data, because a comma in it truncates the string silently with a 200 response and a question mark changes the path a signature covers"`
+	Text string `json:"text,omitempty" jsonschema:"for text(): the string to render. Prefer this to args whenever the text comes from data, because a comma in it truncates the string silently with a 200 response and a question mark changes the path a signature covers. label() is the legacy form of text()"`
 	// Source is for image() and watermark(), whose first argument is a nested
 	// path or URL. A ? in it ends the path the signature covers, and a , splits
 	// the argument list: measured, a URL with a ? gave 403 and one with a ,
 	// gave 404. Both go through b64 here.
-	Source string `json:"source,omitempty" jsonschema:"for image() and watermark(): the nested source, a path or URL. Prefer this to args whenever the source is a URL that may contain ? or , - written raw those give 403 and 404"`
+	Source string `json:"source,omitempty" jsonschema:"for image(): the nested source, a path or URL. Prefer this to args whenever the source is a URL that may contain ? or , - written raw those give 403 and 404. watermark() is the legacy form of image()"`
 }
 
 // TransformInput describes an image transformation. Every field maps onto a
@@ -356,7 +356,53 @@ func compositionWarnings(p imagorpath.Params) []string {
 				"the crop's size. To crop the source and then scale it, use the crop path parameters "+
 				"(crop_left, crop_top, crop_right, crop_bottom) instead of the filter.")
 	}
+	return append(out, positionWarnings(p.Filters)...)
+}
+
+// positionWarnings reports a position written in a form imagor reads as zero.
+//
+// full and full-N belong to the dimension segment. The position grammar has no
+// such form and parses one as 0, so the overlay lands at the origin and the
+// request still returns 200 - the same shape of failure as a comma in text.
+// Measured: y=full-220 on a 630px canvas put a title at the top.
+func positionWarnings(filters imagorpath.Filters) []string {
+	var out []string
+	for _, f := range filters {
+		switch f.Name {
+		case "image", "text", "watermark", "label":
+			// All four take the source or text first, then x, then y.
+			args := imagorpath.SplitArgs(f.Args)
+			for i, role := range []string{"x", "y"} {
+				idx := i + 1
+				if idx >= len(args) {
+					continue
+				}
+				if looksLikeADimension(args[idx]) {
+					out = append(out, fmt.Sprintf(
+						"%s() has %q for its %s. full and full-N are dimension forms: the position grammar "+
+							"has no such form and reads one as 0, so the overlay lands at the origin and the "+
+							"request still returns 200. Use pixels, a percentage such as 20p, or an "+
+							"alignment such as center.", f.Name, args[idx], role))
+				}
+			}
+			// A nested path has its own filters, and the same trap.
+			if inner, ok := nestedPathOf(f); ok {
+				nested := imagorpath.Parse("/" + inner)
+				out = append(out, positionWarnings(nested.Filters)...)
+			}
+		}
+	}
 	return out
+}
+
+// looksLikeADimension reports a value written in the dimension segment's forms.
+func looksLikeADimension(v string) bool {
+	v = strings.TrimSpace(v)
+	if v == "full" || v == "f" {
+		return true
+	}
+	rest := strings.TrimPrefix(strings.TrimPrefix(v, "full"), "f")
+	return strings.HasPrefix(rest, "-") && rest != v
 }
 
 // hasLossyFormat reports whether the filters ask for a format that loses detail,

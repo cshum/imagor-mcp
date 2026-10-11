@@ -247,6 +247,24 @@ canvas - at 1080x1080 the fitted title used 960 of 1080px where at 1600x900 it
 used 1530. There is no percentage font size. Size the text per canvas with
 `fit_text`, or accept that it will not scale with the frame.
 
+## Prefer the current filter to its legacy form
+
+`text()` supersedes `label()`, and `image()` supersedes `watermark()`. Both pairs
+take the same shape — the source or text first, then `x`, then `y` — so a `text`
+or `source` field works for either. Reach for the current one.
+
+## A position is not a dimension
+
+`full` and `full-N` belong to the dimension segment. The position grammar has no
+such form: **written as a position it is read as `0`** and the overlay lands at
+the origin, with a `200`. Measured: `y=full-220` on a 630px canvas put a title at
+the top.
+
+The build tools now warn when they see one. For a position use pixels, a
+percentage such as `20p`, a float `0`–`1`, or an alignment such as `center` or
+`bottom-40` — and remember a position is the **top-left of the box**, so an
+alignment offset moves *past* the edge while a negative number insets from it.
+
 ## Nested sources
 
 `image()` and `watermark()` take a source that is itself a path or URL, and a URL
