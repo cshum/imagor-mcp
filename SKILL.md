@@ -247,6 +247,28 @@ canvas - at 1080x1080 the fitted title used 960 of 1080px where at 1600x900 it
 used 1530. There is no percentage font size. Size the text per canvas with
 `fit_text`, or accept that it will not scale with the frame.
 
+## Editing a path you already have
+
+`parse_template` reads an imagor path back into a template, so a composition you
+already have can be edited rather than retyped. It is the inverse of
+`render_template`, and the two are meant to be used together:
+
+```
+template JSON ──render_template──> path ──render──> image
+     ▲                                                │
+     └──────────── parse_template ◄──── path ◄────────┘
+```
+
+**The geometry comes back absolute.** A path records the numbers a template
+resolved to, not the forms it was written in: `38p` is already `684` by the time a
+path exists, and nothing in the path says so. A template read back from a path
+therefore renders identically and edits cleanly, but it will not adapt to another
+canvas size the way a hand-written one does. If that matters, rewrite the numbers
+as forms after reading it.
+
+A path and a URL both work, signed or not. The text is decoded from `b64:`, and so
+is a source that was encoded because it carried `?` or `,`.
+
 ## Cookbook
 
 `cookbook/` holds ready-made recipes for the formats that come up most: an

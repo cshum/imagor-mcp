@@ -2,6 +2,7 @@ package tools
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"strconv"
 	"strings"
@@ -153,6 +154,12 @@ func (c Config) RenderTemplateTool(ctx context.Context, _ *mcp.CallToolRequest, 
 			if source == "" {
 				resolved = append(resolved, ResolvedSlot{Name: slot.Name, Detail: "skipped: no source"})
 				continue
+			}
+			// a source is data, not syntax: a ? ends the path a signature covers
+			// and a , splits the argument list. Same treatment as the filter
+			// layer, for the same reason.
+			if strings.ContainsAny(source, "?,") {
+				source = "b64:" + base64.RawURLEncoding.EncodeToString([]byte(source))
 			}
 			inner := source
 			if w := strings.TrimSpace(slot.Width); w != "" {

@@ -1286,6 +1286,15 @@ func Register(s *mcp.Server, cfg Config) {
 	}, cfg.RenderTemplateTool)
 
 	mcp.AddTool(s, &mcp.Tool{
+		Name: "parse_template",
+		Description: "Read an imagor path back into a template, so one you already have can be edited " +
+			"rather than retyped. This is the inverse of render_template and the two are meant to be " +
+			"used together: render, look, adjust the JSON, render again. Read get_imagor_skill before " +
+			"composing anything. Note that the geometry comes back absolute - a path records the " +
+			"numbers a template resolved to, not the forms it was written in.",
+	}, cfg.ParseTemplateTool)
+
+	mcp.AddTool(s, &mcp.Tool{
 		Name: "get_imagor_skill",
 		Description: "Read this before composing anything. The order a path is written in, how " +
 			"overlays and text are placed, what the resize modes actually do, and the things a " +
