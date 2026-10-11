@@ -130,10 +130,18 @@ these is invisible in a `200` response and obvious only in the finished image.
 - **`x` is the left edge.** A 0–1 float is a fraction of canvas width used as the
   left edge, so `0.5` starts the text at the middle of the canvas rather than
   centring a box on it. Alignment is the `text()` argument that centres, not `x`.
-- **`center` as an `x` has the same meaning**, and it does not change inside a
-  nested path: it puts the left edge at the centre of that canvas. A group does
-  not give you free centring — measured, a grouped `center` label landed 50px out
-  where a measured absolute placement was 17px out.
+- **`center` as an `x` centres the text on its parent canvas**, and it is the only
+  form that does: measured at 1px off centre on an 800px canvas, where `0.5` and
+  `400` both put the *left edge* at that point.
+- **`center` takes no offset.** `center-100` and `c-100` do not parse as positions,
+  fall through to a number, and silently become `0` — the text lands at the far
+  left with a `200` and no warning. There is no way to shift a centre.
+- **A negative `x` sets the box's right edge**, so `-300` on an 800px canvas ends
+  the text at 500. It is not a leftward offset.
+- **To centre under something narrower than the canvas, make the parent that
+  width.** `center` resolves against the parent, so a group sized to a whole tile
+  centres the label on the tile; size the group to the product and it centres
+  under the product.
 - **`y` is the top of the text box**, not a baseline. Text is placed to the pixel
   and the request still returns `200` when it is a few pixels out.
 - **Font names take hyphens for spaces**: `Palatino-63` means Palatino at 63.
