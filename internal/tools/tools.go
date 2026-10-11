@@ -73,6 +73,24 @@ func ConfigFromEnv() Config {
 	}
 }
 
+// signingMismatchAdvice explains a signature refusal in terms of this server's
+// own settings. A signature covers the whole path, so a refusal means this
+// server and the imagor it is pointed at disagree about how to sign - and the
+// settings that disagree are not visible in the response. There are two shapes:
+// this server signs and the other expects something else, or this server sends
+// no signature at all because it is in unsafe mode.
+func (c Config) signingMismatchAdvice() string {
+	if c.Unsafe {
+		return "This server is in unsafe mode, so it sends no signature at all, and the imagor " +
+			"it is pointed at is not accepting unsigned requests. Set IMAGOR_UNSAFE=1 on that " +
+			"imagor, or give this server IMAGOR_SECRET so it signs. Check that before anything else."
+	}
+	return fmt.Sprintf("This server signs with IMAGOR_SIGNER_TYPE=%s and IMAGOR_SIGNER_TRUNCATE=%d, "+
+		"and the secret it holds must be the same one that imagor was started with. The running "+
+		"imagor has to be configured to match on all three. Check those before anything else.",
+		c.signerName(), c.Truncate)
+}
+
 // signerName reports the signing algorithm in the form a caller would set it,
 // so an error can name the setting rather than an empty string.
 func (c Config) signerName() string {
@@ -526,9 +544,7 @@ func (c Config) VerifyURLTool(ctx context.Context, _ *mcp.CallToolRequest, in Ve
 		// settings are not visible in the response, so name them.
 		if resp.StatusCode == http.StatusForbidden &&
 			strings.Contains(strings.ToLower(string(body)), "signature") {
-			out.Note += fmt.Sprintf(". This server signs with IMAGOR_SIGNER_TYPE=%s and "+
-				"IMAGOR_SIGNER_TRUNCATE=%d; the running imagor must be configured to match. "+
-				"Check those two settings before anything else.", c.signerName(), c.Truncate)
+			out.Note += ". " + c.signingMismatchAdvice()
 		}
 		out.Results = outcomes(p.Filters, nil, OutcomeUnknown)
 		return nil, out, nil
@@ -911,9 +927,10 @@ type DescribeOutput struct {
 	Mode          string     `json:"mode" jsonschema:"signed or unsafe"`
 	ImagorVersion string     `json:"imagor_version" jsonschema:"the imagor release the filter catalogue was generated from"`
 	FilterCount   int        `json:"filter_count" jsonschema:"number of filters accepted by the tools"`
-	SignerType    string     `json:"signer_type"`
-	Truncate      int        `json:"truncate"`
+	SignerType    string     `json:"signer_type" jsonschema:"signature algorithm; must match IMAGOR_SIGNER_TYPE on the imagor this server points at"`
+	Truncate      int        `json:"truncate" jsonschema:"signature length in characters; must match IMAGOR_SIGNER_TRUNCATE on that imagor"`
 	Signed        bool       `json:"signing_enabled"`
+	SetupNote     string     `json:"setup_note" jsonschema:"what has to agree between this server and the imagor it points at, and what a disagreement looks like"`
 	BaseURL       string     `json:"base_url,omitempty"`
 	PathParams    []ParamDoc `json:"path_params" jsonschema:"path grammar parameters, reflected from the imagor path type"`
 	HAlignValues  []string   `json:"h_align_values"`
@@ -962,6 +979,14 @@ func (c Config) DescribeTool(_ context.Context, _ *mcp.CallToolRequest, _ any) (
 			"filter names and argument counts are validated against imagor " + filtercat.ImagorVersion + "; imagor itself ignores unrecognised filters silently",
 		},
 	}
+	out.SetupNote = fmt.Sprintf(
+		"This server is in %s mode, and the imagor it points at has to be set up the same way. "+
+			"Three settings must agree: which of IMAGOR_UNSAFE or IMAGOR_SECRET authorises a "+
+			"request, IMAGOR_SIGNER_TYPE (%s here) and IMAGOR_SIGNER_TRUNCATE (%d here). A "+
+			"mismatch is not reported at startup: it returns 403 with 'url signature mismatch'. "+
+			"A signature covers the whole path, so any difference looks the same, and neither "+
+			"side can read the other's secret - make a request to confirm they agree.",
+		mode, c.signerName(), c.Truncate)
 	if out.SignerType == "" {
 		out.SignerType = "sha1"
 	}

@@ -206,6 +206,24 @@ not tune a whole composition and guess which part moved.
 - Measure the region you changed, not just the whole image: a whole-image number
   hides a label that is 40px out, because most of the canvas did not move.
 
+## When imagor refuses to serve
+
+The server and the imagor it points at must agree on how a request is authorised.
+A disagreement does not look like a configuration error: it comes back as a `403`
+with `url signature mismatch` in the body. Three settings have to line up.
+
+- **Unsigned or signed.** `IMAGOR_UNSAFE=1` sends no signature; `IMAGOR_SECRET`
+  signs. A client sending no signature to a signed imagor is refused. A client
+  that signs, against an imagor running unsafe, is accepted.
+- **`IMAGOR_SIGNER_TYPE`** — `sha1` (the default), `sha256` or `sha512`.
+- **`IMAGOR_SIGNER_TRUNCATE`** — signature length in characters; `0` means none.
+
+A signature covers the whole path, so **any** difference in those three produces
+the same refusal, and neither side can read the other's secret back. The only way
+to know they agree is to make a request. `describe_imagor` reports what this
+server is using — compare that against how imagor was started before debugging
+anything else.
+
 ## Working method
 
 1. `describe_imagor` once, for the grammar this server targets.

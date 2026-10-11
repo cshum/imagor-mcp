@@ -97,3 +97,28 @@ func TestVerifyDistinguishesAnEmptyReportFromAnAbsentOne(t *testing.T) {
 		t.Errorf("the note does not say the request had nothing to report:\n%s", out.Note)
 	}
 }
+
+// An unsafe server sends no signature at all, so a signature refusal means the
+// other side is not accepting unsigned requests. That is a different fault from
+// a signer disagreement, and the advice has to say which one it is.
+func TestVerifyBlamesTheModeWhenThisServerIsUnsafe(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusForbidden)
+		_, _ = w.Write([]byte(`{"message":"url signature mismatch","status":403}`))
+	}))
+	defer srv.Close()
+
+	c := Config{Unsafe: true, BaseURL: srv.URL}
+	_, out, err := c.VerifyURLTool(context.Background(), nil, VerifyInput{Image: "http://x/a.png"})
+	if err != nil {
+		t.Fatalf("verify: %v", err)
+	}
+	for _, want := range []string{"unsafe mode", "IMAGOR_UNSAFE=1", "IMAGOR_SECRET"} {
+		if !strings.Contains(out.Note, want) {
+			t.Errorf("the note does not mention %q:\n%s", want, out.Note)
+		}
+	}
+	if strings.Contains(out.Note, "IMAGOR_SIGNER_TYPE") {
+		t.Errorf("it advised a signer this server is not using:\n%s", out.Note)
+	}
+}
