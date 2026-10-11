@@ -121,7 +121,15 @@ func (c Config) RenderTemplateTool(ctx context.Context, _ *mcp.CallToolRequest, 
 			fontArg := fmt.Sprintf("%s-%d", font, size)
 			// The tail of the argument, in imagor's order: colour, alpha,
 			// blend mode, wrap width, align, justify, wrap mode, spacing.
-			args := fmt.Sprintf("%s,%s,%s,%s", pos(slot.X, "0"), pos(slot.Y, "0"), fontArg, orDefault(slot.Color, "000000"))
+			sx, err := c.position(slot.X, in.CanvasWidth)
+			if err != nil {
+				return nil, TemplateOutput{}, fmt.Errorf("slot %q x: %w", slot.Name, err)
+			}
+			sy, err := c.position(slot.Y, in.CanvasHeight)
+			if err != nil {
+				return nil, TemplateOutput{}, fmt.Errorf("slot %q y: %w", slot.Name, err)
+			}
+			args := fmt.Sprintf("%s,%s,%s,%s", sx, sy, fontArg, orDefault(slot.Color, "000000"))
 			if boxW > 0 {
 				align := orDefault(slot.Align, "low")
 				args += fmt.Sprintf(",0,normal,%d,%s,normal,word", boxW, align)
@@ -129,7 +137,7 @@ func (c Config) RenderTemplateTool(ctx context.Context, _ *mcp.CallToolRequest, 
 			filters = append(filters, imagorpath.Filter{Name: "text", Args: textArgs(text, args)})
 			resolved = append(resolved, ResolvedSlot{
 				Name:   slot.Name,
-				Detail: fmt.Sprintf("text at %s,%s %s, box %dx%d%s", pos(slot.X, "0"), pos(slot.Y, "0"), fontArg, boxW, boxH, detail),
+				Detail: fmt.Sprintf("text at %s,%s %s, box %dx%d%s", sx, sy, fontArg, boxW, boxH, detail),
 			})
 		case "image", "rect":
 			if source == "" {
@@ -141,13 +149,21 @@ func (c Config) RenderTemplateTool(ctx context.Context, _ *mcp.CallToolRequest, 
 				h := orDefault(slot.Height, w)
 				inner = w + "x" + h + "/" + source
 			}
+			sx, err := c.position(slot.X, in.CanvasWidth)
+			if err != nil {
+				return nil, TemplateOutput{}, fmt.Errorf("slot %q x: %w", slot.Name, err)
+			}
+			sy, err := c.position(slot.Y, in.CanvasHeight)
+			if err != nil {
+				return nil, TemplateOutput{}, fmt.Errorf("slot %q y: %w", slot.Name, err)
+			}
 			filters = append(filters, imagorpath.Filter{
 				Name: "image",
-				Args: fmt.Sprintf("%s,%s,%s", inner, pos(slot.X, "0"), pos(slot.Y, "0")),
+				Args: fmt.Sprintf("%s,%s,%s", inner, sx, sy),
 			})
 			resolved = append(resolved, ResolvedSlot{
 				Name:   slot.Name,
-				Detail: fmt.Sprintf("%s at %s,%s sized %sx%s", slot.Kind, pos(slot.X, "0"), pos(slot.Y, "0"), orDefault(slot.Width, "auto"), orDefault(slot.Height, "auto")),
+				Detail: fmt.Sprintf("%s at %s,%s sized %sx%s", slot.Kind, sx, sy, orDefault(slot.Width, "auto"), orDefault(slot.Height, "auto")),
 			})
 		default:
 			return nil, TemplateOutput{}, fmt.Errorf("slot %q has kind %q; use text, image or rect", slot.Name, slot.Kind)
@@ -204,28 +220,82 @@ func (c Config) resolve(v string, dimension, fallback int) (int, error) {
 	if v == "" {
 		return fallback, nil
 	}
-	if !strings.HasPrefix(v, "full") && !strings.HasPrefix(v, "f") {
+	if _, _, isFraction := splitFraction(v); !isFraction {
 		n, err := strconv.Atoi(v)
 		if err != nil {
-			return 0, fmt.Errorf("%q is not pixels and not full or full-N", v)
+			return 0, fmt.Errorf("%q is not pixels and not full, full-N, half, third or quarter", v)
 		}
 		return n, nil
 	}
-	rest := strings.TrimPrefix(strings.TrimPrefix(v, "full"), "f")
+	// Fractions come first, because a layout that wants half the canvas should
+	// not have to know how wide the canvas is. imagor has no fraction form, so
+	// this is the layer that can offer one.
+	base, rest, ok := splitFraction(v)
+	if !ok {
+		return 0, fmt.Errorf("%q is not a form this understands; use pixels, full, full-N, half, third or quarter, each optionally minus pixels", v)
+	}
+	value := dimension
+	switch base {
+	case "", "full", "f":
+	case "half", "h":
+		value = dimension / 2
+	case "third", "t":
+		value = dimension / 3
+	case "quarter", "q":
+		value = dimension / 4
+	default:
+		return 0, fmt.Errorf("%q is not a fraction this knows; use half, third or quarter", v)
+	}
+	rest = strings.TrimSpace(rest)
 	if rest == "" {
-		return dimension, nil
+		return value, nil
 	}
 	if !strings.HasPrefix(rest, "-") {
-		return 0, fmt.Errorf("%q is not a form this understands; use full or full-N", v)
+		return 0, fmt.Errorf("%q is not a form this understands; a fraction takes -N, not +N", v)
 	}
 	n, err := strconv.Atoi(strings.TrimPrefix(rest, "-"))
 	if err != nil {
 		return 0, fmt.Errorf("%q has an offset that is not a number", v)
 	}
-	if n > dimension {
-		return 0, fmt.Errorf("%q takes %d off a %dpx canvas, which leaves nothing", v, n, dimension)
+	if n > value {
+		return 0, fmt.Errorf("%q takes %d off %d, which leaves nothing", v, n, value)
 	}
-	return dimension - n, nil
+	return value - n, nil
+}
+
+// splitFraction separates a fraction or full prefix from a trailing -N offset.
+func splitFraction(v string) (base, rest string, ok bool) {
+	for _, name := range []string{"full", "f", "half", "h", "third", "t", "quarter", "q"} {
+		if v == name {
+			return name, "", true
+		}
+		if strings.HasPrefix(v, name+"-") {
+			return name, v[len(name):], true
+		}
+	}
+	return "", "", false
+}
+
+// position resolves a slot's x or y into something imagor will place correctly.
+//
+// imagor's position grammar has no full or full-N: a relative position written
+// that way is read as zero and the element lands at the origin, silently. So a
+// full-based position is turned into pixels here. Everything else - pixels,
+// center, top, bottom, right, left and their offset forms - is imagor's own and
+// is passed through untouched.
+func (c Config) position(v string, dimension int) (string, error) {
+	v = strings.TrimSpace(v)
+	if v == "" {
+		return "0", nil
+	}
+	if _, _, isFraction := splitFraction(v); !isFraction {
+		return v, nil
+	}
+	n, err := c.resolve(v, dimension, 0)
+	if err != nil {
+		return "", err
+	}
+	return strconv.Itoa(n), nil
 }
 
 // substitute fills {{name}} placeholders from values.
@@ -237,13 +307,6 @@ func substitute(s string, values map[string]string) string {
 		s = strings.ReplaceAll(s, "{{"+k+"}}", v)
 	}
 	return s
-}
-
-func pos(v, fallback string) string {
-	if strings.TrimSpace(v) == "" {
-		return fallback
-	}
-	return strings.TrimSpace(v)
 }
 
 func orDefault(v, fallback string) string {

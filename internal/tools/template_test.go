@@ -24,7 +24,16 @@ func TestResolveGeometryAgainstTheCanvas(t *testing.T) {
 		{"full-80", 630, 550, true},
 		{"", 1200, 0, true},
 		{"full-2000", 1200, 0, false}, // leaves nothing
-		{"half", 1200, 0, false},      // not a form imagor has either
+		// fractions: imagor has no such form, so this is the layer that offers one
+		{"half", 1200, 600, true},
+		{"h", 1200, 600, true},
+		{"third", 1200, 400, true},
+		{"quarter", 1200, 300, true},
+		{"half-40", 1200, 560, true},
+		{"half-40", 1080, 500, true},
+		{"halfway", 1200, 0, false}, // not a form at all
+		{"half+40", 1200, 0, false}, // a fraction takes -N, not +N
+		{"half-2000", 1200, 0, false},
 	} {
 		got, err := c.resolve(tc.in, tc.dim, 0)
 		if tc.ok && err != nil {

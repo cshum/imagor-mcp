@@ -273,6 +273,30 @@ font size on its own is absolute.
 }
 ```
 
+### Geometry forms
+
+A slot's geometry is written the way imagor writes it, plus fractions:
+
+| form | means |
+|---|---|
+| `40` | 40px |
+| `full`, `f` | the canvas dimension |
+| `full-80`, `f-80` | the canvas dimension minus 80px |
+| `half`, `h` | half the canvas dimension |
+| `third`, `t` / `quarter`, `q` | a third / a quarter |
+| `half-40` | half, minus 40px |
+
+**imagor has no fraction form, and no `full-N` for a position.** `full-N` is a
+*dimension*: written as a position it is read as `0` and the element lands at the
+origin, silently, returning `200`. The template resolves positions to pixels for
+you, and passes everything else imagor accepts for a position (`center`, `top`,
+`bottom`, `right`, `left`, and their offset forms) straight through.
+
+**A position is the top-left of the element's box**, so `full-70` for a caption
+puts the *box* 70px from the bottom and the ink reaches below that. Across nine
+real layouts, four ended up with text inside a 40px margin for exactly this
+reason — leave more room than the margin you want.
+
 Measured on that template at three canvas sizes: **serif-84, serif-76, serif-84**,
 with the box following the canvas each time and every element inside the frame.
 The slot list is applied in order, so later slots draw over earlier ones, and
