@@ -73,6 +73,15 @@ func ConfigFromEnv() Config {
 	}
 }
 
+// signerName reports the signing algorithm in the form a caller would set it,
+// so an error can name the setting rather than an empty string.
+func (c Config) signerName() string {
+	if c.SignerType == "" {
+		return "sha1 (the default)"
+	}
+	return c.SignerType
+}
+
 // isTruthy mirrors imagor's own boolean environment parsing.
 func isTruthy(v string) bool {
 	switch strings.ToLower(strings.TrimSpace(v)) {
@@ -512,6 +521,15 @@ func (c Config) VerifyURLTool(ctx context.Context, _ *mcp.CallToolRequest, in Ve
 	if resp.StatusCode != http.StatusOK {
 		out.Note = fmt.Sprintf("the server returned %d, so nothing could be verified; the body was %s",
 			resp.StatusCode, firstLine(body))
+		// A signature covers the whole path, so this is what a signer disagreement
+		// looks like from outside: same secret, different algorithm or length. The
+		// settings are not visible in the response, so name them.
+		if resp.StatusCode == http.StatusForbidden &&
+			strings.Contains(strings.ToLower(string(body)), "signature") {
+			out.Note += fmt.Sprintf(". This server signs with IMAGOR_SIGNER_TYPE=%s and "+
+				"IMAGOR_SIGNER_TRUNCATE=%d; the running imagor must be configured to match. "+
+				"Check those two settings before anything else.", c.signerName(), c.Truncate)
+		}
 		out.Results = outcomes(p.Filters, nil, OutcomeUnknown)
 		return nil, out, nil
 	}
@@ -536,9 +554,12 @@ func (c Config) VerifyURLTool(ctx context.Context, _ *mcp.CallToolRequest, in Ve
 	}
 	if !present {
 		out.Note = fmt.Sprintf(
-			"This server did not report what it did with each filter, so nothing can be verified against it. "+
-				"That needs imagor %s or later. This is not a failure: the composition may be perfectly valid, "+
-				"it simply cannot be checked here.", RequiresImagor)
+			"the metadata body had no %q field, so nothing can be verified against it. A server that "+
+				"reports filter outcomes always sends that field, an empty list when nothing ran, and "+
+				"that difference is how a reporting server is told from one that predates the field. "+
+				"That needs imagor %s or later, so check the release behind %s if you expected a report. "+
+				"This is not a failure: the composition may be perfectly valid, it simply cannot be "+
+				"checked here.", "filters", RequiresImagor, checked)
 		out.Results = outcomes(p.Filters, nil, OutcomeUnknown)
 		return nil, out, nil
 	}
