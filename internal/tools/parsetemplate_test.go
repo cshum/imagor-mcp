@@ -195,8 +195,15 @@ func TestParseTemplateSaysTheGeometryIsAbsolute(t *testing.T) {
 				Width: "38p", Height: "full"},
 		}})
 	back := parse(t, c, out.Path)
-	if !strings.Contains(back.Note, "absolute") {
-		t.Errorf("the note does not mention that the geometry is absolute: %q", back.Note)
+	// the note has to be exact about which forms survive, not say "everything is
+	// absolute" - full is a form imagor has, so it survives
+	for _, want := range []string{"full", "survive", "percentage"} {
+		if !strings.Contains(back.Note, want) {
+			t.Errorf("the note should mention %q: %q", want, back.Note)
+		}
+	}
+	if strings.Contains(back.Note, "geometry is absolute") {
+		t.Errorf("the note should not claim everything comes back absolute: %q", back.Note)
 	}
 	// and the percentage really has become a number, which is the thing the note
 	// is warning about
