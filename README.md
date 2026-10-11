@@ -93,11 +93,21 @@ The server speaks MCP over stdio, so nothing listens on a port.
 | `build_imagor_url` | Build a request path ready to send to imagor, signed or `unsafe/` as configured. |
 | `build_imagor_path` | Build an **unsigned** path for the caller to sign. Use when the MCP server should not hold the secret. |
 | `validate_imagor_path` | Parse a path, report whether it round-trips unchanged, and summarize the transformation. |
-| `list_imagor_filters` | List the accepted filters with their argument counts, optionally filtered by name. |
+| `list_imagor_filters` | List the accepted filters with their signature, description and accepted argument forms, optionally filtered by name. |
 | `describe_imagor` | Report the supported path grammar and the current signing mode. |
 
 Every transformation parameter maps onto a concept in the imagor path grammar.
 There are no invented parameters and no generic "sign this string" tool.
+
+## Skill
+
+The server carries a skill and serves it as the `imagor-mcp://skill` resource, and
+its instructions point at it. It covers what a tool description cannot: the order a
+path is written in, how overlays and text are placed, and a working method that
+builds small pieces before assembling them.
+
+The same file is `SKILL.md` in this repository, for a client that would rather read
+it from disk.
 
 ## Security model
 

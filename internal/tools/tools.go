@@ -25,6 +25,7 @@ import (
 	"strings"
 	"time"
 
+	imagormcp "github.com/cshum/imagor-mcp"
 	"github.com/cshum/imagor/imagorpath"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
@@ -1107,4 +1108,26 @@ func Register(s *mcp.Server, cfg Config) {
 		Description: "Describe the imagor path grammar this server targets, including the parameters " +
 			"reflected from imagor's own path type and the current signing mode.",
 	}, cfg.DescribeTool)
+
+	// The skill travels with the server. A client that only reads tools/list
+	// never sees it, and it carries what a tool description cannot: the order a
+	// path is written in, how overlays and text are placed, and a working method.
+	s.AddResource(&mcp.Resource{
+		URI:  SkillURI,
+		Name: "imagor composition skill",
+		Description: "How to compose and debug imagor URLs with these tools: the order a path is " +
+			"written in, placement and scaling, and a working method.",
+		MIMEType: "text/markdown",
+	}, func(_ context.Context, _ *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {
+		return &mcp.ReadResourceResult{
+			Contents: []*mcp.ResourceContents{{
+				URI:      SkillURI,
+				MIMEType: "text/markdown",
+				Text:     imagormcp.Skill,
+			}},
+		}, nil
+	})
 }
+
+// SkillURI is where the server serves its own skill.
+const SkillURI = "imagor-mcp://skill"

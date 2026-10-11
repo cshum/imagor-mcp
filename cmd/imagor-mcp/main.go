@@ -94,7 +94,16 @@ Example MCP client configuration:
 	server := mcp.NewServer(&mcp.Implementation{
 		Name:    "imagor-mcp",
 		Version: v,
-	}, nil)
+	}, &mcp.ServerOptions{
+		// A client that reads only the tool list never learns the order a path
+		// is written in or how overlays are placed, and imagor answers 200 when
+		// a filter does not apply, so a composition can be wrong and look fine.
+		Instructions: "Builds and verifies imagor image URLs. Read the " + tools.SkillURI +
+			" resource before composing anything: it carries the path grammar, the placement " +
+			"rules and a working method that do not fit in a tool description. Use " +
+			"verify_imagor_url to check a composition, since a request succeeds even when a " +
+			"filter did nothing.",
+	})
 
 	tools.Register(server, cfg)
 

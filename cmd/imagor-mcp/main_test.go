@@ -336,6 +336,43 @@ func TestValidateToolChecksNestedPaths(t *testing.T) {
 	}
 }
 
+// The skill has to reach a client that reads only the tool list, or the
+// procedural layer is invisible to exactly the agent that needs it. A subagent
+// given the tools and the skill reproduced a composite banner in four
+// iterations; given the tools alone it would have had no way to find the skill.
+func TestServerServesTheSkill(t *testing.T) {
+	s := connect(t, unsafeEnv)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	list, err := s.ListResources(ctx, nil)
+	if err != nil {
+		t.Fatalf("resources/list: %v", err)
+	}
+	var found bool
+	for _, r := range list.Resources {
+		if r.URI == "imagor-mcp://skill" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("the skill is not offered as a resource: %+v", list.Resources)
+	}
+
+	read, err := s.ReadResource(ctx, &mcp.ReadResourceParams{URI: "imagor-mcp://skill"})
+	if err != nil {
+		t.Fatalf("resources/read: %v", err)
+	}
+	if len(read.Contents) != 1 || read.Contents[0].Text == "" {
+		t.Fatalf("the skill resource is empty: %+v", read.Contents)
+	}
+	for _, want := range []string{"Parameters first", "Everything after `filters:`", "fit-in"} {
+		if !strings.Contains(read.Contents[0].Text, want) {
+			t.Errorf("the served skill does not mention %q", want)
+		}
+	}
+}
+
 // The server produces signed or unsafe paths, so it must refuse to start without
 // a mode rather than come up in a state where its tools cannot produce a URL.
 func TestServerRequiresAMode(t *testing.T) {
