@@ -1,0 +1,47 @@
+{
+  "name": "tip",
+  "note": "One actionable tip per card. The educational format.",
+  "canvas": [
+    1200,
+    628
+  ],
+  "background": "color:fffbeb",
+  "slots": [
+    {
+      "name": "number",
+      "kind": "text",
+      "text": "{{number}}",
+      "x": "60",
+      "y": "40",
+      "font": "sans-bold-120",
+      "color": "f59e0b"
+    },
+    {
+      "name": "tip",
+      "kind": "text",
+      "text": "{{tip}}",
+      "x": "60",
+      "y": "full-360",
+      "width": "full-120",
+      "height": "full-460",
+      "font": "serif",
+      "color": "451a03",
+      "max_size": 58,
+      "min_size": 22
+    },
+    {
+      "name": "mark",
+      "kind": "text",
+      "text": "{{mark}}",
+      "x": "60",
+      "y": "full-80",
+      "font": "sans-bold-24",
+      "color": "b45309"
+    }
+  ],
+  "values": {
+    "number": "01",
+    "tip": "Pin the version, not the tag.",
+    "mark": "imagor-mcp"
+  }
+}

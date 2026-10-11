@@ -31,8 +31,8 @@ func TestResolveGeometryAgainstTheCanvas(t *testing.T) {
 		{"quarter", 1200, 300, true},
 		{"half-40", 1200, 560, true},
 		{"half-40", 1080, 500, true},
-		{"halfway", 1200, 0, false}, // not a form at all
-		{"half+40", 1200, 0, false}, // a fraction takes -N, not +N
+		{"halfway", 1200, 0, false},  // not a form at all
+		{"half+40", 1200, 640, true}, // an offset either way
 		{"half-2000", 1200, 0, false},
 	} {
 		got, err := c.resolve(tc.in, tc.dim, 0)

@@ -1,0 +1,66 @@
+{
+  "name": "Product OG image",
+  "source": "Bannerbear's Shopify guide (title, price, collection, featured_image, logo)",
+  "canvas": {
+    "width": 1200,
+    "height": 630,
+    "background": "color:ffffff"
+  },
+  "slots": [
+    {
+      "name": "shot",
+      "kind": "image",
+      "image": "{{featured_image}}",
+      "x": "half",
+      "y": "40",
+      "width": "half-40",
+      "height": "full-80"
+    },
+    {
+      "name": "collection",
+      "kind": "text",
+      "text": "{{collection}}",
+      "x": "60",
+      "y": "120",
+      "font": "sans-bold-20",
+      "color": "64748b"
+    },
+    {
+      "name": "title",
+      "kind": "text",
+      "text": "{{title}}",
+      "x": "60",
+      "y": "170",
+      "width": "half-120",
+      "height": "240",
+      "font": "sans",
+      "color": "0f172a",
+      "max_size": 56,
+      "min_size": 24
+    },
+    {
+      "name": "price",
+      "kind": "text",
+      "text": "{{price}}",
+      "x": "60",
+      "y": "full-160",
+      "font": "sans-bold-44",
+      "color": "111827"
+    },
+    {
+      "name": "logo",
+      "kind": "image",
+      "image": "{{logo}}",
+      "x": "60",
+      "y": "full-90",
+      "width": "140"
+    }
+  ],
+  "values": {
+    "title": "",
+    "price": "",
+    "collection": "",
+    "featured_image": "",
+    "logo": ""
+  }
+}

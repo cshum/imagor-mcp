@@ -1,0 +1,57 @@
+{
+  "name": "product",
+  "note": "Product shot, name, price. The ecommerce format.",
+  "canvas": [
+    1200,
+    628
+  ],
+  "background": "color:ffffff",
+  "slots": [
+    {
+      "name": "shot",
+      "kind": "image",
+      "image": "{{image}}",
+      "x": "half",
+      "y": "40",
+      "width": "half-40",
+      "height": "full-80"
+    },
+    {
+      "name": "name",
+      "kind": "text",
+      "text": "{{name}}",
+      "x": "60",
+      "y": "full-320",
+      "width": "half-120",
+      "height": "140",
+      "font": "sans-30",
+      "color": "334155",
+      "max_size": 30,
+      "min_size": 16
+    },
+    {
+      "name": "price",
+      "kind": "text",
+      "text": "{{price}}",
+      "x": "60",
+      "y": "full-170",
+      "font": "sans-bold-52",
+      "color": "0f172a"
+    },
+    {
+      "name": "cta",
+      "kind": "text",
+      "text": "{{cta}}",
+      "x": "60",
+      "y": "full-90",
+      "font": "sans-bold-24",
+      "color": "3b82f6"
+    }
+  ],
+  "values": {
+    "image": "http://localhost:8198/src_p1.png",
+    "name": "Intrecciato 19 leather shoulder bag",
+    "price": "HKD$18500",
+    "cta": "Free delivery"
+  }
+}

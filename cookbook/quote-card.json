@@ -1,0 +1,67 @@
+{
+  "name": "Quote card",
+  "source": "Bannerbear's daily quote automation (quote, background_image)",
+  "canvas": {
+    "width": 1200,
+    "height": 630,
+    "background": "color:111827"
+  },
+  "slots": [
+    {
+      "name": "bg",
+      "kind": "image",
+      "image": "{{background_image}}",
+      "x": "0",
+      "y": "0",
+      "width": "full",
+      "height": "full"
+    },
+    {
+      "name": "scrim",
+      "kind": "rect",
+      "image": "color:000000",
+      "x": "0",
+      "y": "0",
+      "width": "full",
+      "height": "full"
+    },
+    {
+      "name": "mark",
+      "kind": "text",
+      "text": "“",
+      "x": "60",
+      "y": "20",
+      "font": "serif",
+      "color": "3b82f6",
+      "size": 160
+    },
+    {
+      "name": "quote",
+      "kind": "text",
+      "text": "{{quote}}",
+      "x": "70",
+      "y": "210",
+      "width": "full-140",
+      "height": "280",
+      "font": "serif",
+      "color": "ffffff",
+      "align": "low",
+      "max_size": 64,
+      "min_size": 26
+    },
+    {
+      "name": "who",
+      "kind": "text",
+      "text": "{{attribution}}",
+      "x": "70",
+      "y": "full-100",
+      "font": "sans-bold-24",
+      "color": "94a3b8"
+    }
+  ],
+  "values": {
+    "quote": "",
+    "attribution": "",
+    "background_image": ""
+  }
+}

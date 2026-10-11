@@ -250,17 +250,20 @@ func (c Config) resolve(v string, dimension, fallback int) (int, error) {
 	if rest == "" {
 		return value, nil
 	}
-	if !strings.HasPrefix(rest, "-") {
-		return 0, fmt.Errorf("%q is not a form this understands; a fraction takes -N, not +N", v)
+	if !strings.HasPrefix(rest, "-") && !strings.HasPrefix(rest, "+") {
+		return 0, fmt.Errorf("%q is not a form this understands; an offset is written -N or +N", v)
 	}
-	n, err := strconv.Atoi(strings.TrimPrefix(rest, "-"))
+	n, err := strconv.Atoi(rest[1:])
 	if err != nil {
 		return 0, fmt.Errorf("%q has an offset that is not a number", v)
 	}
-	if n > value {
-		return 0, fmt.Errorf("%q takes %d off %d, which leaves nothing", v, n, value)
+	if rest[0] == '-' {
+		if n > value {
+			return 0, fmt.Errorf("%q takes %d off %d, which leaves nothing", v, n, value)
+		}
+		return value - n, nil
 	}
-	return value - n, nil
+	return value + n, nil
 }
 
 // splitFraction separates a fraction or full prefix from a trailing -N offset.
@@ -269,7 +272,7 @@ func splitFraction(v string) (base, rest string, ok bool) {
 		if v == name {
 			return name, "", true
 		}
-		if strings.HasPrefix(v, name+"-") {
+		if strings.HasPrefix(v, name+"-") || strings.HasPrefix(v, name+"+") {
 			return name, v[len(name):], true
 		}
 	}

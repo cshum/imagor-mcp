@@ -1,0 +1,70 @@
+{
+  "name": "News announcement with quote",
+  "source": "Bannerbear's news announcement template",
+  "canvas": {
+    "width": 1200,
+    "height": 630,
+    "background": "color:ffffff"
+  },
+  "slots": [
+    {
+      "name": "bar",
+      "kind": "rect",
+      "image": "color:dc2626",
+      "x": "0",
+      "y": "0",
+      "width": "14",
+      "height": "full"
+    },
+    {
+      "name": "kicker",
+      "kind": "text",
+      "text": "{{kicker}}",
+      "x": "70",
+      "y": "70",
+      "font": "sans-bold-22",
+      "color": "dc2626"
+    },
+    {
+      "name": "headline",
+      "kind": "text",
+      "text": "{{headline}}",
+      "x": "70",
+      "y": "130",
+      "width": "full-140",
+      "height": "200",
+      "font": "sans-bold",
+      "color": "0f172a",
+      "max_size": 58,
+      "min_size": 26
+    },
+    {
+      "name": "quote",
+      "kind": "text",
+      "text": "{{quote}}",
+      "x": "70",
+      "y": "370",
+      "width": "full-140",
+      "height": "150",
+      "font": "serif",
+      "color": "334155",
+      "max_size": 34,
+      "min_size": 18
+    },
+    {
+      "name": "source",
+      "kind": "text",
+      "text": "{{source}}",
+      "x": "70",
+      "y": "full-80",
+      "font": "sans-22",
+      "color": "64748b"
+    }
+  ],
+  "values": {
+    "kicker": "",
+    "headline": "",
+    "quote": "",
+    "source": ""
+  }
+}

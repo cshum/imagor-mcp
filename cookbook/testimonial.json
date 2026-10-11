@@ -1,0 +1,56 @@
+{
+  "name": "testimonial",
+  "note": "Quote, name and company, with a subtle brand frame. The B2B format.",
+  "canvas": [
+    1200,
+    628
+  ],
+  "background": "color:ffffff",
+  "slots": [
+    {
+      "name": "frame",
+      "kind": "rect",
+      "image": "color:e2e8f0",
+      "x": "0",
+      "y": "0",
+      "width": "full",
+      "height": "8"
+    },
+    {
+      "name": "quote",
+      "kind": "text",
+      "text": "{{quote}}",
+      "x": "70",
+      "y": "120",
+      "width": "full-140",
+      "height": "full-360",
+      "font": "serif",
+      "color": "1e293b",
+      "max_size": 54,
+      "min_size": 22
+    },
+    {
+      "name": "name",
+      "kind": "text",
+      "text": "{{name}}",
+      "x": "70",
+      "y": "full-170",
+      "font": "sans-bold-30",
+      "color": "0f172a"
+    },
+    {
+      "name": "company",
+      "kind": "text",
+      "text": "{{company}}",
+      "x": "70",
+      "y": "full-120",
+      "font": "sans-24",
+      "color": "64748b"
+    }
+  ],
+  "values": {
+    "quote": "We replaced a queue of image workers with one URL.",
+    "name": "A. Client",
+    "company": "Engineering, Hong Kong"
+  }
+}

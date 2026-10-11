@@ -247,6 +247,19 @@ canvas - at 1080x1080 the fitted title used 960 of 1080px where at 1600x900 it
 used 1530. There is no percentage font size. Size the text per canvas with
 `fit_text`, or accept that it will not scale with the frame.
 
+## Cookbook
+
+`cookbook/` holds ready-made recipes for the formats that come up most: an
+announcement card, a pull quote, a testimonial, a product, an event, and a tip,
+plus the ones Bannerbear's own library is best known for. Each is a complete
+`render_template` payload, so the fastest way to a result is to take the closest
+one, change the values, and render it.
+
+**They are rendered by the test suite at three canvas sizes**, which is the point:
+a recipe that no longer works teaches a shape that fails. If you change the
+template tool, run `go test ./internal/tools/ -run TestCookbook` before trusting
+them.
+
 ## Prefer the current filter to its legacy form
 
 `text()` supersedes `label()`, and `image()` supersedes `watermark()`. Both pairs

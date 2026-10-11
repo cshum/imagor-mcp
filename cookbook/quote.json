@@ -1,0 +1,47 @@
+{
+  "name": "quote",
+  "note": "A pull quote with attribution. Bannerbear ships several of these.",
+  "canvas": [
+    1200,
+    628
+  ],
+  "background": "color:f8fafc",
+  "slots": [
+    {
+      "name": "mark",
+      "kind": "text",
+      "text": "“",
+      "x": "60",
+      "y": "20",
+      "font": "serif",
+      "color": "3b82f6",
+      "size": 180
+    },
+    {
+      "name": "quote",
+      "kind": "text",
+      "text": "{{quote}}",
+      "x": "80",
+      "y": "220",
+      "width": "full-160",
+      "height": "full-400",
+      "font": "serif",
+      "color": "0f172a",
+      "max_size": 64,
+      "min_size": 24
+    },
+    {
+      "name": "who",
+      "kind": "text",
+      "text": "{{who}}",
+      "x": "80",
+      "y": "full-90",
+      "font": "sans-bold-26",
+      "color": "64748b"
+    }
+  ],
+  "values": {
+    "quote": "The same bytes in, the same bytes out, every time.",
+    "who": "Adrian Shum, imagor"
+  }
+}
