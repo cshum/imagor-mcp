@@ -1,59 +1,94 @@
 {
-  "name": "Avatar card",
-  "source": "An avatar card: background, avatar, name, handle, quote",
-  "canvas": {
-    "width": 1080,
-    "height": 1080,
-    "background": "color:1e293b"
-  },
+  "name": "Portrait profile card",
+  "note": "A framed square profile card with a circular portrait and one centered identity block.",
+  "canvas": [
+    1080,
+    1080
+  ],
+  "background": "color:183b32",
   "slots": [
     {
-      "name": "avatar",
+      "name": "card",
+      "kind": "rect",
+      "image": "color:f4f1e8",
+      "x": "2p+6",
+      "y": "2p+6",
+      "width": "full-56",
+      "height": "full-56"
+    },
+    {
+      "name": "portrait",
       "kind": "image",
-      "image": "{{avatar}}",
-      "x": "center",
-      "y": "180",
-      "width": "280",
-      "height": "280"
+      "image": "{{portrait}}",
+      "x": "30p+6",
+      "y": "12p",
+      "width": "38p+10",
+      "height": "38p+10"
     },
     {
-      "name": "name",
-      "kind": "text",
-      "text": "{{name}}",
-      "x": "center",
-      "y": "540",
-      "font": "sans-bold-52",
-      "color": "ffffff"
-    },
-    {
-      "name": "role",
-      "kind": "text",
-      "text": "{{role}}",
-      "x": "80",
-      "y": "610",
+      "name": "identity-panel",
+      "kind": "rect",
+      "image": "color:183b32",
+      "x": "7p+4",
+      "y": "53p+3",
       "width": "full-160",
-      "height": "44",
-      "font": "sans",
-      "color": "cbd5e1",
-      "align": "low",
-      "max_size": 36,
-      "min_size": 20
+      "height": "28p+8"
     },
     {
-      "name": "handle",
-      "kind": "text",
-      "text": "{{handle}}",
-      "x": "80",
-      "y": "full-120",
-      "font": "sans-26",
-      "color": "3b82f6"
+      "name": "identity",
+      "kind": "rect",
+      "image": "color:183b32",
+      "x": "7p+4",
+      "y": "53p+3",
+      "width": "full-160",
+      "height": "28p+8",
+      "slots": [
+        {
+          "name": "name",
+          "kind": "text",
+          "text": "{{name}}",
+          "x": "center",
+          "y": "4p+3",
+          "font": "sans-bold",
+          "size": 64,
+          "color": "f4f1e8"
+        },
+        {
+          "name": "role",
+          "kind": "text",
+          "text": "{{role}}",
+          "x": "center",
+          "y": "36p",
+          "font": "sans",
+          "size": 30,
+          "color": "c6d0c8"
+        },
+        {
+          "name": "handle",
+          "kind": "text",
+          "text": "{{handle}}",
+          "x": "center",
+          "y": "52p+3",
+          "font": "sans",
+          "size": 22,
+          "color": "d6b783"
+        }
+      ]
+    },
+    {
+      "name": "accent",
+      "kind": "rect",
+      "image": "color:b38b52",
+      "x": "45p+4",
+      "y": "78p+3",
+      "width": "9p+3",
+      "height": "0p+5"
     }
   ],
   "values": {
+    "portrait": "http://localhost:8123/SKgAWqdgwa8pZ3od0W9IR3Bqyro=/420x420/smart/filters:round_corner(210,210,f4f1e8)/http://localhost:8198/src_life.png",
     "name": "Mei Lam",
     "role": "Platform engineering",
-    "handle": "@meilam",
-    "quote": "The same bytes in, the same bytes out.",
-    "avatar": "http://localhost:8198/src_p1.png"
+    "handle": "@meilam"
   }
 }
