@@ -236,39 +236,30 @@ shape that fails.
 
 Text lands wherever the font's own metrics put it, and nothing reports those.
 
-- **A font is a Pango description with hyphens for spaces.** `sans-bold-40`
-  becomes `sans bold 40`, and Pango parses the rest. **The family comes first and
-  the size last.** A number anywhere else is silently ignored — `sans-40-bold`
-  renders at the default 20, not 40 — and a word before the family is read *as*
-  the family: `bold-sans-40` renders exactly as `sans-40`. Size defaults to 20.
-  A literal space in the argument is a **malformed URL**, not a font error — use
+- **Name a face: `Open-Sans`, or `Liberation-Serif` for serif.** The generics are
+  DejaVu — the widest face shipped — so a generic buys nothing and costs the width:
+  a 72px headline that fits one line in `Open-Sans` runs to two in `sans` and lands
+  on the body below. **An uninstalled name falls back to DejaVu, silently and with a
+  `200`**, so which faces exist belongs to the imagor you point at — check before
+  relying on one.
+- **The font is a Pango description with hyphens for spaces.** `sans-bold-40` is
+  `sans bold 40`: **family first, size last**. A number anywhere else is ignored —
+  `sans-40-bold` renders at the default 20 — and a word before the family becomes it,
+  so `bold-sans-40` renders as `sans-40`. A literal space is a **malformed URL**: use
   a hyphen or `b64:`.
-- **Name the face; do not reach for a generic.** On the official image `sans`,
-  `serif` and `monospace` *are* DejaVu, byte for byte at the same size — so a
-  generic buys nothing and costs the width. **DejaVu is the widest of the faces
-  shipped, and type sized for it overflows when it meets a box drawn for anything
-  narrower**: at 72px a headline that fits one line in `Open-Sans` runs to two in
-  `sans` and collides with the body. `Open-Sans` and `Liberation-Sans` are both
-  narrower; `Liberation-Serif` is the serif to name.
-- **An uninstalled name falls back to DejaVu, silently and with a `200`.** The
-  render succeeds and the type is not what was asked for, so which faces exist is
-  a property of the imagor you point at, not of this server — check before relying
-  on one.
 - **A fitted text slot takes the largest size that fits its box.** That is what a
   headline wants and what a supporting line does not — a short line balloons to fill
   the box it was given. Cap it with `max_size`, or give the slot no height and a
   `size` instead.
-- **To centre text, give it a canvas of its own: a slot carrying its own `slots`.**
-  A numeric `x` leaves text hanging left whatever `align` says, and `x=center`
-  resolves against whatever canvas it is on — so the banner is too wide to centre
-  a label against. The outer slot's width and height become that canvas, the inner
-  slots lay out on it, and the result draws where the outer slot is placed. A label
-  measured this way landed at centre 921 against a product centre of 922.
+- **To centre text on something narrower than the frame, give it a canvas of its
+  own: a slot carrying its own `slots`.** `x=center` resolves against the canvas it
+  is on, and a numeric `x` leaves text hanging left whatever `align` says. The outer
+  slot's width and height become that canvas; the result draws where it is placed.
+  A label measured this way landed at centre 921 against a product centre of 922.
 - **A wordmark is one `text()` call, even though that loses the tracking.** `text()`
-  has no letter-spacing and its `spacing` argument is line spacing, applied
-  vertically. One glyph per call reaches the reference's spacing but hard-codes the
-  string, so a different value breaks the layout. **Prefer one call** — the rest of
-  the layout can still be exact.
+  has no letter-spacing, and its `spacing` argument is *line* spacing. One glyph per
+  call reaches the reference's spacing but hard-codes the string, so a different
+  value breaks the layout. Prefer one call; the rest of the layout stays exact.
 - **Measure the region you changed, not the whole image.** A whole-image number
   hides a label that is 40px out, because most of the canvas did not move.
 
@@ -319,11 +310,10 @@ reports what this server is using — compare before debugging anything else.
    it takes parameters, not a URL. `applied` means it ran; `declined` means it was
    recognised and did nothing; `not_reported` means this processor does not handle it.
    Absence is not failure.
-5. **Look at what came back.** The render is attached, scaled, and the note says by how
-   much. Placement, cropping and proportions are visible at preview size, and a
-   composition can report `applied` and still be wrong. Where the preview is too small
-   to read a label, call again with `preview_region` as `x,y,w,h` in **result** pixels —
-   that comes back at full resolution for a fraction of the cost. Iterate until it
+5. **Look at what came back.** A composition can report `applied` and still be wrong,
+   and placement, cropping and proportions are visible at preview size. Where the
+   preview is too small to read a label, call again with `preview_region` as `x,y,w,h`
+   in **result** pixels — full resolution for a fraction of the cost. Iterate until it
    matches.
 6. To composite, build small pieces first: one tile, then the grid, then the banner. A
    wrong number in a nested path is much harder to see in the finished image.
