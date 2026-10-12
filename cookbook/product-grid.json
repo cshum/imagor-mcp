@@ -254,6 +254,7 @@
     "mark_i": "I",
     "mark_s": "S",
     "mark_o": "O",
-    "mark_n": "N"
+    "mark_n": "N",
+    "mark": "MAISON"
   }
 }

@@ -123,6 +123,14 @@ func (c Config) RenderTemplateTool(ctx context.Context, _ *mcp.CallToolRequest, 
 		for _, n := range append(unfilled(slot.Text, in.Values), unfilled(slot.Image, in.Values)...) {
 			missing = append(missing, fmt.Sprintf("%s.%s", slot.Name, n))
 		}
+		// A nested canvas draws text too, so its placeholders are checked here as
+		// well - a {{value}} inside a canvas that was never filled renders as the
+		// literal braces, which looks like a layout fault rather than a missing value.
+		for _, inner := range slot.Slots {
+			for _, n := range unfilled(inner.Text, in.Values) {
+				missing = append(missing, fmt.Sprintf("%s.%s.%s", slot.Name, inner.Name, n))
+			}
+		}
 		if len(slot.Slots) > 0 {
 			// A slot carrying its own slots is a canvas: the inner slots are laid
 			// out on a composition of this slot's size, and the result is drawn
@@ -299,12 +307,14 @@ func (c Config) RenderTemplateTool(ctx context.Context, _ *mcp.CallToolRequest, 
 	if c.BaseURL != "" {
 		out.AbsoluteURL = c.BaseURL + "/" + out.URL
 	}
-	notes := compositionWarnings(p)
 	if len(missing) > 0 {
-		notes = append(notes, fmt.Sprintf(
-			"these placeholders had no value: %s. An image slot left unfilled is a nested source "+
-				"that cannot be fetched, and the render will fail.", strings.Join(missing, ", ")))
+		// Refused rather than noted: an unfilled placeholder does not fail on its
+		// own, it draws its own braces, so the render succeeds and the image is
+		// wrong. That is the one outcome this tool exists to prevent.
+		return nil, TemplateOutput{}, fmt.Errorf(
+			"these placeholders had no value: %s", strings.Join(missing, ", "))
 	}
+	notes := compositionWarnings(p)
 	if len(notes) > 0 {
 		out.Note = strings.Join(notes, "; ")
 	}
