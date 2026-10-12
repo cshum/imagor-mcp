@@ -39,11 +39,11 @@ func TestParseTemplateRoundTripsAPath(t *testing.T) {
 	}{
 		{"text only", TemplateInput{CanvasWidth: 1200, CanvasHeight: 630,
 			Background: "color:1a1a2e", Slots: []TemplateSlot{
-				{Name: "t", Kind: "text", Text: "Hello", X: "60", Y: "80", Font: "serif", Size: 48, Color: "ffffff"}}}},
+				{Name: "t", Kind: "text", Text: "Hello", X: "60", Y: "80", Font: "Liberation-Serif", Size: 48, Color: "ffffff"}}}},
 		{"fitted text", TemplateInput{CanvasWidth: 1200, CanvasHeight: 630,
 			Background: "color:1a1a2e", Slots: []TemplateSlot{
 				{Name: "t", Kind: "text", Text: "A longer headline that wraps", X: "60", Y: "80",
-					Width: "600", Height: "200", Font: "serif", Color: "ffffff", Align: "low"}}}},
+					Width: "600", Height: "200", Font: "Liberation-Serif", Color: "ffffff", Align: "low"}}}},
 		{"image and rect", TemplateInput{CanvasWidth: 800, CanvasHeight: 400,
 			Background: "color:ffffff", Slots: []TemplateSlot{
 				{Name: "r", Kind: "rect", Image: "color:3b82f6", X: "0", Y: "0", Width: "12", Height: "full"},
@@ -55,7 +55,7 @@ func TestParseTemplateRoundTripsAPath(t *testing.T) {
 		{"text with punctuation", TemplateInput{CanvasWidth: 1200, CanvasHeight: 630,
 			Background: "color:1a1a2e", Slots: []TemplateSlot{
 				{Name: "t", Kind: "text", Text: "Pipelines, bytes & the same result?", X: "60", Y: "80",
-					Font: "serif", Size: 48, Color: "ffffff"}}}},
+					Font: "Liberation-Serif", Size: 48, Color: "ffffff"}}}},
 		{"a source that needs encoding", TemplateInput{CanvasWidth: 800, CanvasHeight: 400,
 			Background: "color:ffffff", Slots: []TemplateSlot{
 				{Name: "i", Kind: "image", Image: "http://example.com/a,b.png?v=2", X: "10", Y: "10",
@@ -133,7 +133,7 @@ func TestParseTemplateRecoversEachPart(t *testing.T) {
 			{Name: "hero", Kind: "image", Image: "http://example.com/a.png", X: "0", Y: "0",
 				Width: "400", Height: "full", Fit: true},
 			{Name: "title", Kind: "text", Text: "A headline", X: "440", Y: "80",
-				Width: "600", Height: "200", Font: "serif", Color: "ffffff", Align: "low"},
+				Width: "600", Height: "200", Font: "Liberation-Serif", Color: "ffffff", Align: "low"},
 		}})
 	back := parse(t, c, out.Path)
 	if len(back.Slots) != 2 {
@@ -149,7 +149,7 @@ func TestParseTemplateRecoversEachPart(t *testing.T) {
 	// and the fitted size is recorded in the path, so it comes back as a number
 	// rather than as a request to fit
 	if txt.Kind != "text" || txt.Text != "A headline" || txt.X != "440" || txt.Y != "80" ||
-		txt.Font != "serif" || txt.Size != 96 || txt.Width != "600" || txt.Color != "ffffff" {
+		txt.Font != "Liberation-Serif" || txt.Size != 96 || txt.Width != "600" || txt.Color != "ffffff" {
 		t.Errorf("the text slot came back wrong: %+v", txt)
 	}
 }

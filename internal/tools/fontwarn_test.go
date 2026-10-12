@@ -39,3 +39,33 @@ func TestFontSizeNotLastIsWarned(t *testing.T) {
 		}
 	}
 }
+
+// sans, serif and monospace resolve to DejaVu, the widest face imagor carries, so a
+// slot asking for one gets the narrower face it meant and a note saying so. DejaVu
+// stays reachable by name.
+func TestGenericFontsResolveToTheNarrowerFace(t *testing.T) {
+	cases := []struct{ in, want string }{
+		{"sans", "Open-Sans"},
+		{"sans-bold", "Open-Sans-bold"},
+		{"sans-bold-24", "Open-Sans-bold-24"},
+		{"serif", "Liberation-Serif"},
+		{"serif-72", "Liberation-Serif-72"},
+		{"monospace", "Liberation-Mono"},
+		{"Open-Sans-bold-24", "Open-Sans-bold-24"}, // already a face
+		{"DejaVu-Sans-40", "DejaVu-Sans-40"},       // asked for by name, kept
+		{"Liberation-Serif-24", "Liberation-Serif-24"},
+	}
+	for _, c := range cases {
+		got, note := resolveFont(c.in)
+		if got != c.want {
+			t.Errorf("resolveFont(%q) = %q, want %q", c.in, got, c.want)
+		}
+		swapped := got != c.in
+		if swapped && note == "" {
+			t.Errorf("resolveFont(%q) swapped without saying so", c.in)
+		}
+		if !swapped && note != "" {
+			t.Errorf("resolveFont(%q) left it alone but returned a note: %q", c.in, note)
+		}
+	}
+}

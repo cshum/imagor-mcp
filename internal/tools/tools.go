@@ -355,6 +355,33 @@ func compositionWarnings(p imagorpath.Params) []string {
 	return append(out, positionWarnings(p.Filters)...)
 }
 
+// genericFaces maps a generic family to the face imagor should actually use. sans,
+// serif and monospace resolve to DejaVu, which is the widest face the official image
+// carries, so type sized against it overflows a box drawn for anything narrower. A
+// caller who writes "sans" means "the default sans", not "DejaVu specifically".
+var genericFaces = map[string]string{
+	"sans":      "Open-Sans",
+	"serif":     "Liberation-Serif",
+	"monospace": "Liberation-Mono",
+}
+
+// resolveFont swaps a leading generic family for the face worth using, and reports it.
+// The replacement is by name, so DejaVu remains reachable by asking for it directly.
+func resolveFont(font string) (string, string) {
+	head, rest := font, ""
+	if i := strings.Index(font, "-"); i > 0 {
+		head, rest = font[:i], font[i:]
+	}
+	face, ok := genericFaces[strings.ToLower(head)]
+	if !ok {
+		return font, ""
+	}
+	return face + rest, fmt.Sprintf(
+		"font %q resolved to %q: the generic is DejaVu, the widest face imagor carries, "+
+			"and type sized for it overflows a narrower box. Ask for DejaVu-Sans by name "+
+			"to keep it.", font, face+rest)
+}
+
 // fontWarning reports a font argument whose size will be silently discarded. Pango
 // reads the family first and the size last, so a number anywhere else is ignored:
 // "sans-40-bold" renders at the default size. imagor answers 200 either way, so the

@@ -205,9 +205,14 @@ func (c Config) RenderTemplateTool(ctx context.Context, _ *mcp.CallToolRequest, 
 			// default. Taking the font's own matters: a slot that writes
 			// "sans-bold-11" and nothing else means 11, and reading that as the
 			// default 48 renders it four times too large.
-			// Warn on the font as written, before the fitter appends a size.
+			// Warn on the font as written, before the fitter appends a size, then
+			// resolve a generic to the face worth using.
 			if w := fontWarning(font); w != "" {
 				slotNotes = append(slotNotes, w)
+			}
+			if resolved, note := resolveFont(font); note != "" {
+				font = resolved
+				slotNotes = append(slotNotes, note)
 			}
 			fontFamily, fontSize := splitFontName(font)
 			font = fontFamily
@@ -637,6 +642,9 @@ func (c Config) nestedCanvas(ctx context.Context, slot TemplateSlot, in Template
 			continue
 		}
 		font := orDefault(inner.Font, "sans")
+		if resolved, _ := resolveFont(font); resolved != font {
+			font = resolved
+		}
 		fontFamily, fontSize := splitFontName(font)
 		size := inner.Size
 		if size <= 0 {

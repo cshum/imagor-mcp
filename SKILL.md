@@ -149,9 +149,10 @@ same thing.
 served at any size. A text slot given a height is **fitted against the box its geometry
 resolves to**, which is what makes type adapt.
 
-**Write `Open-Sans` or `Liberation-Serif`, not `sans` or `serif`.** The generics resolve
-to DejaVu, the widest face imagor carries: a headline that fits one line in `Open-Sans`
-runs to two in `sans` and lands on the body below it. See *Placing text* for the rest.
+**Write `sans` or `serif` and the server resolves them to a narrower face** — `Open-Sans`
+and `Liberation-Serif` — reporting it in the note. The generics are DejaVu, the widest
+face imagor carries, and type sized for it overflows a box drawn for anything narrower.
+Ask for `DejaVu-Sans` by name to keep it. See *Placing text* for the rest.
 
 ```json
 {
@@ -238,12 +239,13 @@ shape that fails.
 
 Text lands wherever the font's own metrics put it, and nothing reports those.
 
-- **Name a face: `Open-Sans`, or `Liberation-Serif` for serif.** The generics are
-  DejaVu — the widest face shipped — so a generic buys nothing and costs the width:
-  a 72px headline that fits one line in `Open-Sans` runs to two in `sans` and lands
-  on the body below. **An uninstalled name falls back to DejaVu, silently and with a
-  `200`**, so which faces exist belongs to the imagor you point at — check before
-  relying on one.
+- **A generic is resolved for you.** `sans`, `serif` and `monospace` become
+  `Open-Sans`, `Liberation-Serif` and `Liberation-Mono`, and the note says so. They
+  are DejaVu otherwise — the widest face imagor carries — so type sized for one
+  overflows a narrower box: a 72px headline that fits one line in `Open-Sans` runs to
+  two in DejaVu and lands on the body below. Name `DejaVu-Sans` to keep it.
+- **An uninstalled name falls back to DejaVu, silently and with a `200`**, so which
+  faces exist belongs to the imagor you point at — check before relying on one.
 - **The font is a Pango description with hyphens for spaces.** `sans-bold-40` is
   `sans bold 40`: **family first, size last**. A number anywhere else is ignored —
   `sans-40-bold` renders at the default 20 — and a word before the family becomes it,
