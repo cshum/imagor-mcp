@@ -255,6 +255,11 @@ Text lands wherever the font's own metrics put it, and nothing reports those.
   `sans-40-bold` renders at the default 20 — and a word before the family becomes it,
   so `bold-sans-40` renders as `sans-40`. A literal space is a **malformed URL**: use
   a hyphen or `b64:`.
+- **Only the weights a face carries exist, and an absent one falls back silently.** On
+  the official image Open Sans has Light, Regular, Semibold, Bold and ExtraBold;
+  Liberation has Regular and Bold. `Open-Sans-Medium` renders as Regular and
+  `Open-Sans-Black` as ExtraBold, both with a `200` — the same silent substitution as
+  an unknown family. Check by rendering the weight and comparing against Regular.
 - **A fitted text slot takes the largest size that fits its box.** That is what a
   headline wants and what a supporting line does not — a short line balloons to fill
   the box it was given. Cap it with `max_size`, or give the slot no height and a
