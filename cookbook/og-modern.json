@@ -1,6 +1,6 @@
 {
   "name": "og-modern",
-  "note": "A dark, restrained Open Graph card with a soft blurred glow, split headline, and fitted product grid.",
+  "note": "A dark, restrained Open Graph card with a textured navy ground, split headline, and fitted product grid.",
   "canvas": [
     1200,
     630
@@ -10,7 +10,7 @@
     {
       "name": "texture",
       "kind": "image",
-      "image": "{{texture}}",
+      "image": "https://s.imagor.net/texture-navy.svg",
       "x": "0p",
       "y": "0p",
       "width": "full",
@@ -20,178 +20,271 @@
       "name": "brand",
       "kind": "text",
       "text": "{{brand}}",
-      "x": "6p+10",
-      "y": "10p+5",
-      "font": "Open-Sans-bold",
-      "size": 20,
+      "x": "7p",
+      "y": "8p",
+      "font": "Open-Sans-bold-18",
       "color": "F3F1EC"
+    },
+    {
+      "name": "brand_rule",
+      "kind": "rect",
+      "image": "color:C5A575",
+      "x": "7p",
+      "y": "14p",
+      "width": "3p",
+      "height": "2"
     },
     {
       "name": "headline_lead",
       "kind": "text",
       "text": "{{headline_lead}}",
-      "x": "6p+10",
-      "y": "30p+1",
-      "width": "53p+4",
-      "height": "15p+2",
+      "x": "7p",
+      "y": "30p",
+      "width": "50p",
+      "height": "15p",
       "font": "Open-Sans-bold",
-      "max_size": 80,
-      "min_size": 70,
-      "color": "F3F1EC"
+      "max_size": 76,
+      "min_size": 50,
+      "color": "F3F1EC",
+      "align": "low"
     },
     {
       "name": "headline_accent",
       "kind": "text",
       "text": "{{headline_accent}}",
-      "x": "6p+10",
-      "y": "44p+4",
-      "width": "53p+4",
-      "height": "15p+4",
+      "x": "7p",
+      "y": "45p",
+      "width": "50p",
+      "height": "15p",
       "font": "Open-Sans-bold",
-      "max_size": 82,
-      "min_size": 70,
-      "color": "C5A575"
+      "max_size": 76,
+      "min_size": 50,
+      "color": "C5A575",
+      "align": "low"
     },
     {
       "name": "supporting",
       "kind": "text",
       "text": "{{supporting}}",
-      "x": "7p+1",
-      "y": "65p+4",
-      "width": "50p",
-      "height": "6p+4",
+      "x": "7p",
+      "y": "69p",
+      "width": "48p",
+      "height": "7p",
       "font": "Open-Sans",
       "max_size": 24,
-      "min_size": 19,
-      "color": "A5A6AA"
+      "min_size": 18,
+      "color": "D2D0C8",
+      "align": "low"
     },
     {
       "name": "domain",
       "kind": "text",
       "text": "{{domain}}",
-      "x": "6p+10",
-      "y": "86p+4",
-      "font": "Open-Sans",
-      "size": 17,
-      "color": "85878D"
-    },
-    {
-      "name": "tile1_bg",
-      "kind": "rect",
-      "image": "color:17191e",
-      "x": "64p+2",
-      "y": "26p+2",
-      "width": "10p",
-      "height": "22p+1"
+      "x": "7p",
+      "y": "87p",
+      "font": "Open-Sans-16",
+      "color": "A5A6AA"
     },
     {
       "name": "tile1",
-      "kind": "image",
-      "image": "{{photo1}}",
-      "x": "64p+10",
-      "y": "27p+4",
-      "width": "8p+8",
-      "height": "19p+4",
-      "fit": true
-    },
-    {
-      "name": "tile2_bg",
       "kind": "rect",
-      "image": "color:17191e",
-      "x": "75p+6",
-      "y": "26p+2",
+      "image": "color:121C29",
+      "x": "61p",
+      "y": "22p",
       "width": "10p",
-      "height": "22p+1"
+      "height": "24p",
+      "slots": [
+        {
+          "name": "tile1_photo",
+          "kind": "image",
+          "image": "{{photo1}}",
+          "x": "8p",
+          "y": "7p",
+          "width": "84p",
+          "height": "76p",
+          "fit": true
+        },
+        {
+          "name": "tile1_label",
+          "kind": "text",
+          "text": "01",
+          "x": "center",
+          "y": "89p",
+          "width": "full",
+          "height": "14p",
+          "font": "Open-Sans-bold-12",
+          "color": "C5A575",
+          "align": "center"
+        }
+      ]
     },
     {
       "name": "tile2",
-      "kind": "image",
-      "image": "{{photo2}}",
-      "x": "76p+2",
-      "y": "27p+4",
-      "width": "8p+8",
-      "height": "19p+4",
-      "fit": true
-    },
-    {
-      "name": "tile3_bg",
       "kind": "rect",
-      "image": "color:17191e",
-      "x": "86p+10",
-      "y": "26p+2",
+      "image": "color:121C29",
+      "x": "72p",
+      "y": "22p",
       "width": "10p",
-      "height": "22p+1"
+      "height": "24p",
+      "slots": [
+        {
+          "name": "tile2_photo",
+          "kind": "image",
+          "image": "{{photo2}}",
+          "x": "8p",
+          "y": "7p",
+          "width": "84p",
+          "height": "76p",
+          "fit": true
+        },
+        {
+          "name": "tile2_label",
+          "kind": "text",
+          "text": "02",
+          "x": "center",
+          "y": "89p",
+          "width": "full",
+          "height": "14p",
+          "font": "Open-Sans-bold-12",
+          "color": "C5A575",
+          "align": "center"
+        }
+      ]
     },
     {
       "name": "tile3",
-      "kind": "image",
-      "image": "{{photo3}}",
-      "x": "87p+6",
-      "y": "27p+4",
-      "width": "8p+8",
-      "height": "19p+4",
-      "fit": true
-    },
-    {
-      "name": "tile4_bg",
       "kind": "rect",
-      "image": "color:17191e",
-      "x": "64p+2",
-      "y": "51p+1",
+      "image": "color:121C29",
+      "x": "83p",
+      "y": "22p",
       "width": "10p",
-      "height": "22p+1"
+      "height": "24p",
+      "slots": [
+        {
+          "name": "tile3_photo",
+          "kind": "image",
+          "image": "{{photo3}}",
+          "x": "8p",
+          "y": "7p",
+          "width": "84p",
+          "height": "76p",
+          "fit": true
+        },
+        {
+          "name": "tile3_label",
+          "kind": "text",
+          "text": "03",
+          "x": "center",
+          "y": "89p",
+          "width": "full",
+          "height": "14p",
+          "font": "Open-Sans-bold-12",
+          "color": "C5A575",
+          "align": "center"
+        }
+      ]
     },
     {
       "name": "tile4",
-      "kind": "image",
-      "image": "{{photo4}}",
-      "x": "64p+10",
-      "y": "52p+2",
-      "width": "8p+8",
-      "height": "19p+4",
-      "fit": true
-    },
-    {
-      "name": "tile5_bg",
       "kind": "rect",
-      "image": "color:17191e",
-      "x": "75p+6",
-      "y": "51p+1",
+      "image": "color:121C29",
+      "x": "61p",
+      "y": "50p",
       "width": "10p",
-      "height": "22p+1"
+      "height": "24p",
+      "slots": [
+        {
+          "name": "tile4_photo",
+          "kind": "image",
+          "image": "{{photo4}}",
+          "x": "8p",
+          "y": "7p",
+          "width": "84p",
+          "height": "76p",
+          "fit": true
+        },
+        {
+          "name": "tile4_label",
+          "kind": "text",
+          "text": "04",
+          "x": "center",
+          "y": "89p",
+          "width": "full",
+          "height": "14p",
+          "font": "Open-Sans-bold-12",
+          "color": "C5A575",
+          "align": "center"
+        }
+      ]
     },
     {
       "name": "tile5",
-      "kind": "image",
-      "image": "{{photo5}}",
-      "x": "76p+2",
-      "y": "52p+2",
-      "width": "8p+8",
-      "height": "19p+4",
-      "fit": true
-    },
-    {
-      "name": "tile6_bg",
       "kind": "rect",
-      "image": "color:17191e",
-      "x": "86p+10",
-      "y": "51p+1",
+      "image": "color:121C29",
+      "x": "72p",
+      "y": "50p",
       "width": "10p",
-      "height": "22p+1"
+      "height": "24p",
+      "slots": [
+        {
+          "name": "tile5_photo",
+          "kind": "image",
+          "image": "{{photo5}}",
+          "x": "8p",
+          "y": "7p",
+          "width": "84p",
+          "height": "76p",
+          "fit": true
+        },
+        {
+          "name": "tile5_label",
+          "kind": "text",
+          "text": "05",
+          "x": "center",
+          "y": "89p",
+          "width": "full",
+          "height": "14p",
+          "font": "Open-Sans-bold-12",
+          "color": "C5A575",
+          "align": "center"
+        }
+      ]
     },
     {
       "name": "tile6",
-      "kind": "image",
-      "image": "{{photo6}}",
-      "x": "87p+6",
-      "y": "52p+2",
-      "width": "8p+8",
-      "height": "19p+4",
-      "fit": true
+      "kind": "rect",
+      "image": "color:121C29",
+      "x": "83p",
+      "y": "50p",
+      "width": "10p",
+      "height": "24p",
+      "slots": [
+        {
+          "name": "tile6_photo",
+          "kind": "image",
+          "image": "{{photo6}}",
+          "x": "8p",
+          "y": "7p",
+          "width": "84p",
+          "height": "76p",
+          "fit": true
+        },
+        {
+          "name": "tile6_label",
+          "kind": "text",
+          "text": "06",
+          "x": "center",
+          "y": "89p",
+          "width": "full",
+          "height": "14p",
+          "font": "Open-Sans-bold-12",
+          "color": "C5A575",
+          "align": "center"
+        }
+      ]
     }
   ],
   "values": {
-    "texture": "https://s.imagor.net/texture-navy.svg",
     "brand": "MAISON",
     "headline_lead": "Built for the",
     "headline_accent": "long run",

@@ -1,6 +1,6 @@
 {
   "name": "Product grid banner",
-  "note": "Lifestyle-led product banner with a uniform three-column image grid and reusable product copy.",
+  "note": "Lifestyle-led editorial product grid with a tall campaign panel and product captions nested in each image canvas.",
   "canvas": {
     "width": 1800,
     "height": 942,
@@ -8,121 +8,64 @@
   },
   "slots": [
     {
-      "name": "lifestyle",
+      "name": "lifestyle_panel",
       "kind": "image",
-      "image": "{{src_life}}",
-      "x": "0p",
-      "y": "0p",
-      "width": "38p+4",
-      "height": "100p"
-    },
-    {
-      "name": "p1_cell",
-      "kind": "rect",
       "image": "color:ffffff",
-      "x": "41p+6",
-      "y": "12p+7",
-      "width": "16p+12",
-      "height": "26p+5"
-    },
-    {
-      "name": "p2_cell",
-      "kind": "rect",
-      "image": "color:ffffff",
-      "x": "80p+4",
-      "y": "12p+7",
-      "width": "16p+12",
-      "height": "26p+5"
-    },
-    {
-      "name": "p3_cell",
-      "kind": "rect",
-      "image": "color:ffffff",
-      "x": "41p+6",
-      "y": "64p+7",
-      "width": "16p+12",
-      "height": "26p+5"
-    },
-    {
-      "name": "p4_cell",
-      "kind": "rect",
-      "image": "color:ffffff",
-      "x": "60p+14",
-      "y": "64p+7",
-      "width": "16p+12",
-      "height": "26p+5"
-    },
-    {
-      "name": "p5_cell",
-      "kind": "rect",
-      "image": "color:ffffff",
-      "x": "80p+4",
-      "y": "64p+7",
-      "width": "16p+12",
-      "height": "26p+5"
-    },
-    {
-      "name": "p1_image",
-      "kind": "image",
-      "image": "{{src_p1}}",
-      "x": "43p",
-      "y": "12p+7",
-      "width": "16p+12",
-      "height": "26p+5",
-      "fit": true
-    },
-    {
-      "name": "p2_image",
-      "kind": "image",
-      "image": "{{src_p2}}",
-      "x": "80p+17",
-      "y": "16p+3",
-      "width": "16p+12",
-      "height": "26p+5",
-      "fit": true
-    },
-    {
-      "name": "wordmark",
-      "kind": "image",
-      "x": "57p+18",
-      "y": "23p+9",
-      "width": "22p+4",
-      "height": "9p+7",
+      "x": "3p",
+      "y": "6p",
+      "width": "33p",
+      "height": "88p",
       "slots": [
         {
-          "name": "wordmark_text",
+          "name": "lifestyle_photo",
+          "kind": "image",
+          "image": "{{src_life}}",
+          "x": "0",
+          "y": "0",
+          "width": "full",
+          "height": "87p"
+        },
+        {
+          "name": "wordmark",
           "kind": "text",
           "text": "{{wordmark}}",
           "x": "center",
-          "y": "0p",
-          "width": "full",
-          "height": "100p",
-          "font": "Liberation-Serif",
-          "color": "000000",
-          "max_size": 92,
-          "min_size": 48
+          "y": "90p",
+          "font": "Liberation-Serif-32",
+          "color": "000000"
         }
       ]
     },
     {
-      "name": "p1_caption",
+      "name": "p1_image",
       "kind": "image",
-      "x": "41p+6",
-      "y": "39p+8",
-      "width": "16p+12",
-      "height": "7p+6",
+      "image": "color:ffffff",
+      "x": "38p",
+      "y": "6p",
+      "width": "19p",
+      "height": "42p",
       "slots": [
+        {
+          "name": "p1_photo",
+          "kind": "image",
+          "image": "{{src_p1}}",
+          "x": "0",
+          "y": "0",
+          "width": "full",
+          "height": "70p",
+          "fit": true
+        },
         {
           "name": "p1_name",
           "kind": "text",
           "text": "{{p1_name}}",
           "x": "center",
-          "y": "0p",
-          "width": "full",
-          "height": "33p",
+          "y": "76p",
+          "width": "full-14",
+          "height": "8p",
           "font": "Open-Sans",
           "color": "777777",
-          "max_size": 16,
+          "max_size": 14,
           "min_size": 12
         },
         {
@@ -130,35 +73,46 @@
           "kind": "text",
           "text": "{{p1_price}}",
           "x": "center",
-          "y": "37p",
-          "width": "full",
-          "height": "38p+1",
+          "y": "85p",
+          "width": "full-14",
+          "height": "8p",
           "font": "Open-Sans-bold",
           "color": "000000",
-          "max_size": 20,
-          "min_size": 17
+          "max_size": 16,
+          "min_size": 14
         }
       ]
     },
     {
-      "name": "p2_caption",
+      "name": "p2_image",
       "kind": "image",
-      "x": "80p+4",
-      "y": "39p+8",
-      "width": "16p+12",
-      "height": "7p+6",
+      "image": "color:ffffff",
+      "x": "58p",
+      "y": "6p",
+      "width": "19p",
+      "height": "42p",
       "slots": [
+        {
+          "name": "p2_photo",
+          "kind": "image",
+          "image": "{{src_p2}}",
+          "x": "0",
+          "y": "0",
+          "width": "full",
+          "height": "70p",
+          "fit": true
+        },
         {
           "name": "p2_name",
           "kind": "text",
           "text": "{{p2_name}}",
           "x": "center",
-          "y": "0p",
-          "width": "full",
-          "height": "33p",
+          "y": "76p",
+          "width": "full-14",
+          "height": "8p",
           "font": "Open-Sans",
           "color": "777777",
-          "max_size": 16,
+          "max_size": 14,
           "min_size": 12
         },
         {
@@ -166,65 +120,46 @@
           "kind": "text",
           "text": "{{p2_price}}",
           "x": "center",
-          "y": "37p",
-          "width": "full",
-          "height": "38p+1",
+          "y": "85p",
+          "width": "full-14",
+          "height": "8p",
           "font": "Open-Sans-bold",
           "color": "000000",
-          "max_size": 20,
-          "min_size": 17
+          "max_size": 16,
+          "min_size": 14
         }
       ]
     },
     {
       "name": "p3_image",
       "kind": "image",
-      "image": "{{src_p3}}",
-      "x": "41p+6",
-      "y": "69p+9",
-      "width": "16p+12",
-      "height": "26p+5",
-      "fit": true
-    },
-    {
-      "name": "p4_image",
-      "kind": "image",
-      "image": "{{src_p4}}",
-      "x": "60p+14",
-      "y": "66p+5",
-      "width": "16p+12",
-      "height": "26p+5",
-      "fit": true
-    },
-    {
-      "name": "p5_image",
-      "kind": "image",
-      "image": "{{src_p5}}",
-      "x": "81p+1",
-      "y": "65p+2",
-      "width": "16p+12",
-      "height": "26p+5",
-      "fit": true
-    },
-    {
-      "name": "p3_caption",
-      "kind": "image",
-      "x": "41p+6",
-      "y": "91p+5",
-      "width": "16p+12",
-      "height": "7p+6",
+      "image": "color:ffffff",
+      "x": "78p",
+      "y": "6p",
+      "width": "19p",
+      "height": "42p",
       "slots": [
+        {
+          "name": "p3_photo",
+          "kind": "image",
+          "image": "{{src_p3}}",
+          "x": "0",
+          "y": "0",
+          "width": "full",
+          "height": "70p",
+          "fit": true
+        },
         {
           "name": "p3_name",
           "kind": "text",
           "text": "{{p3_name}}",
           "x": "center",
-          "y": "0p",
-          "width": "full",
-          "height": "33p",
+          "y": "76p",
+          "width": "full-14",
+          "height": "8p",
           "font": "Open-Sans",
           "color": "777777",
-          "max_size": 16,
+          "max_size": 14,
           "min_size": 12
         },
         {
@@ -232,35 +167,46 @@
           "kind": "text",
           "text": "{{p3_price}}",
           "x": "center",
-          "y": "37p",
-          "width": "full",
-          "height": "38p+1",
+          "y": "85p",
+          "width": "full-14",
+          "height": "8p",
           "font": "Open-Sans-bold",
           "color": "000000",
-          "max_size": 20,
-          "min_size": 17
+          "max_size": 16,
+          "min_size": 14
         }
       ]
     },
     {
-      "name": "p4_caption",
+      "name": "p4_image",
       "kind": "image",
-      "x": "60p+14",
-      "y": "91p+5",
-      "width": "16p+12",
-      "height": "7p+6",
+      "image": "color:ffffff",
+      "x": "48p",
+      "y": "52p",
+      "width": "19p",
+      "height": "42p",
       "slots": [
+        {
+          "name": "p4_photo",
+          "kind": "image",
+          "image": "{{src_p4}}",
+          "x": "0",
+          "y": "0",
+          "width": "full",
+          "height": "70p",
+          "fit": true
+        },
         {
           "name": "p4_name",
           "kind": "text",
           "text": "{{p4_name}}",
           "x": "center",
-          "y": "0p",
-          "width": "full",
-          "height": "33p",
+          "y": "76p",
+          "width": "full-14",
+          "height": "8p",
           "font": "Open-Sans",
           "color": "777777",
-          "max_size": 16,
+          "max_size": 14,
           "min_size": 12
         },
         {
@@ -268,35 +214,46 @@
           "kind": "text",
           "text": "{{p4_price}}",
           "x": "center",
-          "y": "37p",
-          "width": "full",
-          "height": "38p+1",
+          "y": "85p",
+          "width": "full-14",
+          "height": "8p",
           "font": "Open-Sans-bold",
           "color": "000000",
-          "max_size": 20,
-          "min_size": 17
+          "max_size": 16,
+          "min_size": 14
         }
       ]
     },
     {
-      "name": "p5_caption",
+      "name": "p5_image",
       "kind": "image",
-      "x": "80p+4",
-      "y": "91p+5",
-      "width": "16p+12",
-      "height": "7p+6",
+      "image": "color:ffffff",
+      "x": "68p",
+      "y": "52p",
+      "width": "19p",
+      "height": "42p",
       "slots": [
+        {
+          "name": "p5_photo",
+          "kind": "image",
+          "image": "{{src_p5}}",
+          "x": "0",
+          "y": "0",
+          "width": "full",
+          "height": "70p",
+          "fit": true
+        },
         {
           "name": "p5_name",
           "kind": "text",
           "text": "{{p5_name}}",
           "x": "center",
-          "y": "0p",
-          "width": "full",
-          "height": "33p",
+          "y": "76p",
+          "width": "full-14",
+          "height": "8p",
           "font": "Open-Sans",
           "color": "777777",
-          "max_size": 16,
+          "max_size": 14,
           "min_size": 12
         },
         {
@@ -304,34 +261,34 @@
           "kind": "text",
           "text": "{{p5_price}}",
           "x": "center",
-          "y": "37p",
-          "width": "full",
-          "height": "38p+1",
+          "y": "85p",
+          "width": "full-14",
+          "height": "8p",
           "font": "Open-Sans-bold",
           "color": "000000",
-          "max_size": 20,
-          "min_size": 17
+          "max_size": 16,
+          "min_size": 14
         }
       ]
     }
   ],
   "values": {
-    "src_life": "https://s.imagor.net/scene-tall.svg",
-    "src_p1": "https://s.imagor.net/product-bag.svg",
-    "src_p2": "https://s.imagor.net/product-box.svg",
-    "src_p3": "https://s.imagor.net/product-bottle.svg",
-    "src_p4": "https://s.imagor.net/product-box.svg",
-    "src_p5": "https://s.imagor.net/product-bag.svg",
+    "src_life": "https://images.unsplash.com/photo-1760624294469-550753ec203a?ixid=M3wxMTAwMjk5fDB8MXxzZWFyY2h8M3x8dG90ZSUyMGJhZ3xlbnwwfDJ8fHwxNzkxODIyNzYyfDA&ixlib=rb-4.1.0?auto=format&fit=crop&w=900&q=80",
+    "src_p1": "https://images.unsplash.com/photo-1691480150204-66dd1eb77391?ixid=M3wxMTAwMjk5fDB8MXxzZWFyY2h8MXx8bGVhdGhlciUyMGJhZ3xlbnwwfDJ8fHwxNzkxODIyNzYxfDA&ixlib=rb-4.1.0?auto=format&fit=crop&w=700&q=80",
+    "src_p2": "https://images.unsplash.com/photo-1719488134786-a4c273733931?ixid=M3wxMTAwMjk5fDB8MXxzZWFyY2h8Mnx8cGFja2FnaW5nJTIwYm94fGVufDB8Mnx8fDE3OTE4MjI3NjN8MA&ixlib=rb-4.1.0?auto=format&fit=crop&w=700&q=80",
+    "src_p3": "https://images.unsplash.com/photo-1691480250099-a63081ecfcb8?ixid=M3wxMTAwMjk5fDB8MXxzZWFyY2h8Mnx8bGVhdGhlciUyMGJhZ3xlbnwwfDJ8fHwxNzkxODIyNzYxfDA&ixlib=rb-4.1.0?auto=format&fit=crop&w=700&q=80",
+    "src_p4": "https://images.unsplash.com/photo-1644085159285-5fd924740cb3?ixid=M3wxMTAwMjk5fDB8MXxzZWFyY2h8NHx8Z2xhc3MlMjBib3R0bGV8ZW58MHwxfHx8MTc5MTgyMjc2NHww&ixlib=rb-4.1.0?auto=format&fit=crop&w=700&q=80",
+    "src_p5": "https://images.unsplash.com/photo-1760624294582-5341f33f9fa4?ixid=M3wxMTAwMjk5fDB8MXxzZWFyY2h8Mnx8dG90ZSUyMGJhZ3xlbnwwfDJ8fHwxNzkxODIyNzYyfDA&ixlib=rb-4.1.0?auto=format&fit=crop&w=700&q=80",
     "wordmark": "MAISON",
-    "p1_name": "Padded leather shoulder bag",
+    "p1_name": "Leather satchel bag",
     "p1_price": "HKD$18500",
-    "p2_name": "Coated-canvas messenger bag",
+    "p2_name": "Ribboned gift box",
     "p2_price": "HKD$11540",
-    "p3_name": "Leather messenger bag",
+    "p3_name": "Grained leather satchel",
     "p3_price": "HKD$12875",
-    "p4_name": "Debossed leather messenger bag",
+    "p4_name": "Amber glass bottle",
     "p4_price": "HKD$13625",
-    "p5_name": "Logo-embossed leather tote bag",
+    "p5_name": "Soft tote, three colourways",
     "p5_price": "HKD$15170"
   }
 }
