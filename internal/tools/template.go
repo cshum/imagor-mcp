@@ -27,7 +27,7 @@ type InnerSlot struct {
 	Y       string `json:"y,omitempty" jsonschema:"vertical position within this canvas"`
 	Width   string `json:"width,omitempty" jsonschema:"the box width; defaults to the canvas width"`
 	Height  string `json:"height,omitempty" jsonschema:"the box height; defaults to the canvas height"`
-	Font    string `json:"font,omitempty" jsonschema:"font family without a size, for example sans-bold; the size is fitted to the box unless size is given"`
+	Font    string `json:"font,omitempty" jsonschema:"a Pango font with hyphens for spaces: family first, size last, e.g. sans-bold or sans-bold-24. A size anywhere but last is ignored by Pango. The size is fitted to the box when height is given and size is not"`
 	Size    int    `json:"size,omitempty" jsonschema:"a fixed size, used instead of fitting"`
 	Color   string `json:"color,omitempty" jsonschema:"text colour as RRGGBB"`
 	Align   string `json:"align,omitempty" jsonschema:"low, center or high; defaults to center"`
@@ -59,7 +59,7 @@ type TemplateSlot struct {
 	Y       string `json:"y" jsonschema:"vertical position: pixels, or full-N / f-N relative to the canvas"`
 	Width   string `json:"width,omitempty" jsonschema:"for text: the box width, which sets the wrap and the fitting; pixels or full-N. For image: the overlay width"`
 	Height  string `json:"height,omitempty" jsonschema:"for text: the box height, which is what the text is fitted into. For image: the overlay height"`
-	Font    string `json:"font,omitempty" jsonschema:"for text: font family without a size, for example serif; the size is chosen by fitting when a height is given"`
+	Font    string `json:"font,omitempty" jsonschema:"for text: a Pango font with hyphens for spaces, family first and size last, e.g. serif or Open-Sans-bold-24. The size is chosen by fitting when a height is given"`
 	Size    int    `json:"size,omitempty" jsonschema:"for text: a fixed size, used only when no height is given so the slot is not fitted"`
 	Color   string `json:"color,omitempty" jsonschema:"text colour, or overlay colour for an image slot"`
 	Align   string `json:"align,omitempty" jsonschema:"text alignment within the box: low, center or high"`
