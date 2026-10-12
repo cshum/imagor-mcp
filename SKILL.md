@@ -111,9 +111,16 @@ canvas size under your control — `padding(color, N)` grows the output instead
 (300px becomes 340px at `padding(x,20)`).
 
 `round_corner` takes pixels, not a ratio: `round_corner(0.5)` is a half-pixel
-radius and renders square. A circle is `round_corner(r,r,background)` where `r` is
-half the width, and the colour matters — leave it out and the corners come back
-black.
+radius and renders square. A circle is `round_corner(r,r,color)` where `r` is half
+the width, and the colour matters — leave it out and the corners come back black.
+
+**A slot's `filters` field is where a filter on its own source goes**, because the
+image field is data and a path in it would be encoded as a source. Write the segment
+as imagor writes it: `smart/filters:round_corner(230,230,fff)`.
+
+**Do not combine `fit` with `round_corner`.** A fitted image letterboxes, and the
+corner is then cut from the letterboxed box rather than the photograph, so the
+circle clips the picture. Use a square crop of the right size instead.
 
 ## When a value has to be encoded
 

@@ -1,56 +1,56 @@
 {
-  "name": "Portrait profile card",
-  "note": "A framed square profile card with a circular portrait and one centered identity block.",
-  "canvas": [
-    1080,
-    1080
-  ],
-  "background": "color:183b32",
+  "name": "Mei Lam portrait profile card",
+  "note": "A balanced 4:5 profile card with a smart-cropped circular portrait and a centered identity block.",
+  "canvas": {
+    "width": 1080,
+    "height": 1350,
+    "background": "color:173f34"
+  },
   "slots": [
     {
-      "name": "card",
+      "name": "cream inset border",
       "kind": "rect",
       "image": "color:f4f1e8",
-      "x": "2p+6",
-      "y": "2p+6",
-      "width": "full-56",
-      "height": "full-56"
+      "x": "2p+10",
+      "y": "2p+5",
+      "width": "full-64",
+      "height": "full-64"
     },
     {
-      "name": "portrait",
+      "name": "green card panel",
+      "kind": "rect",
+      "image": "color:173f34",
+      "x": "4p+5",
+      "y": "3p+8",
+      "width": "full-96",
+      "height": "full-96"
+    },
+    {
+      "name": "circular portrait",
       "kind": "image",
-      "image": "{{portrait}}",
-      "x": "30p+6",
-      "y": "12p",
-      "width": "38p+10",
-      "height": "38p+10"
+      "image": "http://localhost:8198/src_life.png",
+      "filters": "smart/filters:round_corner(200,200,173f34)",
+      "x": "31p+5",
+      "y": "25p+12",
+      "width": "37p",
+      "height": "29p+8"
     },
     {
-      "name": "identity-panel",
-      "kind": "rect",
-      "image": "color:183b32",
-      "x": "7p+4",
-      "y": "53p+3",
-      "width": "full-160",
-      "height": "28p+8"
-    },
-    {
-      "name": "identity",
-      "kind": "rect",
-      "image": "color:183b32",
-      "x": "7p+4",
-      "y": "53p+3",
-      "width": "full-160",
-      "height": "28p+8",
+      "name": "centered profile text block",
+      "kind": "image",
+      "x": "0p",
+      "y": "58p+7",
+      "width": "full",
+      "height": "17p",
       "slots": [
         {
           "name": "name",
           "kind": "text",
           "text": "{{name}}",
           "x": "center",
-          "y": "4p+3",
+          "y": "0p",
           "font": "sans-bold",
-          "size": 64,
+          "size": 56,
           "color": "f4f1e8"
         },
         {
@@ -58,35 +58,25 @@
           "kind": "text",
           "text": "{{role}}",
           "x": "center",
-          "y": "36p",
+          "y": "35p+2",
           "font": "sans",
-          "size": 30,
-          "color": "c6d0c8"
+          "size": 34,
+          "color": "cbd4ce"
         },
         {
           "name": "handle",
           "kind": "text",
           "text": "{{handle}}",
           "x": "center",
-          "y": "52p+3",
+          "y": "62p",
           "font": "sans",
-          "size": 22,
-          "color": "d6b783"
+          "size": 29,
+          "color": "d8c79b"
         }
       ]
-    },
-    {
-      "name": "accent",
-      "kind": "rect",
-      "image": "color:b38b52",
-      "x": "45p+4",
-      "y": "78p+3",
-      "width": "9p+3",
-      "height": "0p+5"
     }
   ],
   "values": {
-    "portrait": "http://localhost:8123/SKgAWqdgwa8pZ3od0W9IR3Bqyro=/420x420/smart/filters:round_corner(210,210,f4f1e8)/http://localhost:8198/src_life.png",
     "name": "Mei Lam",
     "role": "Platform engineering",
     "handle": "@meilam"
