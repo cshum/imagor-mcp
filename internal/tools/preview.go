@@ -98,10 +98,10 @@ func (c Config) previewImage(ctx context.Context, imageURL string) ([]byte, stri
 //
 // Content is set explicitly rather than left for the SDK, which would otherwise
 // fill it with the JSON of the structured output alone.
-func withPreview(out VerifyOutput, data []byte, mime, note string) *mcp.CallToolResult {
+func withPreview(out VerifyOutput, data []byte, mime, note string, scale int) *mcp.CallToolResult {
 	attached := len(data) > 0
 	res := &mcp.CallToolResult{
-		Content: []mcp.Content{&mcp.TextContent{Text: verifySummary(out, note, attached)}},
+		Content: []mcp.Content{&mcp.TextContent{Text: verifySummary(out, note, attached, scale)}},
 	}
 	if attached {
 		// Data is the raw image: the wire format base64-encodes a []byte field
@@ -118,7 +118,7 @@ func withPreview(out VerifyOutput, data []byte, mime, note string) *mcp.CallTool
 // verifySummary is the text half of a verified result. It leads with what was
 // observed so a caller that cannot see the attached image still gets the report,
 // and names the preview so one that can knows what it is looking at.
-func verifySummary(out VerifyOutput, note string, attached bool) string {
+func verifySummary(out VerifyOutput, note string, attached bool, scale int) string {
 	var b strings.Builder
 	fmt.Fprintf(&b, "status %d", out.Status)
 	if out.Width > 0 && out.Height > 0 {
@@ -146,7 +146,16 @@ func verifySummary(out VerifyOutput, note string, attached bool) string {
 	}
 	fmt.Fprintf(&b, "\nurl: %s", out.AbsoluteURL)
 	if attached {
-		b.WriteString("\nThe rendered result is attached. Compare it against your reference.")
+		b.WriteString("\nThe rendered result is attached.")
+		if scale > 0 {
+			// Without the scale the caller cannot tell which coordinate system it
+			// is looking at, and a region asked for in preview pixels lands
+			// somewhere else entirely in the result.
+			fmt.Fprintf(&b, " It is %d%% of the result, so a detail too small to read "+
+				"here can be seen by calling again with preview_region as x,y,w,h in "+
+				"result pixels.", scale)
+		}
+		b.WriteString(" Compare it against your reference.")
 	}
 	return b.String()
 }

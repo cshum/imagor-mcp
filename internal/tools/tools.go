@@ -485,6 +485,11 @@ type VerifyInput struct {
 	// the client whether or not the model wants it, so the choice belongs to
 	// the caller rather than being made for it.
 	Preview *bool `json:"preview,omitempty" jsonschema:"attach the rendered result as an image, so a composition that succeeded but came out wrong can be seen. Defaults to true"`
+	// PreviewRegion attaches one part of the result at its native resolution
+	// instead of the whole result scaled down. A scaled preview shows the layout
+	// and loses small text, so this is how a caller checks a label or a price
+	// without paying for the whole render.
+	PreviewRegion string `json:"preview_region,omitempty" jsonschema:"attach part of the result at native resolution as x,y,w,h in result pixels, for checking text and fine detail that a scaled preview cannot show. Takes precedence over preview"`
 }
 
 // FilterOutcome is what the server reported for one filter in the URL.
@@ -690,18 +695,77 @@ func (c Config) VerifyURLTool(ctx context.Context, _ *mcp.CallToolRequest, in Ve
 	if in.Preview != nil && !*in.Preview {
 		return nil, out, nil
 	}
-	// The preview scales the composed result, not the source, so the composition
-	// is passed in as a nested source and fit inside the preview box. Setting the
-	// dimensions on the composition itself would replace the box it was built
-	// for, and the caller would be shown a different layout from the one the
-	// report describes.
 	previewParams := p
 	previewParams.Image = out.AbsoluteURL
 	previewParams.Path = ""
-	previewParams.FitIn = true
-	previewParams.Width, previewParams.Height = previewMaxEdge, previewMaxEdge
+	if region := in.PreviewRegion; region != "" {
+		// A region is attached at native resolution, so there is no scaling and
+		// no fit-in: the caller asked for a part of the result in order to read
+		// it, and scaling it back down would undo the point of asking.
+		sel, err := regionFilter(region, out.Width, out.Height)
+		if err != nil {
+			return nil, out, nil
+		}
+		previewParams.Filters = append(append(imagorpath.Filters{}, p.Filters...), sel)
+	} else {
+		// The whole result is attached scaled down, because images cost tokens by
+		// area and a layout question is answered at preview size. The composition
+		// is passed in as a nested source rather than having its dimensions
+		// replaced, so the caller is shown the layout the report describes.
+		previewParams.FitIn = true
+		previewParams.Width, previewParams.Height = previewMaxEdge, previewMaxEdge
+	}
 	data, mime, previewNote := c.previewImage(ctx, c.BaseURL+"/"+pathgen.BuildURL(previewParams, signer))
-	return withPreview(out, data, mime, previewNote), out, nil
+	// The caller is told how much the preview was scaled, so it knows which
+	// coordinate system it is looking at when it asks for a region.
+	scale := 0
+	if previewParams.FitIn && out.Width > 0 && out.Height > 0 {
+		scale = previewMaxEdge * 100 / max(out.Width, out.Height)
+	}
+	return withPreview(out, data, mime, previewNote, scale), out, nil
+}
+
+// regionFilter turns "x,y,w,h" in result pixels into the crop a caller asked for.
+//
+// The crop is expressed in percentages because that is what the filter takes,
+// and the result's dimensions are what the report already carried. A region that
+// does not parse, or that falls outside the result, yields no preview rather than
+// a crop of the wrong place: a wrong region is worse than none, because a caller
+// would read it as evidence about the composition.
+func regionFilter(region string, width, height int) (imagorpath.Filter, error) {
+	if width <= 0 || height <= 0 {
+		return imagorpath.Filter{}, fmt.Errorf("the result has no dimensions to crop against")
+	}
+	parts := strings.Split(region, ",")
+	if len(parts) != 4 {
+		return imagorpath.Filter{}, fmt.Errorf("a region is x,y,w,h; got %q", region)
+	}
+	var v [4]float64
+	for i, s := range parts {
+		f, err := strconv.ParseFloat(strings.TrimSpace(s), 64)
+		if err != nil {
+			return imagorpath.Filter{}, fmt.Errorf("a region is x,y,w,h; %q is not a number", s)
+		}
+		v[i] = f
+	}
+	x, y, w, h := v[0], v[1], v[2], v[3]
+	if w <= 0 || h <= 0 || x < 0 || y < 0 || x+w > float64(width) || y+h > float64(height) {
+		return imagorpath.Filter{}, fmt.Errorf(
+			"the region %s is not inside the %dx%d result", region, width, height)
+	}
+	// crop() takes left, top, width and height in pixels, not right and bottom
+	// and not percentages. Passing the far edge as the third and fourth argument
+	// asks for a crop that size, and a percentage form is not understood at all -
+	// both silently return the whole image rather than failing.
+	return imagorpath.Filter{
+		Name: "crop",
+		Args: strings.Join([]string{
+			strconv.Itoa(int(x)),
+			strconv.Itoa(int(y)),
+			strconv.Itoa(int(w)),
+			strconv.Itoa(int(h)),
+		}, ","),
+	}, nil
 }
 
 // outcomes walks the requested filters against the reported ones. The report
