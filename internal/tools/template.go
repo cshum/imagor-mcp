@@ -113,6 +113,7 @@ type TemplateOutput struct {
 // Type is the exception - a font size is absolute - so a text slot with a height
 // is fitted against the box that geometry resolves to, per canvas.
 func (c Config) RenderTemplateTool(ctx context.Context, _ *mcp.CallToolRequest, in TemplateInput) (*mcp.CallToolResult, TemplateOutput, error) {
+	var slotNotes []string
 	if in.CanvasWidth <= 0 || in.CanvasHeight <= 0 {
 		return nil, TemplateOutput{}, fmt.Errorf("a template needs canvas_width and canvas_height in pixels")
 	}
@@ -204,6 +205,10 @@ func (c Config) RenderTemplateTool(ctx context.Context, _ *mcp.CallToolRequest, 
 			// default. Taking the font's own matters: a slot that writes
 			// "sans-bold-11" and nothing else means 11, and reading that as the
 			// default 48 renders it four times too large.
+			// Warn on the font as written, before the fitter appends a size.
+			if w := fontWarning(font); w != "" {
+				slotNotes = append(slotNotes, w)
+			}
 			fontFamily, fontSize := splitFontName(font)
 			font = fontFamily
 			size, lines, detail := slot.Size, 0, ""
@@ -346,7 +351,7 @@ func (c Config) RenderTemplateTool(ctx context.Context, _ *mcp.CallToolRequest, 
 		return nil, TemplateOutput{}, fmt.Errorf(
 			"these placeholders had no value: %s", strings.Join(missing, ", "))
 	}
-	notes := compositionWarnings(p)
+	notes := append(slotNotes, compositionWarnings(p)...)
 	if len(notes) > 0 {
 		out.Note = strings.Join(notes, "; ")
 	}
