@@ -56,17 +56,11 @@ parameters are four flat fields, not a nested object:
 - `trim()` only removes a uniform border, so on a product on a panel it is a no-op
   with byte-identical output.
 
-**When you control the frame, shape it to the source and use plain `WxH` — no fit at
-all.** Measured on a 318×162 source: in a 300×153 frame, `WxH`, `fit-in` and
-`full-fit-in` all return 300×153, so a fit mode adds nothing when the shapes already
-agree.
-
-**Fit is for a cell you cannot shape** — a grid cell whose size the grid fixes. There,
-fitting leaves the image smaller than the cell on one side, which is the point: the
-cells align and the image sits inside without distortion. A fitted image is centred in
-its box, because the template adds `fill(none)`: the letterbox is transparent and the
-image sits in the middle rather than at the top, which keeps a row of tiles sharing a
-baseline.
+**When you control the frame, shape it to the source and use plain `WxH`** — no fit at
+all, because a fit mode adds nothing when the shapes already agree. **Fit is for a cell
+you cannot shape**, a grid cell whose size the layout fixes: there the image sits inside
+without distortion and the cells align. A fitted image is centred in its box, because
+the template adds `fill(none)`, which is what keeps a row of tiles sharing a baseline.
 
 ## Overlays and text
 
@@ -124,10 +118,6 @@ the colour is required — leave it out and the corners come back black. Do not 
 it with `fit`: a fitted image letterboxes, so the corner is cut from the letterboxed box
 rather than the photograph and the circle clips the picture. Use a square crop instead.
 
-**A slot's `filters` field is where a filter on its own source goes**, because the
-image field is data and a path in it would be encoded as a source. Write the segment as
-imagor writes it: `smart/filters:round_corner(230,230,fff)`.
-
 ## When a value has to be encoded
 
 **Text takes a whitelist.** Only `[A-Za-z0-9_-]` is left alone; anything else is
@@ -176,8 +166,20 @@ own is absolute.
 }
 ```
 
+**A slot's `filters` field applies filters to that slot's own source**, because the
+image field is data rather than syntax — a path written there is encoded as a source.
+Write the segment as imagor writes it: `smart/filters:round_corner(230,230,fff)`. The
+signature is minted at render time, so the layout stays portable.
+
 Slots are applied in order, so later ones draw over earlier ones. Values fill
-`{{placeholders}}` in both text and image fields.
+`{{placeholders}}` in text, image **and background** fields. A placeholder with no value
+**refuses the render** rather than drawing its own braces — an unfilled one renders as
+literal `{{name}}`, which reads as a layout fault instead of a missing value.
+
+**A slot carrying its own `slots` is a canvas.** Its width and height become the canvas
+the inner slots lay out on, and the result draws at the outer slot's position. That is
+how text is centred on something narrower than the frame — see the centring rule below.
+A nested canvas is transparent, so it adds only what it draws.
 
 ### Geometry forms
 
@@ -272,9 +274,9 @@ unrelated pictures rather than a grid — and no amount of position tuning fixes
 
 ## Responsive compositions
 
-`fullxfull` fills the parent, `fit-in/full-40xfull-40/PHOTO` insets 40px on every
-side, `12xfull/color:3b82f6` is an accent bar at full height, and `full-80` as a
-`text()` wrap width wraps to the canvas it lands on.
+`fit-in/full-40xfull-40/PHOTO` insets 40px on every side, `12xfull/color:3b82f6` is an
+accent bar at full height, and `full-80` as a `text()` wrap width wraps to the canvas it
+lands on.
 
 **Sizes adapt; type does not.** A font size is in pixels, so the same composition
 renders relatively smaller type on a larger canvas, and there is no percentage font
