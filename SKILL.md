@@ -100,7 +100,8 @@ against the text's, not its centre against the text's centre.
 `full` or `f` in a **nested dimension** inherits the parent: `fullxfull`,
 `fit-in/full-20xfull-20`. A **position** has no such form — `full-N` written as a
 position is read as `0`, lands the element at the origin and returns `200`. The
-build tools warn when they see one.
+build tools warn when they see one. This is the one form that survives a round trip
+and still means something; see *Editing a path you already have*.
 
 ## Nested path order
 
@@ -153,7 +154,7 @@ same thing.
 
 `render_template` renders a layout at a canvas size, so a layout is written once and
 served at any size. A text slot given a height is **fitted against the box its geometry
-resolves to**, which is what makes type adapt.
+resolves to** — see *Placing text* for what that costs and how to cap it.
 
 **A generic font is resolved to a narrower face and the note says so** — `sans` to
 `Open-Sans`, `serif` to `Liberation-Serif`. See *Placing text*.
@@ -330,3 +331,8 @@ reports what this server is using — compare before debugging anything else.
    to the pixel while the shapes read as misaligned, and a whole-image average hides
    a 40px error. Crop to the region you changed and check the pairing before you
    believe the number.
+
+**These rules are procedures and facts on purpose.** A procedure says what to type and
+is followed; a preference asks the reader to want the right thing and is not, so where
+one would be needed the server enforces it instead — a generic font resolves to a
+narrower face, `fit` centres in its box.
