@@ -11,7 +11,7 @@ and still renders, so it looks like a layout problem rather than a parsing one.
 import io, json, os, subprocess, sys, urllib.request
 from PIL import Image, ImageDraw
 
-MCP = "/tmp/imagor-mcp-B"
+MCP = "/tmp/imagor-mcp-e2e"
 BASE = "http://localhost:8123"
 SRC = os.path.expanduser("~/Developer/imagor-mcp/cookbook")
 OUT = sys.argv[1] if len(sys.argv) > 1 else "/tmp/gallery3"
@@ -35,8 +35,20 @@ def main():
                          stderr=subprocess.DEVNULL, text=True, bufsize=1, env=env)
 
     def rpc(o):
+        """Send a request and return its reply.
+
+        The reader took the next line whatever it was, so a notification
+        arriving before the reply was parsed as the reply and reported as a
+        failed call.
+        """
         p.stdin.write(json.dumps(o) + "\n"); p.stdin.flush()
-        return json.loads(p.stdout.readline())
+        while True:
+            line = p.stdout.readline()
+            if not line.strip():
+                return {}
+            m = json.loads(line)
+            if "id" in m:
+                return m
 
     rpc({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {
         "protocolVersion": "2025-06-18", "capabilities": {},

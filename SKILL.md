@@ -249,19 +249,18 @@ Text lands wherever the font's own metrics put it, and nothing reports those.
   family and still returns `200`, so the render succeeds and the type is not what
   was asked for. A generic family is the safe choice; a named face is only safe
   once you have seen it render.
-- **A wordmark is usually letter-spaced, so draw it one glyph per call.** One
-  `text()` cannot reproduce tracking, and `spacing` does not help — it is *line*
-  spacing, applied vertically. Measuring each glyph and placing separate calls is
-  what reaches the reference; on one 1800px banner the wordmark glyphs landed at
-  x=1035, 1111, 1184, 1209, 1282, 1351. **Worth it for a wordmark or a display
-  headline; not for body text**, where the spacing is invisible and the cost is
-  one call per character.
-- **`x=center` is the only form that centres text, and it centres on the canvas.**
-  With a numeric `x` the text hangs left whatever `align` says; `center` centres
-  both the box and the ink in it. Measured on a 600-wide canvas, a 300-wide box put
-  a 210px label at x194-404, symmetric to 2px. But it is canvas-relative, so a
-  label under a specific product cannot use it, and neither can a wordmark that
-  deliberately sits off-centre to clear the layout.
+- **A wordmark that needs tracking is drawn one glyph per call.** `text()` has no
+  letter-spacing, and its `spacing` argument is line spacing, applied vertically.
+- **`x=center` is the only form that centres text**, and it resolves against the
+  canvas it is on. A numeric `x` leaves text hanging left whatever `align` says.
+  So to centre a label under a product, give the label a canvas of its own — see
+  nested slots below.
+- **A slot with its own `slots` is a canvas**, which is how text is centred on
+  something narrower than the banner. The outer slot's width and height are that
+  canvas, the inner slots are laid out on it, and `x=center` inside resolves
+  against it. A label under a product is a canvas as wide as the label, centred on
+  the product, with the text centred in it — a label measured this way landed at
+  centre 921 against a product centre of 922.
 - Measure the region you changed, not the whole image: a whole-image number hides
   a label that is 40px out, because most of the canvas did not move. When the
   sources are exact crops, the whole residual is text, so measure the text bands

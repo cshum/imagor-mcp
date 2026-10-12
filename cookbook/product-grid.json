@@ -42,29 +42,43 @@
     },
     {
       "name": "c1r1_name",
-      "kind": "text",
-      "text": "{{c1r1_name}}",
+      "kind": "image",
       "x": "42p+16",
-      "y": "33p+7",
+      "y": "32p+2",
       "width": "16p+12",
       "height": "5p+5",
-      "font": "sans",
-      "color": "9a9a9a",
-      "max_size": 17,
-      "min_size": 12
+      "slots": [
+        {
+          "name": "label",
+          "kind": "text",
+          "text": "{{c1r1_name}}",
+          "y": "14",
+          "font": "sans",
+          "color": "9a9a9a",
+          "max_size": 17,
+          "min_size": 12
+        }
+      ]
     },
     {
       "name": "c1r1_price",
-      "kind": "text",
-      "text": "{{c1r1_price}}",
+      "kind": "image",
       "x": "42p+16",
-      "y": "40p+1",
+      "y": "38p+5",
       "width": "16p+12",
       "height": "3p+6",
-      "font": "sans-bold",
-      "color": "111111",
-      "max_size": 22,
-      "min_size": 16
+      "slots": [
+        {
+          "name": "price",
+          "kind": "text",
+          "text": "{{c1r1_price}}",
+          "y": "6",
+          "font": "sans-bold",
+          "color": "111111",
+          "max_size": 22,
+          "min_size": 16
+        }
+      ]
     },
     {
       "name": "c2r1_img",
@@ -78,29 +92,43 @@
     },
     {
       "name": "c2r1_name",
-      "kind": "text",
-      "text": "{{c2r1_name}}",
+      "kind": "image",
       "x": "79p+15",
       "y": "32p+2",
       "width": "16p+12",
       "height": "5p+5",
-      "font": "sans",
-      "color": "9a9a9a",
-      "max_size": 17,
-      "min_size": 12
+      "slots": [
+        {
+          "name": "label",
+          "kind": "text",
+          "text": "{{c2r1_name}}",
+          "y": "14",
+          "font": "sans",
+          "color": "9a9a9a",
+          "max_size": 17,
+          "min_size": 12
+        }
+      ]
     },
     {
       "name": "c2r1_price",
-      "kind": "text",
-      "text": "{{c2r1_price}}",
+      "kind": "image",
       "x": "79p+15",
       "y": "38p+5",
       "width": "16p+12",
       "height": "3p+6",
-      "font": "sans-bold",
-      "color": "111111",
-      "max_size": 22,
-      "min_size": 16
+      "slots": [
+        {
+          "name": "price",
+          "kind": "text",
+          "text": "{{c2r1_price}}",
+          "y": "6",
+          "font": "sans-bold",
+          "color": "111111",
+          "max_size": 22,
+          "min_size": 16
+        }
+      ]
     },
     {
       "name": "c1r2_img",
@@ -114,29 +142,43 @@
     },
     {
       "name": "c1r2_name",
-      "kind": "text",
-      "text": "{{c1r2_name}}",
+      "kind": "image",
       "x": "39p+3",
       "y": "90p",
       "width": "17p+14",
       "height": "5p+5",
-      "font": "sans",
-      "color": "9a9a9a",
-      "max_size": 17,
-      "min_size": 12
+      "slots": [
+        {
+          "name": "label",
+          "kind": "text",
+          "text": "{{c1r2_name}}",
+          "y": "14",
+          "font": "sans",
+          "color": "9a9a9a",
+          "max_size": 17,
+          "min_size": 12
+        }
+      ]
     },
     {
       "name": "c1r2_price",
-      "kind": "text",
-      "text": "{{c1r2_price}}",
+      "kind": "image",
       "x": "39p+3",
       "y": "96p+4",
       "width": "17p+14",
       "height": "3p+6",
-      "font": "sans-bold",
-      "color": "111111",
-      "max_size": 22,
-      "min_size": 16
+      "slots": [
+        {
+          "name": "price",
+          "kind": "text",
+          "text": "{{c1r2_price}}",
+          "y": "6",
+          "font": "sans-bold",
+          "color": "111111",
+          "max_size": 22,
+          "min_size": 16
+        }
+      ]
     },
     {
       "name": "c2r2_img",
@@ -150,29 +192,43 @@
     },
     {
       "name": "c2r2_name",
-      "kind": "text",
-      "text": "{{c2r2_name}}",
+      "kind": "image",
       "x": "59p+13",
       "y": "85p+7",
       "width": "18p+16",
       "height": "5p+5",
-      "font": "sans",
-      "color": "9a9a9a",
-      "max_size": 17,
-      "min_size": 12
+      "slots": [
+        {
+          "name": "label",
+          "kind": "text",
+          "text": "{{c2r2_name}}",
+          "y": "14",
+          "font": "sans",
+          "color": "9a9a9a",
+          "max_size": 17,
+          "min_size": 12
+        }
+      ]
     },
     {
       "name": "c2r2_price",
-      "kind": "text",
-      "text": "{{c2r2_price}}",
+      "kind": "image",
       "x": "59p+13",
       "y": "92p+1",
       "width": "18p+16",
       "height": "3p+6",
-      "font": "sans-bold",
-      "color": "111111",
-      "max_size": 22,
-      "min_size": 16
+      "slots": [
+        {
+          "name": "price",
+          "kind": "text",
+          "text": "{{c2r2_price}}",
+          "y": "6",
+          "font": "sans-bold",
+          "color": "111111",
+          "max_size": 22,
+          "min_size": 16
+        }
+      ]
     },
     {
       "name": "c3r2_img",
@@ -186,29 +242,43 @@
     },
     {
       "name": "c3r2_name",
-      "kind": "text",
-      "text": "{{c3r2_name}}",
+      "kind": "image",
       "x": "80p+5",
       "y": "86p+8",
       "width": "17p+4",
       "height": "5p+5",
-      "font": "sans",
-      "color": "9a9a9a",
-      "max_size": 17,
-      "min_size": 12
+      "slots": [
+        {
+          "name": "label",
+          "kind": "text",
+          "text": "{{c3r2_name}}",
+          "y": "14",
+          "font": "sans",
+          "color": "9a9a9a",
+          "max_size": 17,
+          "min_size": 12
+        }
+      ]
     },
     {
       "name": "c3r2_price",
-      "kind": "text",
-      "text": "{{c3r2_price}}",
+      "kind": "image",
       "x": "80p+5",
       "y": "93p+2",
       "width": "17p+4",
       "height": "3p+6",
-      "font": "sans-bold",
-      "color": "111111",
-      "max_size": 22,
-      "min_size": 16
+      "slots": [
+        {
+          "name": "price",
+          "kind": "text",
+          "text": "{{c3r2_price}}",
+          "y": "6",
+          "font": "sans-bold",
+          "color": "111111",
+          "max_size": 22,
+          "min_size": 16
+        }
+      ]
     }
   ],
   "values": {

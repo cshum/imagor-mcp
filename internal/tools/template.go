@@ -11,8 +11,34 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
+// InnerSlot is a slot laid out inside another slot's canvas.
+//
+// It carries the fields a label needs and no Slots of its own: the schema
+// generator rejects a type that contains itself, and a canvas inside a canvas is
+// not something a layout has needed. The canvas it sits on is what makes `center`
+// mean something, since a position inside a nested canvas resolves against that
+// canvas rather than the banner.
+type InnerSlot struct {
+	Name    string `json:"name" jsonschema:"a label for this slot, used in the resolved output"`
+	Kind    string `json:"kind,omitempty" jsonschema:"text or rect; defaults to text"`
+	Text    string `json:"text,omitempty" jsonschema:"the string, which may contain {{values}}"`
+	X       string `json:"x,omitempty" jsonschema:"horizontal position within this canvas; defaults to center, which is the only value that centres text"`
+	Y       string `json:"y,omitempty" jsonschema:"vertical position within this canvas"`
+	Width   string `json:"width,omitempty" jsonschema:"the box width; defaults to the canvas width"`
+	Height  string `json:"height,omitempty" jsonschema:"the box height; defaults to the canvas height"`
+	Font    string `json:"font,omitempty" jsonschema:"font family without a size, for example sans-bold; the size is fitted to the box unless size is given"`
+	Size    int    `json:"size,omitempty" jsonschema:"a fixed size, used instead of fitting"`
+	Color   string `json:"color,omitempty" jsonschema:"text colour as RRGGBB"`
+	Align   string `json:"align,omitempty" jsonschema:"low, center or high; defaults to center"`
+	MaxSize int    `json:"max_size,omitempty" jsonschema:"for fitted text: the largest size to try"`
+	MinSize int    `json:"min_size,omitempty" jsonschema:"for fitted text: the smallest size to accept"`
+}
+
 // TemplateSlot is one element of a template.
 //
+// A slot carrying its own Slots is a canvas, which is how a label is centred
+// under the image it describes: positions inside a nested canvas are relative to
+// it, so `center` resolves there rather than against the whole banner.
 // Geometry is written the way imagor writes it, so `full`, `f`, `full-N` and
 // `f-N` all work: a slot can be positioned and sized relative to the canvas and
 // the same template then serves several canvas sizes. A text slot with both a
@@ -34,6 +60,12 @@ type TemplateSlot struct {
 	Fit     bool   `json:"fit,omitempty" jsonschema:"for image: fit the whole image inside the box rather than filling it, which keeps the aspect ratio instead of stretching"`
 	MaxSize int    `json:"max_size,omitempty" jsonschema:"for fitted text: the largest size to try"`
 	MinSize int    `json:"min_size,omitempty" jsonschema:"for fitted text: the smallest size to accept"`
+
+	// A slot that carries its own slots is a canvas: its width and height become
+	// the canvas the inner slots are laid out on, and the result is drawn at this
+	// slot's x and y. Positions inside are relative to that canvas, so `center`
+	// centres a label under the image it describes rather than on the banner.
+	Slots []InnerSlot `json:"slots,omitempty" jsonschema:"for a nested canvas: the slots to lay out inside this slot's width x height, positioned relative to it"`
 }
 
 // TemplateInput is a layout plus the values to fill it with.
@@ -90,6 +122,35 @@ func (c Config) RenderTemplateTool(ctx context.Context, _ *mcp.CallToolRequest, 
 		source := substitute(slot.Image, in.Values)
 		for _, n := range append(unfilled(slot.Text, in.Values), unfilled(slot.Image, in.Values)...) {
 			missing = append(missing, fmt.Sprintf("%s.%s", slot.Name, n))
+		}
+		if len(slot.Slots) > 0 {
+			// A slot carrying its own slots is a canvas: the inner slots are laid
+			// out on a composition of this slot's size, and the result is drawn
+			// here. Positions inside are relative to that canvas, so `center`
+			// centres a label under the image it describes rather than on the
+			// banner - the one way to centre text, since a numeric x always
+			// leaves it hanging left.
+			inner, innerResolved, err := c.nestedCanvas(ctx, slot, in)
+			if err != nil {
+				return nil, TemplateOutput{}, err
+			}
+			sx, err := c.position(slot.X, in.CanvasWidth)
+			if err != nil {
+				return nil, TemplateOutput{}, fmt.Errorf("slot %q x: %w", slot.Name, err)
+			}
+			sy, err := c.position(slot.Y, in.CanvasHeight)
+			if err != nil {
+				return nil, TemplateOutput{}, fmt.Errorf("slot %q y: %w", slot.Name, err)
+			}
+			filters = append(filters, imagorpath.Filter{
+				Name: "image",
+				Args: fmt.Sprintf("%s,%s,%s", inner, sx, sy),
+			})
+			resolved = append(resolved, ResolvedSlot{
+				Name:   slot.Name,
+				Detail: fmt.Sprintf("canvas %sx%s at %s,%s: %s", slot.Width, orDefault(slot.Height, slot.Width), sx, sy, innerResolved),
+			})
+			continue
 		}
 		switch slot.Kind {
 		case "text":
@@ -459,4 +520,89 @@ func orDefaultInt(v, fallback int) int {
 		return fallback
 	}
 	return v
+}
+
+// nestedCanvas lays a slot's inner slots out on a canvas of their own, and
+// returns the path for that canvas plus a one-line report of what went in.
+//
+// The canvas is color:none - fully transparent - so it composites over whatever
+// is beneath it and the slot only adds what it draws. The point of the canvas is
+// position resolution: a numeric x leaves text hanging left of its box whatever
+// align says, and only `center` centres it, so text that must read as centred
+// needs a canvas narrow enough for `center` to mean something.
+//
+// Text is fitted against the canvas it sits on, so the size that comes out is the
+// size that fits this canvas, not the banner.
+func (c Config) nestedCanvas(ctx context.Context, slot TemplateSlot, in TemplateInput) (string, string, error) {
+	w, err := c.resolve(slot.Width, in.CanvasWidth, 0)
+	if err != nil {
+		return "", "", fmt.Errorf("slot %q width: %w", slot.Name, err)
+	}
+	h, err := c.resolve(orDefault(slot.Height, slot.Width), in.CanvasHeight, 0)
+	if err != nil {
+		return "", "", fmt.Errorf("slot %q height: %w", slot.Name, err)
+	}
+	if w <= 0 || h <= 0 {
+		return "", "", fmt.Errorf("slot %q: a nested canvas needs a width and a height, got %sx%s", slot.Name, slot.Width, slot.Height)
+	}
+
+	filters := make(imagorpath.Filters, 0, len(slot.Slots))
+	var parts []string
+	for _, inner := range slot.Slots {
+		text := substitute(inner.Text, in.Values)
+		if strings.TrimSpace(text) == "" {
+			parts = append(parts, fmt.Sprintf("%s skipped: no text", inner.Name))
+			continue
+		}
+		font := orDefault(inner.Font, "sans")
+		fontFamily, fontSize := splitFontName(font)
+		size := inner.Size
+		if size <= 0 {
+			size = fontSize
+		}
+		// The box is the whole canvas unless the inner slot narrows it: a nested
+		// canvas is usually exactly the label, so the text fits the canvas.
+		boxW, err := c.resolve(orDefault(inner.Width, strconv.Itoa(w)), w, 0)
+		if err != nil {
+			return "", "", fmt.Errorf("slot %q.%s width: %w", slot.Name, inner.Name, err)
+		}
+		boxH, err := c.resolve(orDefault(inner.Height, strconv.Itoa(h)), h, 0)
+		if err != nil {
+			return "", "", fmt.Errorf("slot %q.%s height: %w", slot.Name, inner.Name, err)
+		}
+		if size <= 0 && boxH > 0 {
+			fitted, err := c.fitForTemplate(ctx, text, boxW, boxH, fontFamily, TemplateSlot{
+				MaxSize: inner.MaxSize, MinSize: inner.MinSize, Font: inner.Font,
+			})
+			if err != nil {
+				return "", "", fmt.Errorf("slot %q.%s: %w", slot.Name, inner.Name, err)
+			}
+			size = fitted.Size
+		}
+		if size <= 0 {
+			size = 48
+		}
+		sx, err := c.position(orDefault(inner.X, "center"), w)
+		if err != nil {
+			return "", "", fmt.Errorf("slot %q.%s x: %w", slot.Name, inner.Name, err)
+		}
+		sy, err := c.position(inner.Y, h)
+		if err != nil {
+			return "", "", fmt.Errorf("slot %q.%s y: %w", slot.Name, inner.Name, err)
+		}
+		args := fmt.Sprintf("%s,%s,%s-%d,%s", sx, sy, fontFamily, size, orDefault(inner.Color, "000000"))
+		if boxW > 0 {
+			args += fmt.Sprintf(",0,normal,%d,%s,normal,word", boxW, orDefault(inner.Align, "center"))
+		}
+		filters = append(filters, imagorpath.Filter{Name: "text", Args: textArgs(text, args)})
+		parts = append(parts, fmt.Sprintf("%s %s-%d at %s,%s", inner.Name, fontFamily, size, sx, sy))
+	}
+
+	path := pathgen.Build(imagorpath.Params{
+		Width:   w,
+		Height:  h,
+		Filters: filters,
+		Image:   "color:none",
+	})
+	return path, strings.Join(parts, "; "), nil
 }
