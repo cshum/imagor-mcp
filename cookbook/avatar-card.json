@@ -49,7 +49,7 @@
           "text": "{{name}}",
           "x": "center",
           "y": "0p",
-          "font": "sans-bold",
+          "font": "Open-Sans-bold",
           "size": 56,
           "color": "f4f1e8"
         },
@@ -59,7 +59,7 @@
           "text": "{{role}}",
           "x": "center",
           "y": "35p+2",
-          "font": "sans",
+          "font": "Open-Sans",
           "size": 34,
           "color": "cbd4ce"
         },
@@ -69,7 +69,7 @@
           "text": "{{handle}}",
           "x": "center",
           "y": "62p",
-          "font": "sans",
+          "font": "Open-Sans",
           "size": 29,
           "color": "d8c79b"
         }

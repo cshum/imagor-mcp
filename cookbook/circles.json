@@ -22,7 +22,7 @@
       "text": "{{brand}}",
       "x": "9p+4",
       "y": "8p+3",
-      "font": "sans-bold-18",
+      "font": "Open-Sans-bold-18",
       "color": "242a27"
     },
     {
@@ -33,7 +33,7 @@
       "y": "16p+2",
       "width": "full-144",
       "height": "13p+6",
-      "font": "serif",
+      "font": "Liberation-Serif",
       "color": "242a27",
       "max_size": 64,
       "min_size": 54
@@ -94,7 +94,7 @@
           "y": "0p",
           "width": "full",
           "height": "40p",
-          "font": "sans-bold",
+          "font": "Open-Sans-bold",
           "color": "242a27",
           "max_size": 24,
           "min_size": 20
@@ -107,7 +107,7 @@
           "y": "46p",
           "width": "full",
           "height": "32p",
-          "font": "sans",
+          "font": "Open-Sans",
           "color": "6f7771",
           "max_size": 16,
           "min_size": 13
@@ -130,7 +130,7 @@
           "y": "0p",
           "width": "full",
           "height": "40p",
-          "font": "sans-bold",
+          "font": "Open-Sans-bold",
           "color": "242a27",
           "max_size": 24,
           "min_size": 20
@@ -143,7 +143,7 @@
           "y": "46p",
           "width": "full",
           "height": "32p",
-          "font": "sans",
+          "font": "Open-Sans",
           "color": "6f7771",
           "max_size": 16,
           "min_size": 13
@@ -166,7 +166,7 @@
           "y": "0p",
           "width": "full",
           "height": "40p",
-          "font": "sans-bold",
+          "font": "Open-Sans-bold",
           "color": "242a27",
           "max_size": 24,
           "min_size": 20
@@ -179,7 +179,7 @@
           "y": "46p",
           "width": "full",
           "height": "32p",
-          "font": "sans",
+          "font": "Open-Sans",
           "color": "6f7771",
           "max_size": 16,
           "min_size": 13
@@ -202,7 +202,7 @@
           "y": "0p",
           "width": "full",
           "height": "40p",
-          "font": "sans-bold",
+          "font": "Open-Sans-bold",
           "color": "242a27",
           "max_size": 24,
           "min_size": 20
@@ -215,7 +215,7 @@
           "y": "46p",
           "width": "full",
           "height": "32p",
-          "font": "sans",
+          "font": "Open-Sans",
           "color": "6f7771",
           "max_size": 16,
           "min_size": 13
@@ -247,7 +247,7 @@
           "y": "0p",
           "width": "full",
           "height": "86p",
-          "font": "sans-bold",
+          "font": "Open-Sans-bold",
           "color": "777d77",
           "max_size": 15,
           "min_size": 13
@@ -260,16 +260,16 @@
     "headline": "The people behind it",
     "person1_name": "Mei Lam",
     "person1_role": "Platform engineering",
-    "person1_image": "http://localhost:8198/src_p1.png",
+    "person1_image": "http://srcsrv/src_p1.png",
     "person2_name": "Jon Ho",
     "person2_role": "Image pipeline",
-    "person2_image": "http://localhost:8198/src_p2.png",
+    "person2_image": "http://srcsrv/src_p2.png",
     "person3_name": "Ada Cheng",
     "person3_role": "Developer experience",
-    "person3_image": "http://localhost:8198/src_p3.png",
+    "person3_image": "http://srcsrv/src_p3.png",
     "person4_name": "Sam Yuen",
     "person4_role": "Reliability",
-    "person4_image": "http://localhost:8198/src_p4.png",
+    "person4_image": "http://srcsrv/src_p4.png",
     "footer": "imagor"
   }
 }

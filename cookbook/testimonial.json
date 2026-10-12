@@ -31,7 +31,7 @@
       "text": "CUSTOMER STORY",
       "x": "15p",
       "y": "14p+7",
-      "font": "sans-bold-14",
+      "font": "Open-Sans-bold-14",
       "color": "c6a76a"
     },
     {
@@ -40,7 +40,7 @@
       "text": "“",
       "x": "10p+6",
       "y": "21p+2",
-      "font": "serif-72",
+      "font": "Liberation-Serif-72",
       "color": "c6a76a"
     },
     {
@@ -51,7 +51,7 @@
       "y": "27p",
       "width": "80p",
       "height": "35p+3",
-      "font": "serif",
+      "font": "Liberation-Serif",
       "color": "f7f4ec",
       "max_size": 62,
       "min_size": 42
@@ -71,7 +71,7 @@
       "text": "{{name}}",
       "x": "10p+6",
       "y": "62p+1",
-      "font": "sans-bold-25",
+      "font": "Open-Sans-bold-25",
       "color": "ffffff"
     },
     {
@@ -80,7 +80,7 @@
       "text": "{{company}}",
       "x": "10p+6",
       "y": "69p",
-      "font": "sans-18",
+      "font": "Open-Sans-18",
       "color": "b8c4bd"
     }
   ],

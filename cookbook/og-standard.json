@@ -13,7 +13,7 @@
       "text": "{{brand}}",
       "x": "7p+8",
       "y": "11p+3",
-      "font": "sans-bold-24",
+      "font": "Open-Sans-bold-24",
       "color": "263a32"
     },
     {
@@ -33,7 +33,7 @@
       "y": "30p+3",
       "width": "80p+10",
       "height": "26p+2",
-      "font": "serif",
+      "font": "Liberation-Serif",
       "color": "263a32",
       "max_size": 82,
       "min_size": 60
@@ -46,7 +46,7 @@
       "y": "59p",
       "width": "81p+8",
       "height": "13p",
-      "font": "sans",
+      "font": "Open-Sans",
       "color": "4e5b52",
       "max_size": 32,
       "min_size": 30
@@ -66,7 +66,7 @@
       "text": "{{domain}}",
       "x": "7p+8",
       "y": "87p+4",
-      "font": "sans-20",
+      "font": "Open-Sans-20",
       "color": "58645b"
     }
   ],

@@ -13,7 +13,7 @@
       "text": "{{brand}}",
       "x": "5p+4",
       "y": "6p+6",
-      "font": "sans-bold-18",
+      "font": "Open-Sans-bold-18",
       "color": "213d36"
     },
     {
@@ -33,7 +33,7 @@
       "y": "16p+4",
       "width": "full-128",
       "height": "11p+1",
-      "font": "sans-bold",
+      "font": "Open-Sans-bold",
       "max_size": 45,
       "min_size": 32,
       "color": "182a27",
@@ -81,7 +81,7 @@
       "text": "{{left_label}}",
       "x": "7p+8",
       "y": "38p+6",
-      "font": "sans-bold-24",
+      "font": "Open-Sans-bold-24",
       "color": "756f62"
     },
     {
@@ -90,7 +90,7 @@
       "text": "{{right_label}}",
       "x": "53p+4",
       "y": "38p+6",
-      "font": "sans-bold-24",
+      "font": "Open-Sans-bold-24",
       "color": "a5e4c6"
     },
     {
@@ -127,7 +127,7 @@
       "x": "9p+10",
       "y": "49p+3",
       "width": "36p+8",
-      "font": "sans-18",
+      "font": "Open-Sans-18",
       "color": "3d403b"
     },
     {
@@ -146,7 +146,7 @@
       "x": "55p+6",
       "y": "49p+3",
       "width": "36p+8",
-      "font": "sans-18",
+      "font": "Open-Sans-18",
       "color": "eef4ef"
     },
     {
@@ -165,7 +165,7 @@
       "x": "9p+10",
       "y": "61p+5",
       "width": "36p+8",
-      "font": "sans-18",
+      "font": "Open-Sans-18",
       "color": "3d403b"
     },
     {
@@ -184,7 +184,7 @@
       "x": "55p+6",
       "y": "61p+5",
       "width": "36p+8",
-      "font": "sans-18",
+      "font": "Open-Sans-18",
       "color": "eef4ef"
     },
     {
@@ -203,7 +203,7 @@
       "x": "9p+10",
       "y": "73p+6",
       "width": "36p+8",
-      "font": "sans-18",
+      "font": "Open-Sans-18",
       "color": "3d403b"
     },
     {
@@ -222,7 +222,7 @@
       "x": "55p+6",
       "y": "73p+6",
       "width": "36p+8",
-      "font": "sans-18",
+      "font": "Open-Sans-18",
       "color": "eef4ef"
     },
     {
@@ -231,7 +231,7 @@
       "text": "{{footer}}",
       "x": "5p+4",
       "y": "91p+4",
-      "font": "sans-bold-14",
+      "font": "Open-Sans-bold-14",
       "color": "7b7e76"
     }
   ],

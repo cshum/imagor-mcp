@@ -13,7 +13,7 @@
       "text": "{{eyebrow}}",
       "x": "7p+4",
       "y": "14p",
-      "font": "sans-bold-18",
+      "font": "Open-Sans-bold-18",
       "color": "d2f17f"
     },
     {
@@ -33,7 +33,7 @@
       "y": "28p+4",
       "width": "59p",
       "height": "34p",
-      "font": "serif",
+      "font": "Liberation-Serif",
       "color": "f4f1e8",
       "max_size": 68,
       "min_size": 52
@@ -46,7 +46,7 @@
       "y": "62p",
       "width": "58p",
       "height": "12p",
-      "font": "sans",
+      "font": "Open-Sans",
       "color": "b3bec0",
       "max_size": 25,
       "min_size": 20
@@ -75,7 +75,7 @@
       "text": "✓",
       "x": "78p+4",
       "y": "30p",
-      "font": "sans-bold-72",
+      "font": "Open-Sans-bold-72",
       "color": "1b2d37"
     },
     {
@@ -165,7 +165,7 @@
       "text": "{{mark}}",
       "x": "7p+4",
       "y": "80p",
-      "font": "sans-bold-20",
+      "font": "Open-Sans-bold-20",
       "color": "d2f17f"
     }
   ],

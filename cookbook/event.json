@@ -31,7 +31,7 @@
       "text": "{{day}}",
       "x": "8p",
       "y": "35p",
-      "font": "sans-bold",
+      "font": "Open-Sans-bold",
       "size": 118,
       "color": "fffaf1"
     },
@@ -41,7 +41,7 @@
       "text": "{{month}}",
       "x": "8p+4",
       "y": "55p+3",
-      "font": "sans-bold",
+      "font": "Open-Sans-bold",
       "size": 34,
       "color": "d9e5d9"
     },
@@ -53,7 +53,7 @@
       "y": "28p+6",
       "width": "63p+8",
       "height": "27p+4",
-      "font": "serif",
+      "font": "Liberation-Serif",
       "color": "173c36",
       "max_size": 76,
       "min_size": 44
@@ -73,7 +73,7 @@
       "text": "{{venue}}",
       "x": "31p",
       "y": "63p+5",
-      "font": "sans",
+      "font": "Open-Sans",
       "size": 30,
       "color": "49645d"
     }

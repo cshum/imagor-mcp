@@ -40,7 +40,7 @@
       "text": "{{collection}}",
       "x": "7p",
       "y": "26p+1",
-      "font": "sans-bold",
+      "font": "Open-Sans-bold",
       "size": 19,
       "color": "806d52"
     },
@@ -52,7 +52,7 @@
       "y": "34p+4",
       "width": "37p+6",
       "height": "26p",
-      "font": "serif",
+      "font": "Liberation-Serif",
       "color": "25231f",
       "max_size": 62,
       "min_size": 48,
@@ -64,7 +64,7 @@
       "text": "{{price}}",
       "x": "7p",
       "y": "66p+6",
-      "font": "sans-bold",
+      "font": "Open-Sans-bold",
       "size": 38,
       "color": "25231f"
     },
@@ -83,7 +83,7 @@
       "text": "{{cta}}",
       "x": "7p",
       "y": "81p+2",
-      "font": "sans",
+      "font": "Open-Sans",
       "size": 20,
       "color": "6e665a"
     }
@@ -93,6 +93,6 @@
     "price": "HKD$18500",
     "collection": "Autumn 2026",
     "cta": "Free delivery",
-    "featured_image": "http://localhost:8198/src_p1.png"
+    "featured_image": "http://srcsrv/src_p1.png"
   }
 }

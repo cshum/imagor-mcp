@@ -31,7 +31,7 @@
       "text": "“",
       "x": "11p+4",
       "y": "13p",
-      "font": "serif",
+      "font": "Liberation-Serif",
       "color": "C57B4A",
       "size": 96
     },
@@ -43,7 +43,7 @@
       "y": "26p+2",
       "width": "75p",
       "height": "34p+6",
-      "font": "serif",
+      "font": "Liberation-Serif",
       "color": "173C37",
       "max_size": 72,
       "min_size": 52
@@ -63,7 +63,7 @@
       "text": "{{attribution}}",
       "x": "11p+8",
       "y": "67p+4",
-      "font": "sans",
+      "font": "Open-Sans",
       "color": "244F47",
       "size": 24
     },
@@ -73,7 +73,7 @@
       "text": "{{role}}",
       "x": "11p+8",
       "y": "73p+4",
-      "font": "sans",
+      "font": "Open-Sans",
       "color": "687A72",
       "size": 18
     }

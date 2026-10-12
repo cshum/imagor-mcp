@@ -23,7 +23,7 @@
       "text": "{{brand}}",
       "x": "7p+11",
       "y": "14p+3",
-      "font": "sans",
+      "font": "Open-Sans",
       "size": 17,
       "color": "302a25"
     },
@@ -44,7 +44,7 @@
       "y": "32p+5",
       "width": "49p+8",
       "height": "19p",
-      "font": "serif",
+      "font": "Liberation-Serif",
       "color": "302a25",
       "align": "low",
       "max_size": 76,
@@ -57,7 +57,7 @@
       "x": "7p+11",
       "y": "55p+2",
       "width": "46p+3",
-      "font": "sans",
+      "font": "Open-Sans",
       "size": 19,
       "color": "746b61"
     },
@@ -77,7 +77,7 @@
       "x": "9p+8",
       "y": "71p+4",
       "width": "17p",
-      "font": "sans",
+      "font": "Open-Sans",
       "size": 15,
       "color": "f5f1e9"
     },
@@ -88,13 +88,13 @@
       "x": "7p+11",
       "y": "86p+2",
       "width": "46p+3",
-      "font": "sans",
+      "font": "Open-Sans",
       "size": 15,
       "color": "746b61"
     }
   ],
   "values": {
-    "photo": "http://localhost:8198/src_life.png",
+    "photo": "http://srcsrv/src_life.png",
     "brand": "MAISON",
     "headline": "The Autumn Edit",
     "supporting": "Twelve pieces in vegetable-tanned leather",

@@ -13,7 +13,7 @@
       "text": "{{kicker}}",
       "x": "7p",
       "y": "12p",
-      "font": "sans-bold",
+      "font": "Open-Sans-bold",
       "size": 18,
       "color": "526653"
     },
@@ -34,7 +34,7 @@
       "y": "22p",
       "width": "86p",
       "height": "120",
-      "font": "sans-bold",
+      "font": "Open-Sans-bold",
       "color": "20251f",
       "max_size": 66,
       "min_size": 56
@@ -56,7 +56,7 @@
       "y": "46p",
       "width": "84p",
       "height": "102",
-      "font": "serif",
+      "font": "Liberation-Serif",
       "color": "343b34",
       "max_size": 32,
       "min_size": 27
@@ -67,7 +67,7 @@
       "text": "{{source}}",
       "x": "9p",
       "y": "70p",
-      "font": "sans",
+      "font": "Open-Sans",
       "size": 16,
       "color": "697064"
     },
