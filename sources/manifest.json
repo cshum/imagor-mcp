@@ -110,6 +110,16 @@
     "note": "The other extreme."
   },
   {
+    "name": "texture-forest",
+    "file": "texture-forest.svg",
+    "kind": "texture",
+    "url": "https://s.imagor.net/texture-forest.svg",
+    "width": 1200,
+    "height": 800,
+    "aspect": 1.5,
+    "note": "A deep green diagonal gradient, the house ground."
+  },
+  {
     "name": "texture-navy",
     "file": "texture-navy.svg",
     "kind": "texture",

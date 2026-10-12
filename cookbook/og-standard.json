@@ -71,9 +71,9 @@
     }
   ],
   "values": {
-    "brand": "MAISON",
+    "brand": "SABLON",
     "title": "The Autumn Edit is here",
     "description": "Twelve pieces in vegetable-tanned leather, made in small batches",
-    "domain": "maison.example"
+    "domain": "sablon.example"
   }
 }
