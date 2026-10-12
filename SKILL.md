@@ -149,10 +149,8 @@ same thing.
 served at any size. A text slot given a height is **fitted against the box its geometry
 resolves to**, which is what makes type adapt.
 
-**Write `sans` or `serif` and the server resolves them to a narrower face** — `Open-Sans`
-and `Liberation-Serif` — reporting it in the note. The generics are DejaVu, the widest
-face imagor carries, and type sized for it overflows a box drawn for anything narrower.
-Ask for `DejaVu-Sans` by name to keep it. See *Placing text* for the rest.
+**A generic font is resolved to a narrower face and the note says so** — `sans` to
+`Open-Sans`, `serif` to `Liberation-Serif`. See *Placing text*.
 
 ```json
 {
@@ -239,11 +237,10 @@ shape that fails.
 
 Text lands wherever the font's own metrics put it, and nothing reports those.
 
-- **A generic is resolved for you.** `sans`, `serif` and `monospace` become
-  `Open-Sans`, `Liberation-Serif` and `Liberation-Mono`, and the note says so. They
-  are DejaVu otherwise — the widest face imagor carries — so type sized for one
-  overflows a narrower box: a 72px headline that fits one line in `Open-Sans` runs to
-  two in DejaVu and lands on the body below. Name `DejaVu-Sans` to keep it.
+- **A generic is resolved to a narrower face and the note says so.** `sans`, `serif`
+  and `monospace` become `Open-Sans`, `Liberation-Serif` and `Liberation-Mono`. The
+  generics are DejaVu, the widest face imagor carries, so type sized for one overflows
+  a box drawn for anything narrower. Name `DejaVu-Sans` to keep it.
 - **An uninstalled name falls back to DejaVu, silently and with a `200`**, so which
   faces exist belongs to the imagor you point at — check before relying on one.
 - **The font is a Pango description with hyphens for spaces.** `sans-bold-40` is
