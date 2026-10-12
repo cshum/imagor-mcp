@@ -42,9 +42,10 @@ parameters are four flat fields, not a nested object:
 - `fit-in/WxH` fits **inside** the box and **does not upscale**, so it letterboxes.
   `filters:upscale()` lifts the no-enlargement rule but does **not** make it cover: a
   694×941 photo in `fit-in/580x600/filters:upscale()` is 443×600, still short.
-- `full-fit-in/WxH` is the one that **covers** — one side matches the box, the other
-  **exceeds** it, so the aspect holds and nothing is cropped. The same photo is
-  580×786. It only enlarges a source smaller than the box, so add `upscale()` there.
+- `full-fit-in/WxH` **covers** — one side matches the box, the other **exceeds** it, so
+  the aspect holds and nothing is cropped. The same photo is 580×786. It only enlarges a
+  source smaller than the box, so add `upscale()` there. Reach for it when the box is
+  fixed and the image has to fill it; when you can shape the box, do that instead.
 - `WxH` fills the box exactly by **cropping** from the centre, so it can never aim at
   the one edge that is wrong, and a source of another shape loses its edges.
 - `stretch/WxH` ignores the aspect ratio, so it **distorts** — a 290×175 source in
@@ -56,13 +57,19 @@ parameters are four flat fields, not a nested object:
 - `trim()` only removes a uniform border, so on a product on a panel it is a no-op
   with byte-identical output.
 
-**`fit` is for a cell, not for a frame.** Fitting into a box of another shape leaves
-the image smaller than the box on one side. That is right when the box is fixed — a
-grid cell the image sits inside — and wrong when the frame can be shaped to the source,
-where the image just comes out undersized; shape the frame to the source instead, or
-use `full-fit-in` to cover. A fitted image is centred in its box, because the template
-adds `fill(none)`: the letterbox is transparent and the image sits in the middle rather
-than at the top, which is what keeps a row of tiles sharing a baseline.
+**When you control the frame, shape it to the source and use plain `WxH` — no fit at
+all.** Measured on a 318×162 source: in a 300×153 frame, `WxH`, `fit-in` and
+`full-fit-in` all return 300×153, so a fit mode adds nothing when the shapes already
+agree; in a 300×200 frame, `fit-in` returns 300×153 (undersized) and `full-fit-in`
+returns **393×200**, wider than the frame it was given, because it covers by
+overflowing.
+
+**Fit is for a cell you cannot shape** — a grid cell whose size the grid fixes. There,
+fitting leaves the image smaller than the cell on one side, which is the point: the
+cells align and the image sits inside without distortion. A fitted image is centred in
+its box, because the template adds `fill(none)`: the letterbox is transparent and the
+image sits in the middle rather than at the top, which keeps a row of tiles sharing a
+baseline.
 
 ## Overlays and text
 
