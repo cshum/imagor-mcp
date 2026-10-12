@@ -256,6 +256,12 @@ Text lands wherever the font's own metrics put it, and nothing reports those.
   x=1035, 1111, 1184, 1209, 1282, 1351. **Worth it for a wordmark or a display
   headline; not for body text**, where the spacing is invisible and the cost is
   one call per character.
+- **`x=center` is the only form that centres text, and it centres on the canvas.**
+  With a numeric `x` the text hangs left whatever `align` says; `center` centres
+  both the box and the ink in it. Measured on a 600-wide canvas, a 300-wide box put
+  a 210px label at x194-404, symmetric to 2px. But it is canvas-relative, so a
+  label under a specific product cannot use it, and neither can a wordmark that
+  deliberately sits off-centre to clear the layout.
 - Measure the region you changed, not the whole image: a whole-image number hides
   a label that is 40px out, because most of the canvas did not move. When the
   sources are exact crops, the whole residual is text, so measure the text bands
