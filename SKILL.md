@@ -91,6 +91,12 @@ A position is the **top-left of the box**, so `full-70` for a caption puts the
 *box* 70px from the bottom and the ink reaches below it. Leave more room than the
 margin you want.
 
+**A marker beside text is sized against the x-height, not the line.** A square dot
+tall enough to span ascender to baseline is centred on the text's ink and still reads
+as sitting low, because the eye measures it against the lowercase letters beside it.
+For 15px type the x-height is about 8px — match that, and check the dot's own rows
+against the text's, not its centre against the text's centre.
+
 `full` or `f` in a **nested dimension** inherits the parent: `fullxfull`,
 `fit-in/full-20xfull-20`. A **position** has no such form — `full-N` written as a
 position is read as `0`, lands the element at the origin and returns `200`. The
