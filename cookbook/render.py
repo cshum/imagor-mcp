@@ -11,8 +11,20 @@ and still renders, so it looks like a layout problem rather than a parsing one.
 import io, json, os, subprocess, sys, urllib.request
 from PIL import Image, ImageDraw
 
-MCP = "/tmp/imagor-mcp-e2e"
-BASE = "http://localhost:8123"
+# Render against the imagor image, not a host binary.
+#
+# The recipes name Liberation Serif and Open Sans, and those families live in the
+# published image at /usr/share/fonts/truetype. A binary built for macOS does not carry
+# them and substitutes an Apple face silently - so six different family names came back
+# byte-identical, and every card looked like one font. The substitution is invisible in
+# the output, which is why this has to be the image rather than whatever is installed.
+#
+# Point this at the image, run with IMAGOR_UNSAFE=1 (the published image is configured
+# that way), and use the tag the recipes target:
+#
+#   docker run -d -p 8197:8000 -e IMAGOR_UNSAFE=1 ghcr.io/cshum/imagor:1.9.9
+MCP = os.environ.get("IMAGOR_MCP_BIN", "/tmp/imagor-mcp-e2e")
+BASE = os.environ.get("IMAGOR_BASE_URL", "http://localhost:8197")
 SRC = os.path.expanduser("~/Developer/imagor-mcp/cookbook")
 OUT = sys.argv[1] if len(sys.argv) > 1 else "/tmp/gallery3"
 
@@ -28,8 +40,11 @@ def canvas_of(recipe):
 
 
 def main():
+    # The published image runs unsafe, and the binary refuses a secret alongside
+    # IMAGOR_UNSAFE - both set makes it exit without answering, which surfaces as a
+    # bare "no result" per recipe rather than as a configuration error.
     env = {k: v for k, v in os.environ.items() if not k.startswith("IMAGOR_")}
-    env["IMAGOR_SECRET"] = open("/tmp/e2e-secret.txt").read().strip()
+    env["IMAGOR_UNSAFE"] = "1"
     env["IMAGOR_BASE_URL"] = BASE
     p = subprocess.Popen([MCP], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                          stderr=subprocess.DEVNULL, text=True, bufsize=1, env=env)
