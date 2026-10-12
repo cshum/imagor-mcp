@@ -1,69 +1,86 @@
 {
   "name": "Quote card",
-  "source": "A daily quote card: a quote over a background image (quote, background_image)",
+  "source": "A daily quote card with a flat, typographic treatment (quote, attribution, role)",
   "canvas": {
     "width": 1200,
     "height": 630,
-    "background": "color:111827"
+    "background": "color:142E2B"
   },
   "slots": [
     {
-      "name": "bg",
-      "kind": "image",
-      "image": "{{background_image}}",
-      "x": "0",
-      "y": "0",
-      "width": "full",
-      "height": "full"
+      "name": "panel",
+      "kind": "rect",
+      "image": "color:F4F0E6",
+      "x": "4p",
+      "y": "6p+6",
+      "width": "full-96",
+      "height": "full-88"
     },
     {
-      "name": "scrim",
+      "name": "accent",
       "kind": "rect",
-      "image": "color:000000",
-      "x": "0",
-      "y": "0",
-      "width": "full",
-      "height": "full"
+      "image": "color:C57B4A",
+      "x": "4p",
+      "y": "6p+6",
+      "width": "1p",
+      "height": "full-88"
     },
     {
       "name": "mark",
       "kind": "text",
       "text": "“",
-      "x": "60",
-      "y": "44",
+      "x": "11p+4",
+      "y": "13p",
       "font": "serif",
-      "color": "3b82f6",
-      "size": 160
+      "color": "C57B4A",
+      "size": 96
     },
     {
       "name": "quote",
       "kind": "text",
       "text": "{{quote}}",
-      "x": "70",
-      "y": "210",
-      "width": "full-140",
-      "height": "280",
+      "x": "11p+8",
+      "y": "26p+2",
+      "width": "75p",
+      "height": "34p+6",
       "font": "serif",
-      "color": "ffffff",
-      "align": "low",
-      "max_size": 64,
-      "min_size": 26
+      "color": "173C37",
+      "max_size": 72,
+      "min_size": 52
     },
     {
-      "name": "who",
+      "name": "rule",
+      "kind": "rect",
+      "image": "color:C57B4A",
+      "x": "11p+8",
+      "y": "63p+5",
+      "width": "5p+4",
+      "height": "0p+4"
+    },
+    {
+      "name": "attribution",
       "kind": "text",
       "text": "{{attribution}}",
-      "x": "70",
-      "y": "full-100",
-      "font": "sans-bold-24",
-      "color": "94a3b8"
+      "x": "11p+8",
+      "y": "67p+4",
+      "font": "sans",
+      "color": "244F47",
+      "size": 24
+    },
+    {
+      "name": "role",
+      "kind": "text",
+      "text": "{{role}}",
+      "x": "11p+8",
+      "y": "73p+4",
+      "font": "sans",
+      "color": "687A72",
+      "size": 18
     }
   ],
   "values": {
-    "quote": "The same bytes in, the same bytes out.",
-    "who": "Mei Lam",
-    "role": "Platform engineering, Harbour",
-    "background_image": "http://localhost:8198/src_life.png",
-    "attribution": "Mei Lam, Harbour"
+    "quote": "The same bytes in,\nthe same bytes out.",
+    "attribution": "Mei Lam, Harbour",
+    "role": "Platform engineering, Harbour"
   }
 }
