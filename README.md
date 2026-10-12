@@ -91,6 +91,19 @@ bypasses the cache for crop coordinates, and the cost there is the fetch of the
 composition rather than the decode. `preview()` is never added to the URL a
 caller is given, so none of this changes what a composition means.
 
+### Fonts
+
+Text rendering resolves font families through fontconfig, so which faces are
+available is a property of **the imagor you point at**, not of this server. A
+name that is not installed **falls back silently to sans and still returns
+`200`** — the composition succeeds and the type is not what was asked for.
+
+The official `cshum/imagor-base` image carries **DejaVu** (broad coverage),
+**Liberation2** (metric-compatible with Arial and Times) and **Open Sans** (a
+common display choice for social and OG cards). Generic families — `sans`,
+`serif`, `monospace` — resolve to one of those. For anything else, mount your own
+fonts into the container; CJK and commercial faces are deliberately not included.
+
 ## MCP client configuration
 
 ```json

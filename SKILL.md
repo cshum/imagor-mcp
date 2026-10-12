@@ -235,8 +235,12 @@ Text lands wherever the font's own metrics put it, and nothing reports those.
   pen starts for that font at that size. Two or three probes give the offset for
   a whole label.
 - Font names take hyphens for spaces: `Palatino-63` is Palatino at 63.
-- **A font that is not installed falls back silently**, usually to sans, with a
-  `200`. Expect only one usable sans face.
+- **Which faces exist is a property of the imagor you point at, not of this
+  server.** `sans`, `serif` and `monospace` are resolved by fontconfig, so ask
+  the deployment what it carries rather than assuming a face. A font that is not
+  installed **falls back silently**, usually to sans, with a `200` — the render
+  succeeds and the type is not what was asked for. A generic family is the safe
+  choice; a named face is only safe once you have seen it render.
 - **A wordmark is usually letter-spaced, so draw it one glyph per call.** One
   `text()` cannot reproduce tracking; measuring each glyph and placing separate
   calls is what reaches the reference.
