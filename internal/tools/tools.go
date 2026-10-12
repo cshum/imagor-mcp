@@ -1483,6 +1483,22 @@ func Register(s *mcp.Server, cfg Config) {
 	// never sees it, and it carries what a tool description cannot: the order a
 	// path is written in, how overlays and text are placed, and a working method.
 	s.AddResource(&mcp.Resource{
+		URI:  SourcesURI,
+		Name: "imagor sample sources",
+		Description: "Ready-made images for a composition, with their dimensions: " +
+			"products, portraits, textures, scenes, and edge cases for testing fit and crop.",
+		MIMEType: "text/markdown",
+	}, func(_ context.Context, _ *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {
+		return &mcp.ReadResourceResult{
+			Contents: []*mcp.ResourceContents{{
+				URI:      SourcesURI,
+				MIMEType: "text/markdown",
+				Text:     imagormcp.Sources,
+			}},
+		}, nil
+	})
+
+	s.AddResource(&mcp.Resource{
 		URI:  SkillURI,
 		Name: "imagor composition skill",
 		Description: "How to compose and debug imagor URLs with these tools: the order a path is " +
@@ -1501,3 +1517,9 @@ func Register(s *mcp.Server, cfg Config) {
 
 // SkillURI is where the server serves its own skill.
 const SkillURI = "imagor-mcp://skill"
+
+// SourcesURI is where the server serves the fixture table. It is a second resource
+// rather than part of the skill because every agent that touches this server reads the
+// skill, while only an agent choosing what to put in an image field wants sixteen rows
+// of names and dimensions.
+const SourcesURI = "imagor-mcp://sources"
