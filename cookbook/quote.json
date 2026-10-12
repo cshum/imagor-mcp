@@ -12,9 +12,9 @@
       "kind": "text",
       "text": "“",
       "x": "60",
-      "y": "44",
+      "y": "90",
       "font": "serif",
-      "color": "3b82f6",
+      "color": "bfdbfe",
       "size": 180
     },
     {
@@ -22,20 +22,30 @@
       "kind": "text",
       "text": "{{quote}}",
       "x": "80",
-      "y": "220",
+      "y": "250",
       "width": "full-160",
-      "height": "full-400",
+      "height": "200",
       "font": "serif",
       "color": "0f172a",
       "max_size": 64,
-      "min_size": 24
+      "min_size": 24,
+      "align": "low"
+    },
+    {
+      "name": "rule",
+      "kind": "rect",
+      "image": "color:3b82f6",
+      "x": "80",
+      "y": "full-160",
+      "width": "56",
+      "height": "4"
     },
     {
       "name": "who",
       "kind": "text",
       "text": "{{who}}",
       "x": "80",
-      "y": "full-90",
+      "y": "full-130",
       "font": "sans-bold-26",
       "color": "64748b"
     }

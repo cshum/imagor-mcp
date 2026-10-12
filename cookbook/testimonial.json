@@ -10,24 +10,44 @@
     {
       "name": "frame",
       "kind": "rect",
-      "image": "color:e2e8f0",
+      "image": "color:0f172a",
       "x": "0",
       "y": "0",
       "width": "full",
       "height": "8"
     },
     {
+      "name": "mark",
+      "kind": "text",
+      "text": "“",
+      "x": "60",
+      "y": "90",
+      "font": "serif",
+      "color": "cbd5e1",
+      "size": 150
+    },
+    {
       "name": "quote",
       "kind": "text",
       "text": "{{quote}}",
       "x": "70",
-      "y": "120",
+      "y": "200",
       "width": "full-140",
-      "height": "full-360",
+      "height": "200",
       "font": "serif",
       "color": "1e293b",
       "max_size": 54,
-      "min_size": 22
+      "min_size": 22,
+      "align": "low"
+    },
+    {
+      "name": "rule",
+      "kind": "rect",
+      "image": "color:0f172a",
+      "x": "70",
+      "y": "full-200",
+      "width": "64",
+      "height": "3"
     },
     {
       "name": "name",

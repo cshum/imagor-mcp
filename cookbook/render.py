@@ -75,7 +75,7 @@ def main():
     p.kill()
 
     ims = [(f[:-4], Image.open(os.path.join(OUT, f)))
-           for f in sorted(os.listdir(OUT)) if f.endswith(".png")]
+           for f in sorted(os.listdir(OUT)) if f.endswith(".png") and not f.startswith("_")]
     COLS, CELL, PAD, LABEL = 4, 300, 12, 22
     rows = (len(ims) + COLS - 1) // COLS
     sheet = Image.new("RGB", (COLS * CELL + (COLS + 1) * PAD,
