@@ -191,17 +191,17 @@
     }
   ],
   "values": {
-    "texture": "http://localhost:8123/D7fOhdvEAXK4pb7aBoI8SjwY3SM=/1200x630/filters:blur(180):brightness(-65)/http://localhost:8198/src_life.png",
+    "texture": "https://s.imagor.net/scene-tall.svg",
     "brand": "MAISON",
     "headline_lead": "Built for the",
     "headline_accent": "long run",
     "supporting": "Autumn 2026, available now",
     "domain": "maison.example",
-    "photo1": "http://localhost:8123/veamE1CborRKQ9vhpN7hIQSbzww=/filters:brightness(-18)/http://localhost:8198/src_p1.png",
-    "photo2": "http://localhost:8123/xeHr6hDySR_PgoK86ZjCZ9jlhnw=/filters:brightness(-18)/http://localhost:8198/src_p2.png",
-    "photo3": "http://localhost:8123/ni20hfZQnYsDUz8O2FO3wdlh3Ek=/filters:brightness(-18)/http://localhost:8198/src_p3.png",
-    "photo4": "http://localhost:8123/X9s1PN9CZh0rBg3eo0pCbHPsdQo=/filters:brightness(-18)/http://localhost:8198/src_p4.png",
-    "photo5": "http://localhost:8123/fXU7fMfEvTsIZLee3e0bqFljCJE=/filters:brightness(-18)/http://localhost:8198/src_p5.png",
-    "photo6": "http://localhost:8123/UmsDOEiaq17sLitMlLi8HCWwdyQ=/filters:brightness(-18)/http://localhost:8198/src_life.png"
+    "photo1": "https://s.imagor.net/product-bag.svg",
+    "photo2": "https://s.imagor.net/product-box.svg",
+    "photo3": "https://s.imagor.net/product-bottle.svg",
+    "photo4": "https://s.imagor.net/product-box.svg",
+    "photo5": "https://s.imagor.net/product-bag.svg",
+    "photo6": "https://s.imagor.net/scene-tall.svg"
   }
 }

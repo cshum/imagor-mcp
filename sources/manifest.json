@@ -7,7 +7,7 @@
     "width": 4000,
     "height": 4000,
     "aspect": 1.0,
-    "note": "4000x4000. Much larger than any box, so a fit has to downscale."
+    "note": "Much larger than any box, so a fit has to downscale."
   },
   {
     "name": "portrait-a",
@@ -17,7 +17,7 @@
     "width": 400,
     "height": 400,
     "aspect": 1.0,
-    "note": "An abstract portrait. For circles and avatar cards."
+    "note": "A dark ground and a light subject."
   },
   {
     "name": "portrait-b",
@@ -27,7 +27,7 @@
     "width": 400,
     "height": 400,
     "aspect": 1.0,
-    "note": "An abstract portrait on a lighter ground."
+    "note": "A light ground and a dark subject."
   },
   {
     "name": "portrait-c",
@@ -37,7 +37,7 @@
     "width": 400,
     "height": 400,
     "aspect": 1.0,
-    "note": "An abstract portrait, third tone."
+    "note": "A grey ground and a warm subject."
   },
   {
     "name": "product-bag",
@@ -47,7 +47,7 @@
     "width": 400,
     "height": 400,
     "aspect": 1.0,
-    "note": "A soft rectangular bag. The default for a grid cell."
+    "note": "Soft and rounded. The default for a grid cell."
   },
   {
     "name": "product-bottle",
@@ -57,7 +57,7 @@
     "width": 300,
     "height": 480,
     "aspect": 0.625,
-    "note": "A tall narrow bottle. A different aspect to the others."
+    "note": "Tall and narrow. A different aspect to the others."
   },
   {
     "name": "product-box",
@@ -67,7 +67,7 @@
     "width": 400,
     "height": 400,
     "aspect": 1.0,
-    "note": "A rigid box with a lid. Sits well beside a bag."
+    "note": "Rigid with a lid. Sits well beside a bag."
   },
   {
     "name": "scene-tall",
@@ -77,7 +77,7 @@
     "width": 700,
     "height": 900,
     "aspect": 0.778,
-    "note": "A tall panel with a subject. For a launch card."
+    "note": "A subject in a tall frame, for a launch card."
   },
   {
     "name": "scene-wide",
@@ -87,7 +87,7 @@
     "width": 1600,
     "height": 600,
     "aspect": 2.667,
-    "note": "A wide panel with a subject. For a banner."
+    "note": "A subject in a wide frame, for a banner."
   },
   {
     "name": "square",
@@ -97,7 +97,7 @@
     "width": 600,
     "height": 600,
     "aspect": 1.0,
-    "note": "600x600. A shape no other fixture has, for testing crop."
+    "note": "A shape no other fixture has, for testing crop."
   },
   {
     "name": "tall",
@@ -107,7 +107,7 @@
     "width": 200,
     "height": 1600,
     "aspect": 0.125,
-    "note": "200x1600. The other extreme."
+    "note": "The other extreme."
   },
   {
     "name": "texture-navy",
@@ -117,7 +117,7 @@
     "width": 1200,
     "height": 800,
     "aspect": 1.5,
-    "note": "A dark diagonal gradient. For a hero ground."
+    "note": "A dark diagonal gradient, for a hero ground."
   },
   {
     "name": "texture-warm",
@@ -137,7 +137,7 @@
     "width": 64,
     "height": 64,
     "aspect": 1.0,
-    "note": "64x64. Smaller than most boxes, so a fit has to upscale."
+    "note": "A fit has to upscale it, and fit-in will refuse. Smaller than any box."
   },
   {
     "name": "transparent",
@@ -147,7 +147,7 @@
     "width": 400,
     "height": 400,
     "aspect": 1.0,
-    "note": "400x400 with no ground. Tests what a card does over nothing."
+    "note": "No ground at all. Tests what a card does over nothing."
   },
   {
     "name": "wide",
@@ -157,6 +157,6 @@
     "width": 1600,
     "height": 200,
     "aspect": 8.0,
-    "note": "1600x200. An extreme aspect. Exposes letterboxing."
+    "note": "An extreme aspect. Exposes letterboxing."
   }
 ]

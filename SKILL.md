@@ -235,11 +235,6 @@ path and a URL both work, signed or not.
 
 ## Cookbook
 
-`cookbook/` holds ready-made `render_template` payloads for the formats that come
-up most. Take the closest one, change the values, render it. They are rendered by
-the test suite at three canvas sizes — a recipe that no longer works teaches a
-shape that fails.
-
 ## Placing text is a search, not a calculation
 
 Text lands wherever the font's own metrics put it, and nothing reports those.

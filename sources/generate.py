@@ -90,48 +90,48 @@ height="{h*0.30:.0f}" rx="{w*0.06:.0f}" fill="{accent}" opacity="0.85"/>
 # name, kind, what it is for, the file
 FIXTURES = {
     # Products: three shapes, so a grid has something to arrange.
-    "product-bag": ("product", "A soft rectangular bag. The default for a grid cell.",
+    "product-bag": ("product", "Soft and rounded. The default for a grid cell.",
                     product(400, 400, CREAM, "M 90 150 Q 200 110 310 150 L 320 330 L 80 330 Z",
                             "#2f2a26")),
-    "product-box": ("product", "A rigid box with a lid. Sits well beside a bag.",
+    "product-box": ("product", "Rigid with a lid. Sits well beside a bag.",
                     product(400, 400, CREAM, "M 100 140 L 300 140 L 300 330 L 100 330 Z",
                             "#5a4a3a")),
-    "product-bottle": ("product", "A tall narrow bottle. A different aspect to the others.",
+    "product-bottle": ("product", "Tall and narrow. A different aspect to the others.",
                        product(300, 480, CREAM, "M 120 120 L 180 120 L 185 200 L 195 460 "
                                                 "L 105 460 L 115 200 Z", "#2b4a3f")),
 
     # Portraits: geometry, so no face is being faked and no font is needed.
-    "portrait-a": ("portrait", "An abstract portrait. For circles and avatar cards.",
+    "portrait-a": ("portrait", "A dark ground and a light subject.",
                    portrait(400, GREEN, "#c9b79c")),
-    "portrait-b": ("portrait", "An abstract portrait on a lighter ground.",
+    "portrait-b": ("portrait", "A light ground and a dark subject.",
                    portrait(400, TAN, "#173f34")),
-    "portrait-c": ("portrait", "An abstract portrait, third tone.",
+    "portrait-c": ("portrait", "A grey ground and a warm subject.",
                    portrait(400, SLATE, "#c36c4a")),
 
     # Textures: for cards that want depth behind their copy.
-    "texture-navy": ("texture", "A dark diagonal gradient. For a hero ground.",
+    "texture-navy": ("texture", "A dark diagonal gradient, for a hero ground.",
                      texture(1200, 800, [("0", NAVY), ("1", "#1e3a5f")])),
     "texture-warm": ("texture", "A warm gradient, light to dark.",
                      texture(1200, 800, [("0", CREAM), ("1", TAN)])),
 
     # Scenes: a subject in a frame, for the cards that place copy beside an image.
-    "scene-tall": ("scene", "A tall panel with a subject. For a launch card.",
+    "scene-tall": ("scene", "A subject in a tall frame, for a launch card.",
                    scene(700, 900, CREAM, "#173f34")),
-    "scene-wide": ("scene", "A wide panel with a subject. For a banner.",
+    "scene-wide": ("scene", "A subject in a wide frame, for a banner.",
                    scene(1600, 600, NAVY, "#c9b79c")),
 
     # Deliberately awkward: these exist to break things, not to look good.
-    "tiny": ("edge", "64x64. Smaller than most boxes, so a fit has to upscale.",
+    "tiny": ("edge", "A fit has to upscale it, and fit-in will refuse. Smaller than any box.",
              texture(64, 64, [("0", GREEN), ("1", TAN)])),
-    "huge": ("edge", "4000x4000. Much larger than any box, so a fit has to downscale.",
+    "huge": ("edge", "Much larger than any box, so a fit has to downscale.",
              texture(4000, 4000, [("0", NAVY), ("1", "#c36c4a")])),
-    "wide": ("edge", "1600x200. An extreme aspect. Exposes letterboxing.",
+    "wide": ("edge", "An extreme aspect. Exposes letterboxing.",
              texture(1600, 200, [("0", SLATE), ("1", CREAM)])),
-    "tall": ("edge", "200x1600. The other extreme.",
+    "tall": ("edge", "The other extreme.",
              texture(200, 1600, [("0", TAN), ("1", GREEN)])),
-    "square": ("edge", "600x600. A shape no other fixture has, for testing crop.",
+    "square": ("edge", "A shape no other fixture has, for testing crop.",
                texture(600, 600, [("0", "#c36c4a"), ("1", NAVY)])),
-    "transparent": ("edge", "400x400 with no ground. Tests what a card does over nothing.",
+    "transparent": ("edge", "No ground at all. Tests what a card does over nothing.",
                     svg(400, 400, f'<circle cx="200" cy="200" r="140" fill="{GREEN}" '
                                   f'opacity="0.75"/>')),
 }
