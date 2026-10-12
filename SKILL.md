@@ -324,4 +324,9 @@ reports what this server is using — compare before debugging anything else.
    matches.
 6. To composite, build small pieces first: one tile, then the grid, then the banner. A
    wrong number in a nested path is much harder to see in the finished image.
-7. Measure only what looking cannot settle. See the measuring rule above.
+7. Measure only what looking cannot settle, and measure the **rows**, not the centres.
+   Compare the thing's own ink rows against the rows it is meant to match — a dot's
+   rows against its text's, a panel's against its neighbour's. Two centres can agree
+   to the pixel while the shapes read as misaligned, and a whole-image average hides
+   a 40px error. Crop to the region you changed and check the pairing before you
+   believe the number.
