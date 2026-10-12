@@ -32,6 +32,11 @@ type InnerSlot struct {
 	Align   string `json:"align,omitempty" jsonschema:"low, center or high; defaults to center"`
 	MaxSize int    `json:"max_size,omitempty" jsonschema:"for fitted text: the largest size to try"`
 	MinSize int    `json:"min_size,omitempty" jsonschema:"for fitted text: the smallest size to accept"`
+
+	// An image field is data, not syntax: a value that looks like a path is encoded
+	// so it cannot be read as one. So a filter on this slot's own source needs
+	// somewhere else to live, and this is it.
+	Filters string `json:"filters,omitempty" jsonschema:"for image or rect: filters applied to this slot's own source, written without the filters: prefix, e.g. smart/filters:round_corner(230,230,fff)"`
 }
 
 // TemplateSlot is one element of a template.
@@ -60,6 +65,11 @@ type TemplateSlot struct {
 	Fit     bool   `json:"fit,omitempty" jsonschema:"for image: fit the whole image inside the box rather than filling it, which keeps the aspect ratio instead of stretching"`
 	MaxSize int    `json:"max_size,omitempty" jsonschema:"for fitted text: the largest size to try"`
 	MinSize int    `json:"min_size,omitempty" jsonschema:"for fitted text: the smallest size to accept"`
+
+	// An image field is data, not syntax: a value that looks like a path is encoded
+	// so it cannot be read as one. So a filter on this slot's own source needs
+	// somewhere else to live, and this is it.
+	Filters string `json:"filters,omitempty" jsonschema:"for image or rect: filters applied to this slot's own source, written without the filters: prefix, e.g. smart/filters:round_corner(230,230,fff)"`
 
 	// A slot that carries its own slots is a canvas: its width and height become
 	// the canvas the inner slots are laid out on, and the result is drawn at this
@@ -256,14 +266,27 @@ func (c Config) RenderTemplateTool(ctx context.Context, _ *mcp.CallToolRequest, 
 				if err != nil {
 					return nil, TemplateOutput{}, fmt.Errorf("slot %q height: %w", slot.Name, err)
 				}
-				inner = fmt.Sprintf("%sx%s/%s", iw, ih, source)
+				// fit-in comes first, then filters, then the source. A fitted
+				// image carries fill(none), which centres it in its box and makes
+				// the letterbox transparent. The slot's own filters follow as a
+				// segment of their own, because the image field is data and cannot
+				// hold a path - and because a slot may need both, e.g. smart and
+				// round_corner, which is one segment with an internal slash.
+				dims := fmt.Sprintf("%sx%s", iw, ih)
 				if slot.Fit {
-					// fit-in comes before the dimensions, and a nested path has
-					// to end with its source. fill(none) makes the letterbox
-					// transparent AND centres the image in it - without it the
-					// fitted image sits at the top of its box with the remainder
-					// showing below, which reads as misalignment in a grid.
-					inner = fmt.Sprintf("fit-in/%sx%s/filters:fill(none)/%s", iw, ih, source)
+					dims = "fit-in/" + dims
+				}
+				var segs []string
+				if slot.Fit {
+					segs = append(segs, "filters:fill(none)")
+				}
+				if f := strings.Trim(strings.TrimSpace(slot.Filters), "/"); f != "" {
+					segs = append(segs, f)
+				}
+				if len(segs) > 0 {
+					inner = fmt.Sprintf("%s/%s/%s", dims, strings.Join(segs, "/"), source)
+				} else {
+					inner = fmt.Sprintf("%s/%s", dims, source)
 				}
 			}
 			sx, err := c.position(slot.X, in.CanvasWidth)
