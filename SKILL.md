@@ -39,18 +39,14 @@ parameters are four flat fields, not a nested object:
 
 ## Resize modes
 
-- `fit-in/WxH` fits **inside** the box and **does not upscale**; the result can be
-  smaller than the box on one side, so it letterboxes. `filters:upscale()` lifts
-  the no-enlargement rule but does **not** make it cover: a 694×941 photo in
-  `fit-in/580x600/filters:upscale()` is 443×600, still short of the box.
-- `full-fit-in/WxH` is the one that **covers**: one side matches the box and the
-  other **exceeds** it, so the aspect is kept and nothing is cropped. The same
-  photo in `full-fit-in/580x600` is 580×786. Use it whenever an image has to fill
-  a panel without cutting into it. It only enlarges when the source is smaller
-  than the box, so add `filters:upscale()` when it is.
-- `WxH` fills the box exactly by **cropping** the overflow from the centre, so it
-  can never aim at the one edge that is wrong, and a source whose shape differs
-  from the box loses its edges.
+- `fit-in/WxH` fits **inside** the box and **does not upscale**, so it letterboxes.
+  `filters:upscale()` lifts the no-enlargement rule but does **not** make it cover: a
+  694×941 photo in `fit-in/580x600/filters:upscale()` is 443×600, still short.
+- `full-fit-in/WxH` is the one that **covers** — one side matches the box, the other
+  **exceeds** it, so the aspect holds and nothing is cropped. The same photo is
+  580×786. It only enlarges a source smaller than the box, so add `upscale()` there.
+- `WxH` fills the box exactly by **cropping** from the centre, so it can never aim at
+  the one edge that is wrong, and a source of another shape loses its edges.
 - `stretch/WxH` ignores the aspect ratio, so it **distorts** — a 290×175 source in
   `280x154` comes back at aspect 1.818 against 1.657, nearly 10% wrong. Use
   `full-fit-in` to fill a box of another shape.
@@ -60,16 +56,13 @@ parameters are four flat fields, not a nested object:
 - `trim()` only removes a uniform border, so on a product on a panel it is a no-op
   with byte-identical output.
 
-**A fitted image is centred in its box**, because the template adds `fill(none)` to
-its filters: the letterbox becomes transparent and the image sits in the middle rather
-than at the top. Without it a fitted image hangs at the top of its box with the gap
-below, which reads as misalignment in a row of tiles.
-
-**`fit` is for a cell, not for a frame.** Fitting an image into a box that is a
-different shape leaves it smaller than the box on one side. That is right when the box
-is fixed — a grid cell the image has to sit inside — and wrong when the frame can be
-shaped to the source, where the image just comes out undersized. Shape the frame to the
-source's aspect instead, or use `full-fit-in` if it has to cover.
+**`fit` is for a cell, not for a frame.** Fitting into a box of another shape leaves
+the image smaller than the box on one side. That is right when the box is fixed — a
+grid cell the image sits inside — and wrong when the frame can be shaped to the source,
+where the image just comes out undersized; shape the frame to the source instead, or
+use `full-fit-in` to cover. A fitted image is centred in its box, because the template
+adds `fill(none)`: the letterbox is transparent and the image sits in the middle rather
+than at the top, which is what keeps a row of tiles sharing a baseline.
 
 ## Overlays and text
 
@@ -121,17 +114,15 @@ a rectangle. Stacking one behind an inset photo draws a border, which keeps the
 canvas size under your control — `padding(color, N)` grows the output instead
 (300px becomes 340px at `padding(x,20)`).
 
-`round_corner` takes pixels, not a ratio: `round_corner(0.5)` is a half-pixel
-radius and renders square. A circle is `round_corner(r,r,color)` where `r` is half
-the width, and the colour matters — leave it out and the corners come back black.
+`round_corner` takes pixels, not a ratio: `round_corner(0.5)` is a half-pixel radius
+and renders square. A circle is `round_corner(r,r,color)` with `r` half the width, and
+the colour is required — leave it out and the corners come back black. Do not combine
+it with `fit`: a fitted image letterboxes, so the corner is cut from the letterboxed box
+rather than the photograph and the circle clips the picture. Use a square crop instead.
 
 **A slot's `filters` field is where a filter on its own source goes**, because the
-image field is data and a path in it would be encoded as a source. Write the segment
-as imagor writes it: `smart/filters:round_corner(230,230,fff)`.
-
-**Do not combine `fit` with `round_corner`.** A fitted image letterboxes, and the
-corner is then cut from the letterboxed box rather than the photograph, so the
-circle clips the picture. Use a square crop of the right size instead.
+image field is data and a path in it would be encoded as a source. Write the segment as
+imagor writes it: `smart/filters:round_corner(230,230,fff)`.
 
 ## When a value has to be encoded
 
@@ -277,10 +268,9 @@ unrelated pictures rather than a grid — and no amount of position tuning fixes
 
 ## Responsive compositions
 
-One composition can serve several canvas sizes: `fullxfull` fills the parent,
-`fit-in/full-40xfull-40/PHOTO` insets 40px on every side, `12xfull/color:3b82f6`
-is an accent bar at full height, and `full-80` as a `text()` wrap width wraps to
-the canvas it lands on.
+`fullxfull` fills the parent, `fit-in/full-40xfull-40/PHOTO` insets 40px on every
+side, `12xfull/color:3b82f6` is an accent bar at full height, and `full-80` as a
+`text()` wrap width wraps to the canvas it lands on.
 
 **Sizes adapt; type does not.** A font size is in pixels, so the same composition
 renders relatively smaller type on a larger canvas, and there is no percentage font
@@ -306,22 +296,18 @@ reports what this server is using — compare before debugging anything else.
 1. `describe_imagor` once, for the grammar this server targets.
 2. `list_imagor_filters` before using a filter you have not used here: it carries
    imagor's own signature, description and accepted forms.
-3. `build_imagor_url` refuses invalid compositions, so a refusal is a mistake
-   worth fixing rather than working around.
-4. `verify_imagor_url` the result, passing the same typed parameters you built
-   from — it takes parameters, not a URL. `applied` means it ran; `declined` means
-   it was recognised and did nothing; `not_reported` means this processor does not
-   handle it or the deployment disabled it. Absence is not failure.
-5. **Look at what came back.** The rendered result is attached, scaled, and the
-   note says by how much. Compare it against your reference: placement, cropping
-   and proportions are visible at preview size, and a composition can report
-   `applied` and still be wrong. Where the preview is too small to read a label,
-   call again with `preview_region` as `x,y,w,h` in **result** pixels — that part
-   comes back at full resolution for a fraction of the cost of the whole render.
-   Iterate: build, look, adjust, until it matches.
-6. To composite, build small pieces first and check each: one product tile, then
-   the grid, then the whole banner. A wrong number in a nested path is much harder
-   to see in the finished image than in the piece.
-7. Measure only what looking cannot settle — a colour, a dimension, whether a
-   filter changed anything. A `200` and a plausible image are not evidence; a mean
-   difference over the region you changed is. See the measuring rule above.
+3. `build_imagor_url` refuses invalid compositions, so a refusal is a mistake worth
+   fixing rather than working around.
+4. `verify_imagor_url` the result, passing the same typed parameters you built from —
+   it takes parameters, not a URL. `applied` means it ran; `declined` means it was
+   recognised and did nothing; `not_reported` means this processor does not handle it.
+   Absence is not failure.
+5. **Look at what came back.** The render is attached, scaled, and the note says by how
+   much. Placement, cropping and proportions are visible at preview size, and a
+   composition can report `applied` and still be wrong. Where the preview is too small
+   to read a label, call again with `preview_region` as `x,y,w,h` in **result** pixels —
+   that comes back at full resolution for a fraction of the cost. Iterate until it
+   matches.
+6. To composite, build small pieces first: one tile, then the grid, then the banner. A
+   wrong number in a nested path is much harder to see in the finished image.
+7. Measure only what looking cannot settle. See the measuring rule above.
