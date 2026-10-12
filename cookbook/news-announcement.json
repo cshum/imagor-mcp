@@ -1,64 +1,84 @@
 {
-  "name": "News announcement with quote",
-  "source": "A news announcement: kicker, headline, quote, attribution",
+  "name": "Maison editorial news announcement",
+  "note": "A restrained, editorial announcement for a product return, pairing a prominent headline with a supporting quote and dateline.",
   "canvas": {
     "width": 1200,
     "height": 630,
-    "background": "color:ffffff"
+    "background": "color:f6f4ed"
   },
   "slots": [
-    {
-      "name": "bar",
-      "kind": "rect",
-      "image": "color:dc2626",
-      "x": "0",
-      "y": "0",
-      "width": "14",
-      "height": "full"
-    },
     {
       "name": "kicker",
       "kind": "text",
       "text": "{{kicker}}",
-      "x": "70",
-      "y": "70",
-      "font": "sans-bold-22",
-      "color": "dc2626"
+      "x": "7p",
+      "y": "12p",
+      "font": "sans-bold",
+      "size": 18,
+      "color": "526653"
+    },
+    {
+      "name": "kicker-rule",
+      "kind": "rect",
+      "image": "color:526653",
+      "x": "7p",
+      "y": "18p",
+      "width": "4p",
+      "height": "2"
     },
     {
       "name": "headline",
       "kind": "text",
       "text": "{{headline}}",
-      "x": "70",
-      "y": "130",
-      "width": "full-140",
-      "height": "200",
+      "x": "7p",
+      "y": "22p",
+      "width": "86p",
+      "height": "120",
       "font": "sans-bold",
-      "color": "0f172a",
-      "max_size": 58,
-      "min_size": 26
+      "color": "20251f",
+      "max_size": 66,
+      "min_size": 56
+    },
+    {
+      "name": "quote-rule",
+      "kind": "rect",
+      "image": "color:9a7958",
+      "x": "7p",
+      "y": "48p",
+      "width": "3",
+      "height": "100"
     },
     {
       "name": "quote",
       "kind": "text",
       "text": "{{quote}}",
-      "x": "70",
-      "y": "370",
-      "width": "full-140",
-      "height": "150",
+      "x": "9p",
+      "y": "46p",
+      "width": "84p",
+      "height": "102",
       "font": "serif",
-      "color": "334155",
-      "max_size": 34,
-      "min_size": 18
+      "color": "343b34",
+      "max_size": 32,
+      "min_size": 27
     },
     {
       "name": "source",
       "kind": "text",
       "text": "{{source}}",
-      "x": "70",
-      "y": "full-110",
-      "font": "sans-22",
-      "color": "64748b"
+      "x": "9p",
+      "y": "70p",
+      "font": "sans",
+      "size": 16,
+      "color": "697064"
+    },
+    {
+      "name": "footer-rule",
+      "kind": "rect",
+      "image": "color:d7d6cc",
+      "x": "7p",
+      "y": "87p",
+      "width": "86p",
+      "height": "1"
     }
   ],
   "values": {

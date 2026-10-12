@@ -1,71 +1,87 @@
 {
   "name": "testimonial",
-  "note": "Quote, name and company, with a subtle brand frame. The B2B format.",
+  "note": "B2B customer quote with an inset forest panel, warm paper margins and restrained brass accents.",
   "canvas": [
     1200,
     628
   ],
-  "background": "color:ffffff",
+  "background": "color:f2efe6",
   "slots": [
     {
-      "name": "frame",
+      "name": "panel",
       "kind": "rect",
-      "image": "color:0f172a",
-      "x": "0",
-      "y": "0",
-      "width": "full",
-      "height": "8"
+      "image": "color:142c29",
+      "x": "5p",
+      "y": "8p-2",
+      "width": "90p",
+      "height": "84p+4"
     },
     {
-      "name": "mark",
+      "name": "eyebrow-rule",
+      "kind": "rect",
+      "image": "color:c6a76a",
+      "x": "10p+6",
+      "y": "16p+3",
+      "width": "34",
+      "height": "2"
+    },
+    {
+      "name": "eyebrow",
+      "kind": "text",
+      "text": "CUSTOMER STORY",
+      "x": "15p",
+      "y": "14p+7",
+      "font": "sans-bold-14",
+      "color": "c6a76a"
+    },
+    {
+      "name": "quote-mark",
       "kind": "text",
       "text": "“",
-      "x": "60",
-      "y": "90",
-      "font": "serif",
-      "color": "cbd5e1",
-      "size": 150
+      "x": "10p+6",
+      "y": "21p+2",
+      "font": "serif-72",
+      "color": "c6a76a"
     },
     {
       "name": "quote",
       "kind": "text",
       "text": "{{quote}}",
-      "x": "70",
-      "y": "200",
-      "width": "full-140",
-      "height": "200",
+      "x": "10p+6",
+      "y": "27p",
+      "width": "80p",
+      "height": "35p+3",
       "font": "serif",
-      "color": "1e293b",
-      "max_size": 54,
-      "min_size": 22,
-      "align": "low"
+      "color": "f7f4ec",
+      "max_size": 62,
+      "min_size": 42
     },
     {
       "name": "rule",
       "kind": "rect",
-      "image": "color:0f172a",
-      "x": "70",
-      "y": "full-200",
-      "width": "64",
-      "height": "3"
+      "image": "color:c6a76a",
+      "x": "10p+6",
+      "y": "58p+4",
+      "width": "48",
+      "height": "2"
     },
     {
       "name": "name",
       "kind": "text",
       "text": "{{name}}",
-      "x": "70",
-      "y": "full-170",
-      "font": "sans-bold-30",
-      "color": "0f172a"
+      "x": "10p+6",
+      "y": "62p+1",
+      "font": "sans-bold-25",
+      "color": "ffffff"
     },
     {
       "name": "company",
       "kind": "text",
       "text": "{{company}}",
-      "x": "70",
-      "y": "full-120",
-      "font": "sans-24",
-      "color": "64748b"
+      "x": "10p+6",
+      "y": "69p",
+      "font": "sans-18",
+      "color": "b8c4bd"
     }
   ],
   "values": {

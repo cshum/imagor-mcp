@@ -5,60 +5,168 @@
     1200,
     628
   ],
-  "background": "color:0f172a",
+  "background": "color:111c24",
   "slots": [
-    {
-      "name": "bar",
-      "kind": "rect",
-      "image": "color:3b82f6",
-      "x": "0",
-      "y": "0",
-      "width": "12",
-      "height": "full"
-    },
     {
       "name": "eyebrow",
       "kind": "text",
       "text": "{{eyebrow}}",
-      "x": "60",
-      "y": "60",
-      "font": "sans-bold-22",
-      "color": "3b82f6"
+      "x": "7p+4",
+      "y": "14p",
+      "font": "sans-bold-18",
+      "color": "d2f17f"
+    },
+    {
+      "name": "headline-accent",
+      "kind": "rect",
+      "image": "color:d2f17f",
+      "x": "7p+4",
+      "y": "22p",
+      "width": "84",
+      "height": "5"
     },
     {
       "name": "headline",
       "kind": "text",
       "text": "{{headline}}",
-      "x": "60",
-      "y": "150",
-      "width": "full-120",
-      "height": "full-330",
+      "x": "7p+4",
+      "y": "28p+4",
+      "width": "59p",
+      "height": "34p",
       "font": "serif",
-      "color": "ffffff",
-      "max_size": 84,
-      "min_size": 24
+      "color": "f4f1e8",
+      "max_size": 68,
+      "min_size": 52
     },
     {
       "name": "supporting",
       "kind": "text",
       "text": "{{supporting}}",
-      "x": "60",
-      "y": "full-180",
-      "width": "full-120",
-      "height": "80",
-      "font": "sans-28",
-      "color": "94a3b8",
-      "max_size": 28,
-      "min_size": 16
+      "x": "7p+4",
+      "y": "62p",
+      "width": "58p",
+      "height": "12p",
+      "font": "sans",
+      "color": "b3bec0",
+      "max_size": 25,
+      "min_size": 20
+    },
+    {
+      "name": "status-panel",
+      "kind": "rect",
+      "image": "color:1b2d37",
+      "x": "68p+4",
+      "y": "22p",
+      "width": "300",
+      "height": "352"
+    },
+    {
+      "name": "status-mark-background",
+      "kind": "rect",
+      "image": "color:d2f17f",
+      "x": "76p+4",
+      "y": "30p",
+      "width": "108",
+      "height": "107"
+    },
+    {
+      "name": "status-mark",
+      "kind": "text",
+      "text": "✓",
+      "x": "78p+4",
+      "y": "30p",
+      "font": "sans-bold-72",
+      "color": "1b2d37"
+    },
+    {
+      "name": "status-track-one",
+      "kind": "rect",
+      "image": "color:3a4b52",
+      "x": "71p+4",
+      "y": "58p",
+      "width": "204",
+      "height": "5"
+    },
+    {
+      "name": "status-progress-one",
+      "kind": "rect",
+      "image": "color:d2f17f",
+      "x": "71p+4",
+      "y": "58p",
+      "width": "120",
+      "height": "5"
+    },
+    {
+      "name": "status-indicator-one",
+      "kind": "rect",
+      "image": "color:d2f17f",
+      "x": "90p",
+      "y": "58p",
+      "width": "12",
+      "height": "12"
+    },
+    {
+      "name": "status-track-two",
+      "kind": "rect",
+      "image": "color:3a4b52",
+      "x": "71p+4",
+      "y": "64p",
+      "width": "204",
+      "height": "5"
+    },
+    {
+      "name": "status-progress-two",
+      "kind": "rect",
+      "image": "color:d2f17f",
+      "x": "71p+4",
+      "y": "64p",
+      "width": "168",
+      "height": "5"
+    },
+    {
+      "name": "status-indicator-two",
+      "kind": "rect",
+      "image": "color:d2f17f",
+      "x": "90p",
+      "y": "64p",
+      "width": "12",
+      "height": "12"
+    },
+    {
+      "name": "status-track-three",
+      "kind": "rect",
+      "image": "color:3a4b52",
+      "x": "71p+4",
+      "y": "70p",
+      "width": "204",
+      "height": "5"
+    },
+    {
+      "name": "status-progress-three",
+      "kind": "rect",
+      "image": "color:d2f17f",
+      "x": "71p+4",
+      "y": "70p",
+      "width": "96",
+      "height": "5"
+    },
+    {
+      "name": "status-indicator-three",
+      "kind": "rect",
+      "image": "color:d2f17f",
+      "x": "90p",
+      "y": "70p",
+      "width": "12",
+      "height": "12"
     },
     {
       "name": "mark",
       "kind": "text",
       "text": "{{mark}}",
-      "x": "60",
-      "y": "full-110",
-      "font": "sans-bold-24",
-      "color": "3b82f6"
+      "x": "7p+4",
+      "y": "80p",
+      "font": "sans-bold-20",
+      "color": "d2f17f"
     }
   ],
   "values": {
