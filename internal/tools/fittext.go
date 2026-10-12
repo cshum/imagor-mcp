@@ -22,7 +22,7 @@ type FitTextInput struct {
 	Text      string `json:"text" jsonschema:"the string to fit; it may contain %0A for a hard line break"`
 	BoxWidth  int    `json:"box_width" jsonschema:"width of the area the text has to fit, in pixels"`
 	BoxHeight int    `json:"box_height" jsonschema:"height of that area; the wrapped text may not exceed it"`
-	Font      string `json:"font" jsonschema:"font family without a size, for example serif, sans or Palatino"`
+	Font      string `json:"font" jsonschema:"a Pango font with hyphens for spaces, family first and size last, e.g. Open-Sans-bold or Liberation-Serif-24"`
 	MaxSize   int    `json:"max_size" jsonschema:"largest size to try, in points"`
 	MinSize   int    `json:"min_size,omitempty" jsonschema:"smallest size to accept; the search stops here and reports that it does not fit"`
 	Color     string `json:"color,omitempty" jsonschema:"text colour; affects nothing measurable, and defaults to black"`
