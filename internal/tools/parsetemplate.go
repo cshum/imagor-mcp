@@ -107,9 +107,18 @@ func (c Config) slotFromFilter(f imagorpath.Filter) (TemplateSlot, bool) {
 		}
 		if i := strings.Index(rest, "/"); i > 0 {
 			dims := rest[:i]
+			src := rest[i+1:]
+			// A fitted image is written fit-in/WxH/filters:fill(none)/source,
+			// because fill(none) is what centres it in its box. The fill is the
+			// template's own, so it is stripped here - otherwise the slot reads
+			// back as an image whose source is a filter, and the round trip is
+			// not stable.
+			if slot.Fit {
+				src = strings.TrimPrefix(src, "filters:fill(none)/")
+			}
 			// a source carrying ? or , was encoded on the way in, and has to be
 			// decoded on the way back or the round trip is not stable
-			slot.Image = decodeTextValue(rest[i+1:])
+			slot.Image = decodeTextValue(src)
 			if w, h, ok := splitDims(dims); ok {
 				slot.Width, slot.Height = w, h
 			}

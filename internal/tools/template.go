@@ -259,8 +259,11 @@ func (c Config) RenderTemplateTool(ctx context.Context, _ *mcp.CallToolRequest, 
 				inner = fmt.Sprintf("%sx%s/%s", iw, ih, source)
 				if slot.Fit {
 					// fit-in comes before the dimensions, and a nested path has
-					// to end with its source
-					inner = fmt.Sprintf("fit-in/%sx%s/%s", iw, ih, source)
+					// to end with its source. fill(none) makes the letterbox
+					// transparent AND centres the image in it - without it the
+					// fitted image sits at the top of its box with the remainder
+					// showing below, which reads as misalignment in a grid.
+					inner = fmt.Sprintf("fit-in/%sx%s/filters:fill(none)/%s", iw, ih, source)
 				}
 			}
 			sx, err := c.position(slot.X, in.CanvasWidth)
