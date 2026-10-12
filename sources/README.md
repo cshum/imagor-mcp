@@ -58,3 +58,8 @@ set is worth having:
 
 Measured through imagor: `fit-in/400x400` gives `64x64` for `tiny`, `400x50` for `wide`
 and `50x400` for `tall`.
+
+## Brands and copy
+
+The recipes' brands, people and copy are invented. `cookbook/CONTENT.md` records the
+three worlds they come from, what each world's voice is, and which recipes belong to it.
