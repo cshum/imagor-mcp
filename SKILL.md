@@ -51,7 +51,12 @@ parameters are four flat fields, not a nested object:
 - `WxH` fills the box exactly by **cropping** the overflow from the centre, so it
   can never aim at the one edge that is wrong, and a source whose shape differs
   from the box loses its edges.
-- `stretch/WxH` ignores the aspect ratio.
+- `stretch/WxH` ignores the aspect ratio, which **distorts the image**. A 290×175
+  source stretched into `280x154` comes back at aspect 1.818 against the source's
+  1.657 — nearly 10% wrong, and visible on anything with a known shape. It is
+  correct only when the box already matches the source, where it does nothing, or
+  when distortion is wanted. To fill a box of a different shape use `full-fit-in`,
+  which keeps the aspect and lets the long side overrun and clip instead.
 - `crop()` is the only mode that **aims**. It is what removes an unwanted sliver
   on a known side.
 - `fit-in` letterboxes, so it keeps the sliver and adds bars.
