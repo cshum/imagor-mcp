@@ -94,7 +94,7 @@
     }
   ],
   "values": {
-    "photo": "http://srcsrv/src_life.png",
+    "photo": "http://localhost:8198/src_life.png",
     "brand": "MAISON",
     "headline": "The Autumn Edit",
     "supporting": "Twelve pieces in vegetable-tanned leather",
