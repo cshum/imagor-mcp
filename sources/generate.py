@@ -18,11 +18,17 @@ small enough to embed in the binary, diff in a pull request, and serve from anyw
     python3 generate.py            # write the fixtures and manifest.json
 """
 
+import argparse
 import json
 import os
 import textwrap
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+
+# Where the fixtures are served. The repo layout maps to the URL one for one: a file at
+# sources/product-bag.svg is served at <base>/product-bag.svg, which is what makes the
+# deployed set and the committed set checkable against each other.
+DEFAULT_BASE = "https://s.imagor.net"
 
 
 def svg(width, height, body):
@@ -132,6 +138,12 @@ FIXTURES = {
 
 
 def main():
+    ap = argparse.ArgumentParser(description="Write the fixtures and manifest.json")
+    ap.add_argument("--base", default=DEFAULT_BASE,
+                    help="public base URL for the fixtures")
+    args = ap.parse_args()
+    base = args.base.rstrip("/")
+
     manifest = []
     for name, (kind, note, body) in sorted(FIXTURES.items()):
         path = os.path.join(HERE, name + ".svg")
@@ -144,6 +156,7 @@ def main():
         h = int(head.split('height="')[1].split('"')[0])
         manifest.append({
             "name": name, "file": name + ".svg", "kind": kind,
+            "url": f"{base}/{name}.svg",
             "width": w, "height": h,
             "aspect": round(w / h, 3), "note": note,
         })
