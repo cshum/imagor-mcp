@@ -249,8 +249,12 @@ Text lands wherever the font's own metrics put it, and nothing reports those.
   family and still returns `200`, so the render succeeds and the type is not what
   was asked for. A generic family is the safe choice; a named face is only safe
   once you have seen it render.
-- **A wordmark that needs tracking is drawn one glyph per call.** `text()` has no
-  letter-spacing, and its `spacing` argument is line spacing, applied vertically.
+- **A wordmark is one `text()` call, even though that loses the tracking.** `text()`
+  has no letter-spacing and its `spacing` argument is line spacing, applied
+  vertically. One glyph per call does reach the reference's spacing, but it hard-codes
+  the string: six glyph slots spell one word, and a different word breaks them. In a
+  reusable layout the copy comes from a value, so **prefer one call and accept the
+  tighter wordmark** — the rest of the layout can still be exact.
 - **`x=center` is the only form that centres text**, and it resolves against the
   canvas it is on. A numeric `x` leaves text hanging left whatever `align` says.
   So to centre a label under a product, give the label a canvas of its own — see
