@@ -6,7 +6,10 @@ description: Use when composing or debugging an imagor URL with imagor-mcp — b
 # Composing imagor URLs with imagor-mcp
 
 `verify_imagor_url` is the only way to know a composition worked: imagor answers
-`200` with the image unchanged when a filter does not apply.
+`200` with the image unchanged when a filter does not apply. It returns the
+rendered result as an image, so check it against your reference rather than only
+reading what the server reported — the report says a filter ran, not that the
+result is right.
 
 ## Order in a path
 
@@ -273,9 +276,18 @@ reports what this server is using — compare before debugging anything else.
    from — it takes parameters, not a URL. `applied` means it ran; `declined` means
    it was recognised and did nothing; `not_reported` means this processor does not
    handle it or the deployment disabled it. Absence is not failure.
-5. To composite, build small pieces first and check each: one product tile, then
+5. **Look at what came back.** The rendered result is attached, scaled, and the
+   note says by how much. Compare it against your reference: placement, cropping
+   and proportions are visible at preview size, and a composition can report
+   `applied` and still be wrong. Where the preview is too small to read a label,
+   call again with `preview_region` as `x,y,w,h` in **result** pixels — that part
+   comes back at full resolution for a fraction of the cost of the whole render.
+   Iterate: build, look, adjust, until it matches.
+6. To composite, build small pieces first and check each: one product tile, then
    the grid, then the whole banner. A wrong number in a nested path is much harder
    to see in the finished image than in the piece.
-6. Measure what you rendered against what you intended, numerically. A `200` and a
-   plausible-looking image are not evidence; a mean difference over the region you
-   changed is.
+7. Where you cannot see the answer — a colour, a dimension, whether a filter
+   changed anything — measure it. A `200` and a plausible-looking image are not
+   evidence; a mean difference over the region you changed is. But measure only
+   what looking cannot settle, because a number is not a substitute for the
+   picture when the question is whether it looks right.
