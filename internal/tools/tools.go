@@ -206,8 +206,8 @@ type TransformInput struct {
 	Width  int `json:"width,omitempty" jsonschema:"target width in pixels; 0 means automatic"`
 	Height int `json:"height,omitempty" jsonschema:"target height in pixels; 0 means automatic"`
 
-	FitIn         bool `json:"fit_in,omitempty" jsonschema:"fit within width x height instead of cropping to fill"`
-	FullFitIn     bool `json:"full_fit_in,omitempty" jsonschema:"fit using the largest dimension; requires fit_in"`
+	FitIn         bool `json:"fit_in,omitempty" jsonschema:"fit inside width x height instead of cropping to fill; the result can be smaller than the box on one side"`
+	FullFitIn     bool `json:"full_fit_in,omitempty" jsonschema:"cover the box without cropping: one side matches width x height and the other exceeds it, keeping the aspect. Use for an image that must fill a panel without cutting into it. Requires fit_in, and add upscale() when the source is smaller than the box"`
 	AdaptiveFitIn bool `json:"adaptive_fit_in,omitempty" jsonschema:"invert width and height when that yields better definition; requires fit_in"`
 	Stretch       bool `json:"stretch,omitempty" jsonschema:"stretch to exactly width x height, ignoring aspect ratio"`
 	Smart         bool `json:"smart,omitempty" jsonschema:"use content-aware smart crop"`

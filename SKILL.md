@@ -39,17 +39,18 @@ parameters are four flat fields, not a nested object:
 
 ## Resize modes
 
-- `fit-in/WxH` fits inside the box and **does not upscale**; add
-  `filters:upscale()` to enlarge.
-- `WxH` fills the box, cropping the overflow from the centre. Use it for sizing;
-  it can never aim at the one edge that is wrong.
-- **A source that has to be shown whole gets `fit-in/WxH/filters:upscale()`.**
-  `WxH` alone crops to the box, so a panel dropped into a differently shaped box
-  silently loses its edges — a 265×240 panel in `274x360` is cut, not resized.
-  `fit-in` constrains to the source's own aspect and `upscale()` lifts the
-  no-enlargement rule, so `fit-in/274x248/filters:upscale()` returns the whole
-  product at 274×248. The box shape does not matter: `fit-in/274x360/...` gives
-  the same 274×248, fitted inside.
+- `fit-in/WxH` fits **inside** the box and **does not upscale**; the result can be
+  smaller than the box on one side, so it letterboxes. `filters:upscale()` lifts
+  the no-enlargement rule but does **not** make it cover: a 694×941 photo in
+  `fit-in/580x600/filters:upscale()` is 443×600, still short of the box.
+- `full-fit-in/WxH` is the one that **covers**: one side matches the box and the
+  other **exceeds** it, so the aspect is kept and nothing is cropped. The same
+  photo in `full-fit-in/580x600` is 580×786. Use it whenever an image has to fill
+  a panel without cutting into it. It only enlarges when the source is smaller
+  than the box, so add `filters:upscale()` when it is.
+- `WxH` fills the box exactly by **cropping** the overflow from the centre, so it
+  can never aim at the one edge that is wrong, and a source whose shape differs
+  from the box loses its edges.
 - `stretch/WxH` ignores the aspect ratio.
 - `crop()` is the only mode that **aims**. It is what removes an unwanted sliver
   on a known side.
