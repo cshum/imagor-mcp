@@ -240,6 +240,10 @@ Text lands wherever the font's own metrics put it, and nothing reports those.
   property of the imagor you point at, not of this server. On the official image
   the generics already reach DejaVu, so naming it adds nothing; the ones worth
   naming are `Liberation-Sans` and `Open-Sans`.
+- **A fitted text slot takes the largest size that fits its box.** That is what a
+  headline wants and what a supporting line does not — a short line balloons to fill
+  the box it was given. Cap it with `max_size`, or give the slot no height and a
+  `size` instead.
 - **To centre text, give it a canvas of its own: a slot carrying its own `slots`.**
   A numeric `x` leaves text hanging left whatever `align` says, and `x=center`
   resolves against whatever canvas it is on — so the banner is too wide to centre

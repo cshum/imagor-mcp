@@ -108,7 +108,9 @@ func (c Config) RenderTemplateTool(ctx context.Context, _ *mcp.CallToolRequest, 
 	if len(in.Slots) == 0 {
 		return nil, TemplateOutput{}, fmt.Errorf("a template needs at least one slot")
 	}
-	background := in.Background
+	// The background is a field like any other, so it takes values too - a palette
+	// that comes from a value should not work everywhere except the canvas.
+	background := substitute(in.Background, in.Values)
 	if background == "" {
 		background = "color:white"
 	}
@@ -306,6 +308,9 @@ func (c Config) RenderTemplateTool(ctx context.Context, _ *mcp.CallToolRequest, 
 	}
 	if c.BaseURL != "" {
 		out.AbsoluteURL = c.BaseURL + "/" + out.URL
+	}
+	for _, n := range unfilled(in.Background, in.Values) {
+		missing = append(missing, "background."+n)
 	}
 	if len(missing) > 0 {
 		// Refused rather than noted: an unfilled placeholder does not fail on its
