@@ -1257,6 +1257,13 @@ func (c Config) ListFiltersTool(_ context.Context, _ *mcp.CallToolRequest, in Li
 		if needle != "" && !strings.Contains(strings.ToLower(name), needle) {
 			continue
 		}
+		// A filter a caller cannot read a signature for is worse than one it
+		// cannot see: it invites a guess. superseded filters work and still parse,
+		// so they stay available to validation and to paths that already use them,
+		// but they are not offered here.
+		if superseded(name) {
+			continue
+		}
 		spec, ok := filtercat.Lookup(name)
 		if !ok {
 			continue
@@ -1276,6 +1283,16 @@ func (c Config) ListFiltersTool(_ context.Context, _ *mcp.CallToolRequest, in Li
 		out.Note = fmt.Sprintf("no filter name contains %q", in.NameContains)
 	}
 	return nil, out, nil
+}
+
+// superseded reports filters that work but should not be offered.
+//
+// label() is undocumented and text() accepts everything it does at the same
+// argument positions 1-5, then adds blending, wrapping, alignment, spacing and
+// dpi. Nothing label does is unavailable, and its signature is not in imagor's
+// reference, so a caller that sees it listed can only guess at the arguments.
+func superseded(name string) bool {
+	return name == "label"
 }
 
 // signatureFor renders a filter's accepted argument count for humans.

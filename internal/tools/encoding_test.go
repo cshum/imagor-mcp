@@ -202,3 +202,17 @@ func TestReservedPrefixesCoverImagorsCommands(t *testing.T) {
 		}
 	}
 }
+
+// A filter that is listed but has no readable signature invites a guess. label()
+// is undocumented and text() does everything it does, so it is not offered - but
+// it still parses, so a path that already uses it keeps working.
+func TestSupersededFiltersAreNotOffered(t *testing.T) {
+	if !superseded("label") {
+		t.Error("label should not be offered: text covers it and it has no signature")
+	}
+	for _, keep := range []string{"text", "modulate", "trim", "padding", "image"} {
+		if superseded(keep) {
+			t.Errorf("%s should stay offered", keep)
+		}
+	}
+}
