@@ -31,6 +31,7 @@ type InnerSlot struct {
 	Size    int    `json:"size,omitempty" jsonschema:"a fixed size, used instead of fitting"`
 	Color   string `json:"color,omitempty" jsonschema:"text colour as RRGGBB"`
 	Align   string `json:"align,omitempty" jsonschema:"low, center or high; defaults to center"`
+	Fit     bool   `json:"fit,omitempty" jsonschema:"for image: fit the whole image inside the box rather than filling it, which keeps the aspect ratio instead of stretching"`
 	MaxSize int    `json:"max_size,omitempty" jsonschema:"for fitted text: the largest size to try"`
 	MinSize int    `json:"min_size,omitempty" jsonschema:"for fitted text: the smallest size to accept"`
 
@@ -617,23 +618,39 @@ func (c Config) nestedCanvas(ctx context.Context, slot TemplateSlot, in Template
 			if err != nil {
 				return "", "", fmt.Errorf("slot %q.%s height: %w", slot.Name, inner.Name, err)
 			}
-			ix, err := c.resolve(orDefault(inner.X, "0"), w, 0)
+			// position, not resolve: an inner image must accept the same anchors a
+			// text slot does, or a picture can only be placed by pixel count.
+			ixs, err := c.position(orDefault(inner.X, "0"), w)
 			if err != nil {
 				return "", "", fmt.Errorf("slot %q.%s x: %w", slot.Name, inner.Name, err)
 			}
-			iy, err := c.resolve(orDefault(inner.Y, "0"), h, 0)
+			iys, err := c.position(orDefault(inner.Y, "0"), h)
 			if err != nil {
 				return "", "", fmt.Errorf("slot %q.%s y: %w", slot.Name, inner.Name, err)
 			}
+			// fit-in comes first, then filters, then the source - the same order the
+			// outer slot uses. A fitted image carries fill(none), which centres it in
+			// its box and makes the letterbox transparent, so a caption nested in the
+			// same box can sit in the space the picture did not fill.
 			seg := fmt.Sprintf("%dx%d", iw, ih)
+			if inner.Fit {
+				seg = "fit-in/" + seg
+			}
+			var innerSegs []string
+			if inner.Fit {
+				innerSegs = append(innerSegs, "filters:fill(none)")
+			}
 			if f := strings.Trim(strings.TrimSpace(inner.Filters), "/"); f != "" {
-				seg = fmt.Sprintf("%s/%s", seg, f)
+				innerSegs = append(innerSegs, f)
+			}
+			if len(innerSegs) > 0 {
+				seg = fmt.Sprintf("%s/%s", seg, strings.Join(innerSegs, "/"))
 			}
 			filters = append(filters, imagorpath.Filter{
 				Name: "image",
-				Args: fmt.Sprintf("%s/%s,%d,%d", seg, encodeSourceValue(src), ix, iy),
+				Args: fmt.Sprintf("%s/%s,%s,%s", seg, encodeSourceValue(src), ixs, iys),
 			})
-			parts = append(parts, fmt.Sprintf("%s %s at %d,%d", inner.Name, kind, ix, iy))
+			parts = append(parts, fmt.Sprintf("%s %s at %s,%s", inner.Name, kind, ixs, iys))
 			continue
 		}
 		text := substitute(inner.Text, in.Values)

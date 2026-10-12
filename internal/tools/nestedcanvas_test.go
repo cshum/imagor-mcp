@@ -119,3 +119,40 @@ func TestNestedCanvasHoldsARectAndAnImage(t *testing.T) {
 		t.Fatalf("an empty rect was emitted:\n%s", out2.Path)
 	}
 }
+
+// A nested canvas may hold an image that fits itself and a caption below it. The two
+// fields that made this impossible were Fit, absent from InnerSlot, and an x that the
+// image branch resolved as a dimension rather than a position - so a nested picture
+// could not be centred and could not keep its aspect ratio.
+func TestNestedCanvasHoldsAFittedImageAndACaption(t *testing.T) {
+	cfg := Config{Unsafe: true}
+	in := TemplateInput{
+		CanvasWidth:  600,
+		CanvasHeight: 400,
+		Slots: []TemplateSlot{{
+			Name: "cell", Kind: "image", X: "6p", Y: "8p", Width: "30p", Height: "80p",
+			Image: "https://s.imagor.net/product-bag.svg",
+			Slots: []InnerSlot{
+				{Name: "photo", Kind: "image", X: "center", Y: "0p",
+					Width: "full", Height: "70p",
+					Image: "https://s.imagor.net/product-bag.svg", Fit: true},
+				{Name: "caption", Kind: "text", X: "center", Y: "76p",
+					Width: "full", Height: "18p",
+					Text: "Leather satchel bag", Font: "Open-Sans-16", Color: "000000"},
+			},
+		}},
+	}
+	_, out, err := cfg.RenderTemplateTool(context.Background(), nil, in)
+	if err != nil {
+		t.Fatalf("render: %v", err)
+	}
+	if !strings.Contains(out.Path, "fit-in/") {
+		t.Errorf("the nested image should fit itself, path was %s", out.Path)
+	}
+	if !strings.Contains(out.Path, "fill(none)") {
+		t.Errorf("a fitted nested image should carry fill(none), path was %s", out.Path)
+	}
+	if !strings.Contains(out.Path, ",center,0)") {
+		t.Errorf("the nested image should be centred, path was %s", out.Path)
+	}
+}
