@@ -149,6 +149,10 @@ same thing.
 served at any size. A text slot given a height is **fitted against the box its geometry
 resolves to**, which is what makes type adapt.
 
+**Write `Open-Sans` or `Liberation-Serif`, not `sans` or `serif`.** The generics resolve
+to DejaVu, the widest face imagor carries: a headline that fits one line in `Open-Sans`
+runs to two in `sans` and lands on the body below it. See *Placing text* for the rest.
+
 ```json
 {
   "canvas_width": 1200, "canvas_height": 630, "background": "color:1a1a2e",
@@ -167,8 +171,9 @@ resolves to**, which is what makes type adapt.
 
 **A slot's `filters` field applies filters to that slot's own source**, because the
 image field is data rather than syntax — a path written there is encoded as a source.
-Write the segment as imagor writes it: `smart/filters:round_corner(230,230,fff)`. The
-signature is minted at render time, so the layout stays portable.
+Write the filters **without** the `filters:` prefix: `smart/round_corner(230,230,fff)`.
+Writing the prefix too is accepted and ignored, so a doubled one is not an error you
+will see. The signature is minted at render time, so the layout stays portable.
 
 Slots are applied in order, so later ones draw over earlier ones. Values fill
 `{{placeholders}}` in text, image **and background** fields. A placeholder with no value
