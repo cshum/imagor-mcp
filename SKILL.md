@@ -231,21 +231,15 @@ shape that fails.
 
 Text lands wherever the font's own metrics put it, and nothing reports those.
 
-- **Use `sans`, `serif` or `monospace` — lowercase, and that is the whole
-  choice.** `sans-40` is sans at 40, `sans-bold-40` bold, `monospace-18` a mono
-  face. Case is ignored by the parser, so lowercase is a convention rather than a
-  requirement, but it is the form to write. The size may be omitted, defaulting
-  to 20. A literal space in the argument is a **malformed URL**, not a font error,
-  so use a hyphen or `b64:`.
-- **Other families need their full name**, hyphenated: `DejaVu-Sans`,
-  `Liberation-Sans`, `Open-Sans`. There is no short alias for them, and on the
-  official image they are the ones a generic does not already reach — `sans`
-  resolves to DejaVu Sans, so naming it adds nothing.
-- **Which faces exist is a property of the imagor you point at, not of this
-  server.** A name that is not installed **falls back silently** to a different
-  family and still returns `200`, so the render succeeds and the type is not what
-  was asked for. A generic family is the safe choice; a named face is only safe
-  once you have seen it render.
+- **A font is `family[-style]-size`.** `sans-40`, `sans-bold-40`, `monospace-18`;
+  size optional, defaulting to 20, and case is ignored. A literal space in the
+  argument is a **malformed URL**, not a font error — use a hyphen or `b64:`.
+- **Prefer a generic — `sans`, `serif`, `monospace` — over a named face.** A name
+  that is not installed **falls back silently** and still returns `200`, so the
+  render succeeds and the type is not what was asked for. Which faces exist is a
+  property of the imagor you point at, not of this server. On the official image
+  the generics already reach DejaVu, so naming it adds nothing; the ones worth
+  naming are `Liberation-Sans` and `Open-Sans`.
 - **To centre text, give it a canvas of its own: a slot carrying its own `slots`.**
   A numeric `x` leaves text hanging left whatever `align` says, and `x=center`
   resolves against whatever canvas it is on — so the banner is too wide to centre
@@ -257,24 +251,19 @@ Text lands wherever the font's own metrics put it, and nothing reports those.
   vertically. One glyph per call reaches the reference's spacing but hard-codes the
   string, so a different value breaks the layout. **Prefer one call** — the rest of
   the layout can still be exact.
-- Measure the region you changed, not the whole image: a whole-image number hides
-  a label that is 40px out, because most of the canvas did not move. When the
-  sources are exact crops, the whole residual is text, so measure the text bands
-  separately or you will tune placement against a number placement cannot move.
+- **Measure the region you changed, not the whole image.** A whole-image number
+  hides a label that is 40px out, because most of the canvas did not move.
 
 ## Grids of images
 
-Sources are whatever shape they are, and sizing each panel to its own source gives
-panels of different shapes — which reads as unrelated pictures, not a grid. No
-amount of position tuning fixes it.
+Sizing each panel to its own source gives panels of different shapes, which reads as
+unrelated pictures rather than a grid — and no amount of position tuning fixes it.
 
-- **Give every cell the same size, laid out on even rows and columns, and fit the
-  image inside its cell** (`fit`). The cells align; the images inside them do not
-  fill them. The result is centred in the cell with even space around it, and
-  nothing is distorted.
-- **Write the cells as one identical size, not five similar ones.** Percentage
-  forms make this checkable: five cells of `16p+12 x 26p+5` stay one size at every
-  canvas, five cells of 300x250 do not.
+- **Give every cell one identical size, on even rows and columns, and fit the image
+  inside its cell** (`fit`). The cells align; the images inside them do not fill
+  them, so nothing is distorted and the space around each is even.
+- **Percentage forms make the sameness checkable**: five cells of `16p+12 x 26p+5`
+  stay one size at every canvas; five of 300x250 do not.
 
 ## Responsive compositions
 
