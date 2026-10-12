@@ -40,6 +40,13 @@ parameters are four flat fields, not a nested object:
   `filters:upscale()` to enlarge.
 - `WxH` fills the box, cropping the overflow from the centre. Use it for sizing;
   it can never aim at the one edge that is wrong.
+- **A source that has to be shown whole gets `fit-in/WxH/filters:upscale()`.**
+  `WxH` alone crops to the box, so a panel dropped into a differently shaped box
+  silently loses its edges — a 265×240 panel in `274x360` is cut, not resized.
+  `fit-in` constrains to the source's own aspect and `upscale()` lifts the
+  no-enlargement rule, so `fit-in/274x248/filters:upscale()` returns the whole
+  product at 274×248. The box shape does not matter: `fit-in/274x360/...` gives
+  the same 274×248, fitted inside.
 - `stretch/WxH` ignores the aspect ratio.
 - `crop()` is the only mode that **aims**. It is what removes an unwanted sliver
   on a known side.

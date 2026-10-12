@@ -479,6 +479,12 @@ const (
 // VerifyInput is a composition to check against a running imagor.
 type VerifyInput struct {
 	TransformInput
+	// Preview attaches the rendered result so a caller that can see images can
+	// compare it against its reference. Defaults to on, and can be turned off
+	// when the caller only wants the report: an attached image is delivered to
+	// the client whether or not the model wants it, so the choice belongs to
+	// the caller rather than being made for it.
+	Preview *bool `json:"preview,omitempty" jsonschema:"attach the rendered result as an image, so a composition that succeeded but came out wrong can be seen. Defaults to true"`
 }
 
 // FilterOutcome is what the server reported for one filter in the URL.
@@ -675,7 +681,27 @@ func (c Config) VerifyURLTool(ctx context.Context, _ *mcp.CallToolRequest, in Ve
 	out.Verified = true
 	out.Results = outcomes(p.Filters, reported, OutcomeNotReported)
 	out.Note = summarizeOutcomes(out.Results)
-	return nil, out, nil
+	// The report says what the server did; the preview says what it looks like.
+	// A caller that can see images can compare the result against its reference
+	// and fix a composition that succeeded but came out wrong, which the report
+	// alone cannot reveal. It is asked for through a scaled path, because images
+	// cost tokens by area and the full render costs several times the preview for
+	// no more answer to "is this panel in the right place".
+	if in.Preview != nil && !*in.Preview {
+		return nil, out, nil
+	}
+	// The preview scales the composed result, not the source, so the composition
+	// is passed in as a nested source and fit inside the preview box. Setting the
+	// dimensions on the composition itself would replace the box it was built
+	// for, and the caller would be shown a different layout from the one the
+	// report describes.
+	previewParams := p
+	previewParams.Image = out.AbsoluteURL
+	previewParams.Path = ""
+	previewParams.FitIn = true
+	previewParams.Width, previewParams.Height = previewMaxEdge, previewMaxEdge
+	data, mime, previewNote := c.previewImage(ctx, c.BaseURL+"/"+pathgen.BuildURL(previewParams, signer))
+	return withPreview(out, data, mime, previewNote), out, nil
 }
 
 // outcomes walks the requested filters against the reported ones. The report
@@ -1229,7 +1255,12 @@ func Register(s *mcp.Server, cfg Config) {
 			"A server that does not report filter outcomes returns unknown for every filter and " +
 			"verified: false, which means the result is unknown rather than wrong. Compare the " +
 			"reported dimensions and outcomes against what you intended, and fetch the result to " +
-			"compare it against your reference: a composition can succeed and still be wrong.",
+			"compare it against your reference: a composition can succeed and still be wrong. " +
+			"The rendered result is attached as an image by default, so you can see what you built " +
+			"rather than only reading what the server did with it - use it to check placement, " +
+			"cropping and text against your reference, and iterate until it matches. The image is " +
+			"scaled down, so it shows the layout and not fine detail. Pass preview: false to get " +
+			"the report alone when you do not need to look.",
 	}, cfg.VerifyURLTool)
 
 	mcp.AddTool(s, &mcp.Tool{
