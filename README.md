@@ -98,11 +98,21 @@ available is a property of **the imagor you point at**, not of this server. A
 name that is not installed **falls back silently to sans and still returns
 `200`** — the composition succeeds and the type is not what was asked for.
 
-The official `cshum/imagor-base` image carries **DejaVu** (broad coverage),
-**Liberation2** (metric-compatible with Arial and Times) and **Open Sans** (a
-common display choice for social and OG cards). Generic families — `sans`,
-`serif`, `monospace` — resolve to one of those. For anything else, mount your own
-fonts into the container; CJK and commercial faces are deliberately not included.
+The official `cshum/imagor-base` image carries eight families. Three have short
+names, and those are usually enough:
+
+| name | family |
+|---|---|
+| `sans` | DejaVu Sans |
+| `serif` | DejaVu Serif |
+| `monospace` | DejaVu Sans Mono |
+| `DejaVu-Sans` / `DejaVu-Serif` | DejaVu, named |
+| `Liberation-Sans` / `Liberation-Serif` | metric-compatible with Arial and Times |
+| `Open-Sans` / `Open-Sans-Condensed` | common display choice for social and OG cards |
+
+The named families need their full names; there is no shorter alias for them. Add
+`-bold` for weight. For anything else — CJK, commercial faces — mount your own
+fonts into the container.
 
 ## MCP client configuration
 
