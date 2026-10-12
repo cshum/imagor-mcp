@@ -38,8 +38,8 @@ const needingSourceEncoding = " ?#&(),"
 // the start of a source. A source that happens to begin with one is encoded even
 // though it contains no special character at all.
 var reservedSourcePrefixes = []string{
-	"trim/", "meta/", "fit-in/", "stretch/",
-	"top/", "left/", "right/", "bottom/", "center/", "smart/",
+	"trim/", "meta/", "fit-in/", "full-fit-in/", "adaptive-fit-in/",
+	"stretch/", "top/", "left/", "right/", "bottom/", "center/", "smart/",
 }
 
 // encodeTextValue encodes a text argument only when it is not trivially safe.

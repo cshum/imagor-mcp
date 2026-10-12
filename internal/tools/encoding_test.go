@@ -178,3 +178,27 @@ func TestASourceArgumentKeepsItsCharacters(t *testing.T) {
 		}
 	}
 }
+
+// Every word imagor reads as a command has to be in the reserved list. A source
+// that begins with one is otherwise left unencoded and read as that command, and
+// the failure is silent: the path resolves to a different image rather than
+// erroring. The list is derived from imagor's own parser, so it grows whenever
+// imagor grows a prefix.
+func TestReservedPrefixesCoverImagorsCommands(t *testing.T) {
+	// The prefixes imagorpath.Parse recognises before the source, taken from
+	// imagorpath/parse.go.
+	commands := []string{
+		"trim", "meta", "fit-in", "full-fit-in", "adaptive-fit-in",
+		"stretch", "top", "left", "right", "bottom", "center", "smart",
+	}
+	have := map[string]bool{}
+	for _, p := range reservedSourcePrefixes {
+		have[strings.TrimSuffix(p, "/")] = true
+	}
+	for _, c := range commands {
+		if !have[c] {
+			t.Errorf("%q is a command but is not a reserved prefix, so a source "+
+				"beginning with it would be read as one", c+"/")
+		}
+	}
+}

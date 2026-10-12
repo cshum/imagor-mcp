@@ -14,7 +14,7 @@ result is right.
 ## Order in a path
 
 ```
-{trim}/{crop}/{fit-in}/{WxH}/{halign}{valign}/{filters}/{image}
+{trim}/{crop}/{fit-in|full-fit-in}/{WxH}/{halign}{valign}/{filters}/{image}
 ```
 
 **Everything after `filters:` is read as the image.** A parameter written after
@@ -131,8 +131,9 @@ a text argument.
 a path or URL, which legitimately contains `/`, `:`, `.` and `=`, so a whitelist
 there would encode every real source and make every path opaque. Encoded are any
 of **space `?` `#` `&` `(` `)` `,`** — each changes how the path is read — and a
-source **beginning with `trim/`, `meta/`, `fit-in/`, `stretch/`, `top/`, `left/`,
-`right/`, `bottom/`, `center/` or `smart/`**, which imagor reads as a command.
+source **beginning with `trim/`, `meta/`, `fit-in/`, `full-fit-in/`,
+`adaptive-fit-in/`, `stretch/`, `top/`, `left/`, `right/`, `bottom/`, `center/`
+or `smart/`**, which imagor reads as a command.
 
 Put text in the `text` field and a source in the `source` field and both are
 handled — the argument is data, not syntax, and does not belong in a string
