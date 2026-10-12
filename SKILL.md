@@ -234,13 +234,17 @@ Text lands wherever the font's own metrics put it, and nothing reports those.
 - Render **one glyph** on its own, fetch it, and find the ink: that is where the
   pen starts for that font at that size. Two or three probes give the offset for
   a whole label.
-- Font names take hyphens for spaces: `Palatino-63` is Palatino at 63.
+- **Font syntax is `family[-style]-size`, with hyphens for spaces and no spaces.**
+  `sans-40` is sans at 40, `sans-bold-40` bold, `DejaVu-Sans-40` a named family.
+  Case does not matter — `SANS-40` and `sans-Bold-40` resolve the same — and the
+  size may be omitted, defaulting to 20. `sans`, `serif` and `monospace` are the
+  generic families and are usually all that is needed; a literal space in the
+  argument is a **malformed URL**, not a font error, so use a hyphen or `b64:`.
 - **Which faces exist is a property of the imagor you point at, not of this
-  server.** `sans`, `serif` and `monospace` are resolved by fontconfig, so ask
-  the deployment what it carries rather than assuming a face. A font that is not
-  installed **falls back silently**, usually to sans, with a `200` — the render
-  succeeds and the type is not what was asked for. A generic family is the safe
-  choice; a named face is only safe once you have seen it render.
+  server.** A font that is not installed **falls back silently**, usually to sans,
+  with a `200` — the render succeeds and the type is not what was asked for. A
+  generic family is the safe choice; a named face is only safe once you have seen
+  it render.
 - **A wordmark is usually letter-spaced, so draw it one glyph per call.** One
   `text()` cannot reproduce tracking; measuring each glyph and placing separate
   calls is what reaches the reference.
