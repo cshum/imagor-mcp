@@ -61,5 +61,5 @@ and `50x400` for `tall`.
 
 ## Brands and copy
 
-The recipes' brands, people and copy are invented. `cookbook/CONTENT.md` records the
+The recipes' brands, people and copy are invented. `content/worlds.json` records the
 three worlds they come from, what each world's voice is, and which recipes belong to it.
