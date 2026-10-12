@@ -42,16 +42,14 @@ parameters are four flat fields, not a nested object:
 - `fit-in/WxH` fits **inside** the box and **does not upscale**, so it letterboxes.
   `filters:upscale()` lifts the no-enlargement rule but does **not** make it cover: a
   694×941 photo in `fit-in/580x600/filters:upscale()` is 443×600, still short.
-- `full-fit-in/WxH` **covers** — one side matches the box, the other **exceeds** it, so
-  the aspect holds and nothing is cropped. The same photo is 580×786. It only enlarges a
-  source smaller than the box, so add `upscale()` there. Reach for it when the box is
-  fixed and the image has to fill it; when you can shape the box, do that instead.
+  `full-fit-in` is its opposite — it **covers**, overrunning one side (a 300×200 frame
+  returns 393×200) — which is what you want only when the box cannot be reshaped and
+  whatever holds it clips. Add `upscale()` when the source is smaller than the box.
 - `WxH` fills the box exactly by **cropping** from the centre, so it can never aim at
   the one edge that is wrong, and a source of another shape loses its edges.
 - `stretch/WxH` ignores the aspect ratio, so it **distorts** — a 290×175 source in
-  `280x154` comes back at aspect 1.818 against 1.657, nearly 10% wrong. If the box
-  cannot be reshaped, `full-fit-in` fills it without distorting, at the cost of
-  overrunning one side.
+  `280x154` comes back at aspect 1.818 against 1.657, nearly 10% wrong. Reshape the
+  box instead, or `full-fit-in` if it cannot be reshaped.
 - `crop()` is the only mode that **aims**, which is what removes an unwanted sliver
   on a known side. `focal` and `smart` also crop: `focal` lands where a centre crop
   does unless the subject is off-centre, and `smart` frames by content.
@@ -61,9 +59,7 @@ parameters are four flat fields, not a nested object:
 **When you control the frame, shape it to the source and use plain `WxH` — no fit at
 all.** Measured on a 318×162 source: in a 300×153 frame, `WxH`, `fit-in` and
 `full-fit-in` all return 300×153, so a fit mode adds nothing when the shapes already
-agree; in a 300×200 frame, `fit-in` returns 300×153 (undersized) and `full-fit-in`
-returns **393×200**, wider than the frame it was given, because it covers by
-overflowing.
+agree.
 
 **Fit is for a cell you cannot shape** — a grid cell whose size the grid fixes. There,
 fitting leaves the image smaller than the cell on one side, which is the point: the
