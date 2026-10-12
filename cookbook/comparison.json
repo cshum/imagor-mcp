@@ -1,0 +1,251 @@
+{
+  "name": "Comparison card",
+  "note": "Two matched columns of points, for a before and after.",
+  "canvas": [
+    1200,
+    630
+  ],
+  "background": "color:f7f5ef",
+  "slots": [
+    {
+      "name": "brand",
+      "kind": "text",
+      "text": "{{brand}}",
+      "x": "5p+4",
+      "y": "6p+6",
+      "font": "sans-bold-18",
+      "color": "213d36"
+    },
+    {
+      "name": "top_rule",
+      "kind": "rect",
+      "image": "color:c58e43",
+      "x": "5p+4",
+      "y": "13p",
+      "width": "3p+8",
+      "height": "0p+3"
+    },
+    {
+      "name": "headline",
+      "kind": "text",
+      "text": "{{headline}}",
+      "x": "5p+4",
+      "y": "16p+4",
+      "width": "full-128",
+      "height": "11p+1",
+      "font": "sans-bold",
+      "max_size": 45,
+      "min_size": 32,
+      "color": "182a27",
+      "align": "low"
+    },
+    {
+      "name": "left_panel",
+      "kind": "rect",
+      "image": "color:efede6",
+      "x": "5p+4",
+      "y": "34p+4",
+      "width": "43p+8",
+      "height": "53p"
+    },
+    {
+      "name": "right_panel",
+      "kind": "rect",
+      "image": "color:1d443c",
+      "x": "51p",
+      "y": "34p+4",
+      "width": "43p+8",
+      "height": "53p"
+    },
+    {
+      "name": "left_accent",
+      "kind": "rect",
+      "image": "color:c58e43",
+      "x": "5p+4",
+      "y": "34p+4",
+      "width": "0p+6",
+      "height": "53p"
+    },
+    {
+      "name": "right_accent",
+      "kind": "rect",
+      "image": "color:79c7a6",
+      "x": "51p",
+      "y": "34p+4",
+      "width": "0p+6",
+      "height": "53p"
+    },
+    {
+      "name": "left_label",
+      "kind": "text",
+      "text": "{{left_label}}",
+      "x": "7p+8",
+      "y": "38p+6",
+      "font": "sans-bold-24",
+      "color": "756f62"
+    },
+    {
+      "name": "right_label",
+      "kind": "text",
+      "text": "{{right_label}}",
+      "x": "53p+4",
+      "y": "38p+6",
+      "font": "sans-bold-24",
+      "color": "a5e4c6"
+    },
+    {
+      "name": "left_label_rule",
+      "kind": "rect",
+      "image": "color:d1cdc2",
+      "x": "7p+8",
+      "y": "44p+6",
+      "width": "39p",
+      "height": "0p+1"
+    },
+    {
+      "name": "right_label_rule",
+      "kind": "rect",
+      "image": "color:45685f",
+      "x": "53p+4",
+      "y": "44p+6",
+      "width": "39p",
+      "height": "0p+1"
+    },
+    {
+      "name": "left_bullet_1",
+      "kind": "rect",
+      "image": "color:c58e43",
+      "x": "7p+10",
+      "y": "50p+2",
+      "width": "0p+8",
+      "height": "1p+2"
+    },
+    {
+      "name": "left_point_1",
+      "kind": "text",
+      "text": "{{left_point_1}}",
+      "x": "9p+10",
+      "y": "49p+3",
+      "width": "36p+8",
+      "font": "sans-18",
+      "color": "3d403b"
+    },
+    {
+      "name": "right_bullet_1",
+      "kind": "rect",
+      "image": "color:79c7a6",
+      "x": "53p+6",
+      "y": "50p+2",
+      "width": "0p+8",
+      "height": "1p+2"
+    },
+    {
+      "name": "right_point_1",
+      "kind": "text",
+      "text": "{{right_point_1}}",
+      "x": "55p+6",
+      "y": "49p+3",
+      "width": "36p+8",
+      "font": "sans-18",
+      "color": "eef4ef"
+    },
+    {
+      "name": "left_bullet_2",
+      "kind": "rect",
+      "image": "color:c58e43",
+      "x": "7p+10",
+      "y": "62p+3",
+      "width": "0p+8",
+      "height": "1p+2"
+    },
+    {
+      "name": "left_point_2",
+      "kind": "text",
+      "text": "{{left_point_2}}",
+      "x": "9p+10",
+      "y": "61p+5",
+      "width": "36p+8",
+      "font": "sans-18",
+      "color": "3d403b"
+    },
+    {
+      "name": "right_bullet_2",
+      "kind": "rect",
+      "image": "color:79c7a6",
+      "x": "53p+6",
+      "y": "62p+3",
+      "width": "0p+8",
+      "height": "1p+2"
+    },
+    {
+      "name": "right_point_2",
+      "kind": "text",
+      "text": "{{right_point_2}}",
+      "x": "55p+6",
+      "y": "61p+5",
+      "width": "36p+8",
+      "font": "sans-18",
+      "color": "eef4ef"
+    },
+    {
+      "name": "left_bullet_3",
+      "kind": "rect",
+      "image": "color:c58e43",
+      "x": "7p+10",
+      "y": "74p+5",
+      "width": "0p+8",
+      "height": "1p+2"
+    },
+    {
+      "name": "left_point_3",
+      "kind": "text",
+      "text": "{{left_point_3}}",
+      "x": "9p+10",
+      "y": "73p+6",
+      "width": "36p+8",
+      "font": "sans-18",
+      "color": "3d403b"
+    },
+    {
+      "name": "right_bullet_3",
+      "kind": "rect",
+      "image": "color:79c7a6",
+      "x": "53p+6",
+      "y": "74p+5",
+      "width": "0p+8",
+      "height": "1p+2"
+    },
+    {
+      "name": "right_point_3",
+      "kind": "text",
+      "text": "{{right_point_3}}",
+      "x": "55p+6",
+      "y": "73p+6",
+      "width": "36p+8",
+      "font": "sans-18",
+      "color": "eef4ef"
+    },
+    {
+      "name": "footer",
+      "kind": "text",
+      "text": "{{footer}}",
+      "x": "5p+4",
+      "y": "91p+4",
+      "font": "sans-bold-14",
+      "color": "7b7e76"
+    }
+  ],
+  "values": {
+    "brand": "MAISON",
+    "headline": "What changed in the last release",
+    "left_label": "Before",
+    "left_point_1": "A filter that did nothing looked like one that worked",
+    "left_point_2": "Errors were reported after the response",
+    "left_point_3": "No way to tell a working URL from an inert one",
+    "right_label": "After",
+    "right_point_1": "Every filter reports whether it ran",
+    "right_point_2": "A refusal arrives before the render",
+    "right_point_3": "The catalogue is generated from imagor itself",
+    "footer": "imagor"
+  }
+}

@@ -1,0 +1,275 @@
+{
+  "name": "Contributor circles",
+  "note": "A row of contributors as circular portraits with names and roles beneath. The portraits should be images on a plain or transparent ground - a source with its own background shows that background as a square block around the circle, which is the source's shape and not a fault in the corner.",
+  "canvas": {
+    "width": 1200,
+    "height": 630,
+    "background": "color:f6f4ee"
+  },
+  "slots": [
+    {
+      "name": "brand-accent",
+      "kind": "rect",
+      "image": "color:c36c4a",
+      "x": "6p",
+      "y": "10p+1",
+      "width": "2p+2",
+      "height": "0p+3"
+    },
+    {
+      "name": "brand",
+      "kind": "text",
+      "text": "{{brand}}",
+      "x": "9p+4",
+      "y": "8p+3",
+      "font": "sans-bold-18",
+      "color": "242a27"
+    },
+    {
+      "name": "headline",
+      "kind": "text",
+      "text": "{{headline}}",
+      "x": "6p",
+      "y": "16p+2",
+      "width": "full-144",
+      "height": "13p+6",
+      "font": "serif",
+      "color": "242a27",
+      "max_size": 64,
+      "min_size": 54
+    },
+    {
+      "name": "portrait-1",
+      "kind": "image",
+      "image": "{{person1_image}}",
+      "x": "7p+8",
+      "y": "37p+5",
+      "width": "14p+8",
+      "height": "27p+6",
+      "filters": "smart/filters:round_corner(88,88,f6f4ee)"
+    },
+    {
+      "name": "portrait-2",
+      "kind": "image",
+      "image": "{{person2_image}}",
+      "x": "31p",
+      "y": "37p+5",
+      "width": "14p+8",
+      "height": "27p+6",
+      "filters": "smart/filters:round_corner(88,88,f6f4ee)"
+    },
+    {
+      "name": "portrait-3",
+      "kind": "image",
+      "image": "{{person3_image}}",
+      "x": "54p+4",
+      "y": "37p+5",
+      "width": "14p+8",
+      "height": "27p+6",
+      "filters": "smart/filters:round_corner(88,88,f6f4ee)"
+    },
+    {
+      "name": "portrait-4",
+      "kind": "image",
+      "image": "{{person4_image}}",
+      "x": "77p+8",
+      "y": "37p+5",
+      "width": "14p+8",
+      "height": "27p+6",
+      "filters": "smart/filters:round_corner(88,88,f6f4ee)"
+    },
+    {
+      "name": "person-1-labels",
+      "kind": "image",
+      "x": "5p+10",
+      "y": "68p+3",
+      "width": "18p+4",
+      "height": "13p+2",
+      "slots": [
+        {
+          "name": "name",
+          "kind": "text",
+          "text": "{{person1_name}}",
+          "x": "center",
+          "y": "0p",
+          "width": "full",
+          "height": "40p",
+          "font": "sans-bold",
+          "color": "242a27",
+          "max_size": 24,
+          "min_size": 20
+        },
+        {
+          "name": "role",
+          "kind": "text",
+          "text": "{{person1_role}}",
+          "x": "center",
+          "y": "46p",
+          "width": "full",
+          "height": "32p",
+          "font": "sans",
+          "color": "6f7771",
+          "max_size": 16,
+          "min_size": 13
+        }
+      ]
+    },
+    {
+      "name": "person-2-labels",
+      "kind": "image",
+      "x": "29p+2",
+      "y": "68p+3",
+      "width": "18p+4",
+      "height": "13p+2",
+      "slots": [
+        {
+          "name": "name",
+          "kind": "text",
+          "text": "{{person2_name}}",
+          "x": "center",
+          "y": "0p",
+          "width": "full",
+          "height": "40p",
+          "font": "sans-bold",
+          "color": "242a27",
+          "max_size": 24,
+          "min_size": 20
+        },
+        {
+          "name": "role",
+          "kind": "text",
+          "text": "{{person2_role}}",
+          "x": "center",
+          "y": "46p",
+          "width": "full",
+          "height": "32p",
+          "font": "sans",
+          "color": "6f7771",
+          "max_size": 16,
+          "min_size": 13
+        }
+      ]
+    },
+    {
+      "name": "person-3-labels",
+      "kind": "image",
+      "x": "52p+6",
+      "y": "68p+3",
+      "width": "18p+4",
+      "height": "13p+2",
+      "slots": [
+        {
+          "name": "name",
+          "kind": "text",
+          "text": "{{person3_name}}",
+          "x": "center",
+          "y": "0p",
+          "width": "full",
+          "height": "40p",
+          "font": "sans-bold",
+          "color": "242a27",
+          "max_size": 24,
+          "min_size": 20
+        },
+        {
+          "name": "role",
+          "kind": "text",
+          "text": "{{person3_role}}",
+          "x": "center",
+          "y": "46p",
+          "width": "full",
+          "height": "32p",
+          "font": "sans",
+          "color": "6f7771",
+          "max_size": 16,
+          "min_size": 13
+        }
+      ]
+    },
+    {
+      "name": "person-4-labels",
+      "kind": "image",
+      "x": "75p+10",
+      "y": "68p+3",
+      "width": "18p+4",
+      "height": "13p+2",
+      "slots": [
+        {
+          "name": "name",
+          "kind": "text",
+          "text": "{{person4_name}}",
+          "x": "center",
+          "y": "0p",
+          "width": "full",
+          "height": "40p",
+          "font": "sans-bold",
+          "color": "242a27",
+          "max_size": 24,
+          "min_size": 20
+        },
+        {
+          "name": "role",
+          "kind": "text",
+          "text": "{{person4_role}}",
+          "x": "center",
+          "y": "46p",
+          "width": "full",
+          "height": "32p",
+          "font": "sans",
+          "color": "6f7771",
+          "max_size": 16,
+          "min_size": 13
+        }
+      ]
+    },
+    {
+      "name": "footer-rule",
+      "kind": "rect",
+      "image": "color:d9d6cd",
+      "x": "6p",
+      "y": "88p+2",
+      "width": "full-144",
+      "height": "0p+1"
+    },
+    {
+      "name": "footer",
+      "kind": "image",
+      "x": "87p+6",
+      "y": "90p+6",
+      "width": "6p+6",
+      "height": "4p+5",
+      "slots": [
+        {
+          "name": "footer-text",
+          "kind": "text",
+          "text": "{{footer}}",
+          "x": "center",
+          "y": "0p",
+          "width": "full",
+          "height": "86p",
+          "font": "sans-bold",
+          "color": "777d77",
+          "max_size": 15,
+          "min_size": 13
+        }
+      ]
+    }
+  ],
+  "values": {
+    "brand": "MAISON",
+    "headline": "The people behind it",
+    "person1_name": "Mei Lam",
+    "person1_role": "Platform engineering",
+    "person1_image": "http://localhost:8198/src_p1.png",
+    "person2_name": "Jon Ho",
+    "person2_role": "Image pipeline",
+    "person2_image": "http://localhost:8198/src_p2.png",
+    "person3_name": "Ada Cheng",
+    "person3_role": "Developer experience",
+    "person3_image": "http://localhost:8198/src_p3.png",
+    "person4_name": "Sam Yuen",
+    "person4_role": "Reliability",
+    "person4_image": "http://localhost:8198/src_p4.png",
+    "footer": "imagor"
+  }
+}
