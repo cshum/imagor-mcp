@@ -67,6 +67,30 @@ which; it never falls back to unsigned URLs on its own.
 The signing settings must match the target imagor instance exactly, or its
 signature verification will reject the URLs.
 
+### Preview performance
+
+`verify_imagor_url` returns the rendered result, and it asks imagor for it with
+`preview()`. That filter tells imagor not to write the render to result storage,
+and opts the request into its in-memory cache when one is configured.
+
+**Enabling the cache on the imagor you point at makes repeated previews much
+faster.** Measured on a 1600×600 composition: the first whole preview took
+**386 ms** and a repeat **25 ms**, because the composition is served from the
+cache instead of being re-decoded. Set it on the imagor side:
+
+```bash
+VIPS_CACHE_SIZE=52428800      # byte budget; 0 disables the cache (default)
+VIPS_CACHE_MAX_WIDTH=2400     # images larger than this are not cached
+VIPS_CACHE_MAX_HEIGHT=2000
+VIPS_CACHE_TTL=               # 0 = no expiry, LRU eviction only
+```
+
+This matters most when a caller looks at the same composition repeatedly, which
+is what iterating on a layout does. A **region** request is unaffected: imagor
+bypasses the cache for crop coordinates, and the cost there is the fetch of the
+composition rather than the decode. `preview()` is never added to the URL a
+caller is given, so none of this changes what a composition means.
+
 ## MCP client configuration
 
 ```json
