@@ -1,78 +1,98 @@
 {
   "name": "Product OG image",
-  "source": "A product share card: title, price, collection, featured image, logo",
+  "note": "An editorial product share card with a featured product photograph and concise offer details.",
   "canvas": {
     "width": 1200,
-    "height": 630,
-    "background": "color:ffffff"
+    "height": 630
   },
+  "background": "color:f7f5f0",
   "slots": [
     {
-      "name": "shot",
+      "name": "photo-mat",
+      "kind": "rect",
+      "image": "color:ffffff",
+      "x": "51p+8",
+      "y": "6p+4",
+      "width": "44p+4",
+      "height": "86p+4"
+    },
+    {
+      "name": "featured-image",
       "kind": "image",
       "image": "{{featured_image}}",
-      "x": "half",
-      "y": "0",
-      "width": "half",
-      "height": "full"
+      "x": "52p+8",
+      "y": "7p+6",
+      "width": "42p+4",
+      "height": "83p+6"
+    },
+    {
+      "name": "collection-accent",
+      "kind": "rect",
+      "image": "color:9b8057",
+      "x": "7p",
+      "y": "22p+3",
+      "width": "2p+10",
+      "height": "0p+3"
     },
     {
       "name": "collection",
       "kind": "text",
       "text": "{{collection}}",
-      "x": "60",
-      "y": "180",
-      "font": "sans-bold-20",
-      "color": "64748b"
+      "x": "7p",
+      "y": "26p+1",
+      "font": "sans-bold",
+      "size": 19,
+      "color": "806d52"
     },
     {
       "name": "title",
       "kind": "text",
       "text": "{{title}}",
-      "x": "60",
-      "y": "230",
-      "width": "half-120",
-      "height": "150",
-      "font": "sans",
-      "color": "0f172a",
-      "max_size": 52,
-      "min_size": 24,
+      "x": "7p",
+      "y": "34p+4",
+      "width": "37p+6",
+      "height": "26p",
+      "font": "serif",
+      "color": "25231f",
+      "max_size": 62,
+      "min_size": 48,
       "align": "low"
     },
     {
       "name": "price",
       "kind": "text",
       "text": "{{price}}",
-      "x": "60",
-      "y": "full-200",
-      "font": "sans-bold-44",
-      "color": "111827"
+      "x": "7p",
+      "y": "66p+6",
+      "font": "sans-bold",
+      "size": 38,
+      "color": "25231f"
+    },
+    {
+      "name": "cta-accent",
+      "kind": "rect",
+      "image": "color:9b8057",
+      "x": "7p",
+      "y": "77p+5",
+      "width": "2p+4",
+      "height": "0p+2"
     },
     {
       "name": "cta",
       "kind": "text",
       "text": "{{cta}}",
-      "x": "60",
-      "y": "full-140",
-      "font": "sans-22",
-      "color": "2563eb"
-    },
-    {
-      "name": "logo",
-      "kind": "image",
-      "image": "{{logo}}",
-      "x": "60",
-      "y": "80",
-      "width": "120"
+      "x": "7p",
+      "y": "81p+2",
+      "font": "sans",
+      "size": 20,
+      "color": "6e665a"
     }
   ],
   "values": {
-    "name": "Intrecciato 19 shoulder bag",
+    "title": "Intrecciato 19 shoulder bag",
     "price": "HKD$18500",
     "collection": "Autumn 2026",
     "cta": "Free delivery",
-    "featured_image": "http://localhost:8198/src_p1.png",
-    "logo": "http://localhost:8198/src_p1.png",
-    "title": "Intrecciato 19 shoulder bag"
+    "featured_image": "http://localhost:8198/src_p1.png"
   }
 }
