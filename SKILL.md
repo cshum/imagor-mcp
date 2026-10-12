@@ -49,8 +49,9 @@ parameters are four flat fields, not a nested object:
 - `WxH` fills the box exactly by **cropping** from the centre, so it can never aim at
   the one edge that is wrong, and a source of another shape loses its edges.
 - `stretch/WxH` ignores the aspect ratio, so it **distorts** — a 290×175 source in
-  `280x154` comes back at aspect 1.818 against 1.657, nearly 10% wrong. Use
-  `full-fit-in` to fill a box of another shape.
+  `280x154` comes back at aspect 1.818 against 1.657, nearly 10% wrong. If the box
+  cannot be reshaped, `full-fit-in` fills it without distorting, at the cost of
+  overrunning one side.
 - `crop()` is the only mode that **aims**, which is what removes an unwanted sliver
   on a known side. `focal` and `smart` also crop: `focal` lands where a centre crop
   does unless the subject is off-centre, and `smart` frames by content.
