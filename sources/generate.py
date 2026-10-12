@@ -111,8 +111,6 @@ FIXTURES = {
     # Textures: for cards that want depth behind their copy.
     "texture-navy": ("texture", "A dark diagonal gradient, for a hero ground.",
                      texture(1200, 800, [("0", NAVY), ("1", "#1e3a5f")])),
-    "texture-forest": ("texture", "A deep green diagonal gradient, the house ground.",
-                       texture(1200, 800, [("0", "#142e2b"), ("1", "#20443c")])),
     "texture-warm": ("texture", "A warm gradient, light to dark.",
                      texture(1200, 800, [("0", CREAM), ("1", TAN)])),
 
