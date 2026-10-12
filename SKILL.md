@@ -51,28 +51,21 @@ parameters are four flat fields, not a nested object:
 - `WxH` fills the box exactly by **cropping** the overflow from the centre, so it
   can never aim at the one edge that is wrong, and a source whose shape differs
   from the box loses its edges.
-- `stretch/WxH` ignores the aspect ratio, which **distorts the image**. A 290×175
-  source stretched into `280x154` comes back at aspect 1.818 against the source's
-  1.657 — nearly 10% wrong, and visible on anything with a known shape. It is
-  correct only when the box already matches the source, where it does nothing, or
-  when distortion is wanted. To fill a box of a different shape use `full-fit-in`,
-  which keeps the aspect and lets the long side overrun and clip instead.
-- `crop()` is the only mode that **aims**. It is what removes an unwanted sliver
-  on a known side.
-- `fit-in` letterboxes, so it keeps the sliver and adds bars.
-- `trim()` only removes a uniform border; on a product sitting on a panel it is a
-  no-op with byte-identical output.
-- `focal` lands where a centre crop lands unless the subject is off-centre.
-- `smart` is a crop mode too, for content-aware framing; it composes with
-  `round_corner` for a circular avatar.
+- `stretch/WxH` ignores the aspect ratio, so it **distorts** — a 290×175 source in
+  `280x154` comes back at aspect 1.818 against 1.657, nearly 10% wrong. Use
+  `full-fit-in` to fill a box of another shape.
+- `crop()` is the only mode that **aims**, which is what removes an unwanted sliver
+  on a known side. `focal` and `smart` also crop: `focal` lands where a centre crop
+  does unless the subject is off-centre, and `smart` frames by content.
+- `trim()` only removes a uniform border, so on a product on a panel it is a no-op
+  with byte-identical output.
 
 ## Overlays and text
 
 `image(path, x, y[, alpha[, blend_mode]])` composites a processed image and its
 path is a full imagor path, so it nests. `text(text, x, y, font, color)` draws a
-label. Positions are relative to the **current canvas** — inside a nested path
-that is the overlay, not the parent, so a label centred under a product belongs
-in the nested path.
+label. Positions are relative to the **current canvas**, so inside a nested path
+that is the overlay, not the parent.
 
 ```
 fit-in/200x260/filters:fill(white)
@@ -83,43 +76,39 @@ fit-in/200x260/filters:fill(white)
 
 Accepted positions, on both axes:
 
-- A number: from the left or top. **Negative: from the right or bottom**, an
-  inset of that many pixels.
-- `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`, `center`, optionally with an
-  offset. `right-20` moves **past** the right edge, the opposite direction to
-  `-20`, so it can clip off the canvas.
-- `Np` or a float `0.0`–`1.0` for a percentage of the canvas, placing the **left**
-  or **top** edge — `0.5` is the same as `50p`, and neither centres. `center`
-  centres, and takes no offset: `center-100` does not parse and silently becomes
-  `0`.
+- A number: from the left or top. **Negative: from the right or bottom**, an inset
+  of that many pixels.
+- `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`, `center`, optionally offset.
+  `right-20` moves **past** the right edge — the opposite of `-20` — so it can clip.
+- `Np`, or a float `0.0`–`1.0`, for a percentage of the canvas, placing the **left**
+  or **top** edge: `0.5` is `50p`, and neither centres. `center` takes no offset —
+  `center-100` does not parse and silently becomes `0`.
 - `repeat` tiles.
 
 A position is the **top-left of the box**, so `full-70` for a caption puts the
 *box* 70px from the bottom and the ink reaches below it. Leave more room than the
 margin you want.
 
-`full` or `f` in a nested dimension inherits the parent: `fullxfull`,
+`full` or `f` in a **nested dimension** inherits the parent: `fullxfull`,
 `fit-in/full-20xfull-20`. A **position** has no such form — `full-N` written as a
-position is read as `0` and the element lands at the origin, with a `200`. The
+position is read as `0`, lands the element at the origin and returns `200`. The
 build tools warn when they see one.
 
 ## Nested path order
 
 Inside `image()` the path is a normal path, so crop and dimensions come before
-`filters:`. `image()` is the one to reach for; `watermark()` is the older,
-narrower form, as `label()` is to `text()`. Both pairs take the source or text
-first, then `x`, then `y`, so a `text` or `source` field works for either.
+`filters:`. `watermark()` is the older, narrower form of `image()`, and takes the
+source first, then `x`, then `y`.
 
 Sources inside `image()` need a full URL; a bare filename is a `404`, even when
 the same name works as the top-level image.
 
 ## Colors and awkward URLs
 
-`color:white` is a canvas with no source. A strip no source covers can be painted
-flat: `image(311x35/color:f1f2ee,1096,600)` is a rectangle, and stacking a colour
-rectangle behind an inset photo is also how a border is drawn — it keeps the
-canvas size under your control, where `padding(color, N)` grows the output (300px
-becomes 340px at `padding(x,20)`).
+`color:white` is a canvas with no source: `image(311x35/color:f1f2ee,1096,600)` is
+a rectangle. Stacking one behind an inset photo draws a border, which keeps the
+canvas size under your control — `padding(color, N)` grows the output instead
+(300px becomes 340px at `padding(x,20)`).
 
 `round_corner` takes pixels, not a ratio: `round_corner(0.5)` is a half-pixel
 radius and renders square. A circle is `round_corner(r,r,background)` where `r` is
@@ -132,13 +121,12 @@ black.
 encoded, and markup characters escaped, because the renderer reads Pango markup in
 a text argument.
 
-**A source takes a character set, plus reserved words.** A source is nearly always
-a path or URL, which legitimately contains `/`, `:`, `.` and `=`, so a whitelist
-there would encode every real source and make every path opaque. Encoded are any
-of **space `?` `#` `&` `(` `)` `,`** — each changes how the path is read — and a
-source **beginning with `trim/`, `meta/`, `fit-in/`, `full-fit-in/`,
-`adaptive-fit-in/`, `stretch/`, `top/`, `left/`, `right/`, `bottom/`, `center/`
-or `smart/`**, which imagor reads as a command.
+**A source takes a character set, plus reserved words.** A source is a path or URL
+and legitimately contains `/`, `:`, `.` and `=`, so a whitelist would encode every
+real source. Encoded are **space `?` `#` `&` `(` `)` `,`** — each changes how the
+path is read — and a source **beginning with `trim/`, `meta/`, `fit-in/`,
+`full-fit-in/`, `adaptive-fit-in/`, `stretch/`, `top/`, `left/`, `right/`,
+`bottom/`, `center/` or `smart/`**, which imagor reads as a command.
 
 Put text in the `text` field and a source in the `source` field and both are
 handled — the argument is data, not syntax, and does not belong in a string
@@ -271,14 +259,13 @@ unrelated pictures rather than a grid — and no amount of position tuning fixes
 
 ## Responsive compositions
 
-In any dimension segment `full` or `f` means the parent's dimension and
-`full-NNN` means that minus NNN pixels, so one composition can serve several
-canvas sizes: `fullxfull` fills the parent, `fit-in/full-40xfull-40/PHOTO` insets
-40px on every side, `12xfull/color:3b82f6` is an accent bar at full height, and
-`full-80` as a `text()` wrap width wraps to the canvas it lands on.
+One composition can serve several canvas sizes: `fullxfull` fills the parent,
+`fit-in/full-40xfull-40/PHOTO` insets 40px on every side, `12xfull/color:3b82f6`
+is an accent bar at full height, and `full-80` as a `text()` wrap width wraps to
+the canvas it lands on.
 
 **Sizes adapt; type does not.** A font size is in pixels, so the same composition
-renders relatively smaller type on a larger canvas and there is no percentage font
+renders relatively smaller type on a larger canvas, and there is no percentage font
 size. Size the text per canvas with `fit_text`, or accept that it will not scale.
 
 ## When imagor refuses to serve
@@ -317,8 +304,6 @@ reports what this server is using — compare before debugging anything else.
 6. To composite, build small pieces first and check each: one product tile, then
    the grid, then the whole banner. A wrong number in a nested path is much harder
    to see in the finished image than in the piece.
-7. Where you cannot see the answer — a colour, a dimension, whether a filter
-   changed anything — measure it. A `200` and a plausible-looking image are not
-   evidence; a mean difference over the region you changed is. But measure only
-   what looking cannot settle, because a number is not a substitute for the
-   picture when the question is whether it looks right.
+7. Measure only what looking cannot settle — a colour, a dimension, whether a
+   filter changed anything. A `200` and a plausible image are not evidence; a mean
+   difference over the region you changed is. See the measuring rule above.
