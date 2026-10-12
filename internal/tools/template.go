@@ -20,8 +20,9 @@ import (
 // canvas rather than the banner.
 type InnerSlot struct {
 	Name    string `json:"name" jsonschema:"a label for this slot, used in the resolved output"`
-	Kind    string `json:"kind,omitempty" jsonschema:"text or rect; defaults to text"`
-	Text    string `json:"text,omitempty" jsonschema:"the string, which may contain {{values}}"`
+	Kind    string `json:"kind,omitempty" jsonschema:"text, image or rect; defaults to text"`
+	Text    string `json:"text,omitempty" jsonschema:"for text: the string, which may contain {{values}}"`
+	Image   string `json:"image,omitempty" jsonschema:"for image or rect: a source URL, or color:RRGGBB for a rect"`
 	X       string `json:"x,omitempty" jsonschema:"horizontal position within this canvas; defaults to center, which is the only value that centres text"`
 	Y       string `json:"y,omitempty" jsonschema:"vertical position within this canvas"`
 	Width   string `json:"width,omitempty" jsonschema:"the box width; defaults to the canvas width"`
@@ -590,6 +591,41 @@ func (c Config) nestedCanvas(ctx context.Context, slot TemplateSlot, in Template
 	filters := make(imagorpath.Filters, 0, len(slot.Slots))
 	var parts []string
 	for _, inner := range slot.Slots {
+		// An inner slot is not necessarily text: a canvas holding a coloured panel or
+		// a photograph is the other half of what a canvas is for.
+		if kind := orDefault(inner.Kind, "text"); kind == "image" || kind == "rect" {
+			src := substitute(inner.Image, in.Values)
+			if strings.TrimSpace(src) == "" {
+				parts = append(parts, fmt.Sprintf("%s skipped: no source", inner.Name))
+				continue
+			}
+			iw, err := c.resolve(orDefault(inner.Width, strconv.Itoa(w)), w, 0)
+			if err != nil {
+				return "", "", fmt.Errorf("slot %q.%s width: %w", slot.Name, inner.Name, err)
+			}
+			ih, err := c.resolve(orDefault(inner.Height, strconv.Itoa(h)), h, 0)
+			if err != nil {
+				return "", "", fmt.Errorf("slot %q.%s height: %w", slot.Name, inner.Name, err)
+			}
+			ix, err := c.resolve(orDefault(inner.X, "0"), w, 0)
+			if err != nil {
+				return "", "", fmt.Errorf("slot %q.%s x: %w", slot.Name, inner.Name, err)
+			}
+			iy, err := c.resolve(orDefault(inner.Y, "0"), h, 0)
+			if err != nil {
+				return "", "", fmt.Errorf("slot %q.%s y: %w", slot.Name, inner.Name, err)
+			}
+			seg := fmt.Sprintf("%dx%d", iw, ih)
+			if f := strings.Trim(strings.TrimSpace(inner.Filters), "/"); f != "" {
+				seg = fmt.Sprintf("%s/%s", seg, f)
+			}
+			filters = append(filters, imagorpath.Filter{
+				Name: "image",
+				Args: fmt.Sprintf("%s/%s,%d,%d", seg, encodeSourceValue(src), ix, iy),
+			})
+			parts = append(parts, fmt.Sprintf("%s %s at %d,%d", inner.Name, kind, ix, iy))
+			continue
+		}
 		text := substitute(inner.Text, in.Values)
 		if strings.TrimSpace(text) == "" {
 			parts = append(parts, fmt.Sprintf("%s skipped: no text", inner.Name))

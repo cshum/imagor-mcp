@@ -179,7 +179,9 @@ literal `{{name}}`, which reads as a layout fault instead of a missing value.
 **A slot carrying its own `slots` is a canvas.** Its width and height become the canvas
 the inner slots lay out on, and the result draws at the outer slot's position. That is
 how text is centred on something narrower than the frame — see the centring rule below.
-A nested canvas is transparent, so it adds only what it draws.
+The inner slots may be text, an image or a rect, so a canvas can hold a coloured panel
+or a photograph as well as a label. A nested canvas is transparent, so it adds only what
+it draws.
 
 ### Geometry forms
 

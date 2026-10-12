@@ -83,3 +83,39 @@ func TestNestedCanvasNeedsASize(t *testing.T) {
 		t.Fatal("a nested canvas without a width and height should be refused")
 	}
 }
+
+// A nested canvas holds more than text. A coloured panel or a photograph inside one
+// is the other half of what a canvas is for, and the inner type had no image field,
+// so a rect inside a canvas was refused as an unknown property rather than built.
+func TestNestedCanvasHoldsARectAndAnImage(t *testing.T) {
+	c := Config{Unsafe: true}
+	in := TemplateInput{
+		CanvasWidth: 400, CanvasHeight: 200, Background: "color:ffffff",
+		Slots: []TemplateSlot{{
+			Name: "panel", Kind: "image", X: "50", Y: "50", Width: "300", Height: "100",
+			Slots: []InnerSlot{
+				{Name: "bg", Kind: "rect", Image: "color:e11d48", X: "0", Y: "0", Width: "300", Height: "100"},
+				{Name: "t", Kind: "text", Text: "HELLO", Y: "40", Font: "sans-bold", Size: 28},
+			},
+		}},
+	}
+	_, out, err := c.RenderTemplateTool(context.Background(), nil, in)
+	if err != nil {
+		t.Fatalf("render: %v", err)
+	}
+	// The rect is an image() inside the nested path, sized to the canvas, with its
+	// colour as the source.
+	if !strings.Contains(out.Path, "image(300x100/color:e11d48,0,0)") {
+		t.Fatalf("the inner rect is not in the nested path:\n%s", out.Path)
+	}
+	if !strings.Contains(out.Path, ":text(HELLO,") {
+		t.Fatalf("the inner text is not in the nested path:\n%s", out.Path)
+	}
+	// A rect with no source is skipped rather than emitted empty.
+	in.Slots[0].Slots[0].Image = ""
+	if _, out2, err := c.RenderTemplateTool(context.Background(), nil, in); err != nil {
+		t.Fatalf("render with an empty rect: %v", err)
+	} else if strings.Contains(out2.Path, "color:,0,0") {
+		t.Fatalf("an empty rect was emitted:\n%s", out2.Path)
+	}
+}
