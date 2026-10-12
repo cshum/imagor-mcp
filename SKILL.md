@@ -250,8 +250,12 @@ Text lands wherever the font's own metrics put it, and nothing reports those.
   was asked for. A generic family is the safe choice; a named face is only safe
   once you have seen it render.
 - **A wordmark is usually letter-spaced, so draw it one glyph per call.** One
-  `text()` cannot reproduce tracking; measuring each glyph and placing separate
-  calls is what reaches the reference.
+  `text()` cannot reproduce tracking, and `spacing` does not help — it is *line*
+  spacing, applied vertically. Measuring each glyph and placing separate calls is
+  what reaches the reference; on one 1800px banner the wordmark glyphs landed at
+  x=1035, 1111, 1184, 1209, 1282, 1351. **Worth it for a wordmark or a display
+  headline; not for body text**, where the spacing is invisible and the cost is
+  one call per character.
 - Measure the region you changed, not the whole image: a whole-image number hides
   a label that is 40px out, because most of the canvas did not move. When the
   sources are exact crops, the whole residual is text, so measure the text bands
