@@ -352,7 +352,43 @@ func compositionWarnings(p imagorpath.Params) []string {
 				"the crop's size. To crop the source and then scale it, use the crop path parameters "+
 				"(crop_left, crop_top, crop_right, crop_bottom) instead of the filter.")
 	}
-	return append(out, positionWarnings(p.Filters)...)
+	return append(out, append(positionWarnings(p.Filters), fontWarnings(p.Filters)...)...)
+}
+
+// fontWarnings reports font arguments whose size will be silently discarded. Pango
+// reads the family first and the size last, so a number anywhere else is ignored:
+// "sans-40-bold" renders at the default 20. imagor answers 200 either way, so the
+// only evidence is the type looking wrong.
+func fontWarnings(filters []imagorpath.Filter) []string {
+	var out []string
+	for _, f := range filters {
+		if f.Name != "text" {
+			continue
+		}
+		args := strings.Split(f.Args, ",")
+		if len(args) < 4 {
+			continue
+		}
+		font := strings.TrimSpace(args[3])
+		parts := strings.Split(font, "-")
+		if len(parts) < 3 {
+			continue
+		}
+		for i, tok := range parts[1 : len(parts)-1] {
+			if _, err := strconv.Atoi(tok); err != nil {
+				continue
+			}
+			// The fix is to move the size to the end, not to add a second one.
+			moved := append(append([]string{}, parts[:i+1]...), parts[i+2:]...)
+			moved = append(moved, tok)
+			out = append(out, fmt.Sprintf(
+				"text() font %q names a size that is not last, so Pango ignores it and the text "+
+					"renders at the default 20. Write %s instead.",
+				font, strings.Join(moved, "-")))
+			break
+		}
+	}
+	return out
 }
 
 // positionWarnings reports a position written in a form imagor reads as zero.

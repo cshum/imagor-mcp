@@ -236,15 +236,19 @@ shape that fails.
 
 Text lands wherever the font's own metrics put it, and nothing reports those.
 
-- **A font is `family[-style]-size`.** `sans-40`, `sans-bold-40`, `monospace-18`;
-  size optional, defaulting to 20, and case is ignored. A literal space in the
-  argument is a **malformed URL**, not a font error — use a hyphen or `b64:`.
-- **Prefer a generic — `sans`, `serif`, `monospace` — over a named face.** A name
-  that is not installed **falls back silently** and still returns `200`, so the
-  render succeeds and the type is not what was asked for. Which faces exist is a
-  property of the imagor you point at, not of this server. On the official image
-  the generics already reach DejaVu, so naming it adds nothing; the ones worth
-  naming are `Liberation-Sans` and `Open-Sans`.
+- **A font is a Pango description with hyphens for spaces.** `sans-bold-40`
+  becomes `sans bold 40`, and Pango parses the rest. **The family comes first and
+  the size last.** A number anywhere else is silently ignored — `sans-40-bold`
+  renders at the default 20, not 40 — and a word before the family is read *as*
+  the family: `bold-sans-40` renders exactly as `sans-40`. Size defaults to 20.
+  A literal space in the argument is a **malformed URL**, not a font error — use
+  a hyphen or `b64:`.
+- **Prefer a generic — `sans`, `serif`, `monospace` — over a named face.** On the
+  official image they *are* DejaVu, byte for byte at the same size, so naming it
+  adds nothing; the ones worth naming are `Liberation-Sans` and `Open-Sans`. A
+  name that is not installed falls back to DejaVu, silently and with a `200`, so
+  the render succeeds and the type is not what was asked for. Which faces exist is
+  a property of the imagor you point at, not of this server.
 - **A fitted text slot takes the largest size that fits its box.** That is what a
   headline wants and what a supporting line does not — a short line balloons to fill
   the box it was given. Cap it with `max_size`, or give the slot no height and a
