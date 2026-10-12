@@ -1,0 +1,146 @@
+[
+  {
+    "name": "huge",
+    "file": "huge.svg",
+    "kind": "edge",
+    "width": 4000,
+    "height": 4000,
+    "aspect": 1.0,
+    "note": "4000x4000. Much larger than any box, so a fit has to downscale."
+  },
+  {
+    "name": "portrait-a",
+    "file": "portrait-a.svg",
+    "kind": "portrait",
+    "width": 400,
+    "height": 400,
+    "aspect": 1.0,
+    "note": "An abstract portrait. For circles and avatar cards."
+  },
+  {
+    "name": "portrait-b",
+    "file": "portrait-b.svg",
+    "kind": "portrait",
+    "width": 400,
+    "height": 400,
+    "aspect": 1.0,
+    "note": "An abstract portrait on a lighter ground."
+  },
+  {
+    "name": "portrait-c",
+    "file": "portrait-c.svg",
+    "kind": "portrait",
+    "width": 400,
+    "height": 400,
+    "aspect": 1.0,
+    "note": "An abstract portrait, third tone."
+  },
+  {
+    "name": "product-bag",
+    "file": "product-bag.svg",
+    "kind": "product",
+    "width": 400,
+    "height": 400,
+    "aspect": 1.0,
+    "note": "A soft rectangular bag. The default for a grid cell."
+  },
+  {
+    "name": "product-bottle",
+    "file": "product-bottle.svg",
+    "kind": "product",
+    "width": 300,
+    "height": 480,
+    "aspect": 0.625,
+    "note": "A tall narrow bottle. A different aspect to the others."
+  },
+  {
+    "name": "product-box",
+    "file": "product-box.svg",
+    "kind": "product",
+    "width": 400,
+    "height": 400,
+    "aspect": 1.0,
+    "note": "A rigid box with a lid. Sits well beside a bag."
+  },
+  {
+    "name": "scene-tall",
+    "file": "scene-tall.svg",
+    "kind": "scene",
+    "width": 700,
+    "height": 900,
+    "aspect": 0.778,
+    "note": "A tall panel with a subject. For a launch card."
+  },
+  {
+    "name": "scene-wide",
+    "file": "scene-wide.svg",
+    "kind": "scene",
+    "width": 1600,
+    "height": 600,
+    "aspect": 2.667,
+    "note": "A wide panel with a subject. For a banner."
+  },
+  {
+    "name": "square",
+    "file": "square.svg",
+    "kind": "edge",
+    "width": 600,
+    "height": 600,
+    "aspect": 1.0,
+    "note": "600x600. A shape no other fixture has, for testing crop."
+  },
+  {
+    "name": "tall",
+    "file": "tall.svg",
+    "kind": "edge",
+    "width": 200,
+    "height": 1600,
+    "aspect": 0.125,
+    "note": "200x1600. The other extreme."
+  },
+  {
+    "name": "texture-navy",
+    "file": "texture-navy.svg",
+    "kind": "texture",
+    "width": 1200,
+    "height": 800,
+    "aspect": 1.5,
+    "note": "A dark diagonal gradient. For a hero ground."
+  },
+  {
+    "name": "texture-warm",
+    "file": "texture-warm.svg",
+    "kind": "texture",
+    "width": 1200,
+    "height": 800,
+    "aspect": 1.5,
+    "note": "A warm gradient, light to dark."
+  },
+  {
+    "name": "tiny",
+    "file": "tiny.svg",
+    "kind": "edge",
+    "width": 64,
+    "height": 64,
+    "aspect": 1.0,
+    "note": "64x64. Smaller than most boxes, so a fit has to upscale."
+  },
+  {
+    "name": "transparent",
+    "file": "transparent.svg",
+    "kind": "edge",
+    "width": 400,
+    "height": 400,
+    "aspect": 1.0,
+    "note": "400x400 with no ground. Tests what a card does over nothing."
+  },
+  {
+    "name": "wide",
+    "file": "wide.svg",
+    "kind": "edge",
+    "width": 1600,
+    "height": 200,
+    "aspect": 8.0,
+    "note": "1600x200. An extreme aspect. Exposes letterboxing."
+  }
+]
