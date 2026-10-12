@@ -145,10 +145,9 @@ same thing.
 
 ## Templates
 
-`render_template` renders a layout at a canvas size, so a layout is written once
-and served at any size. A text slot given a height is **fitted against the box its
-geometry resolves to**, which is what makes the type adapt — a font size on its
-own is absolute.
+`render_template` renders a layout at a canvas size, so a layout is written once and
+served at any size. A text slot given a height is **fitted against the box its geometry
+resolves to**, which is what makes type adapt.
 
 ```json
 {
@@ -157,9 +156,9 @@ own is absolute.
     {"name":"bar","kind":"rect","image":"color:3b82f6","x":"0","y":"0",
      "width":"12","height":"full"},
     {"name":"eyebrow","kind":"text","text":"{{eyebrow}}","x":"40","y":"40",
-     "font":"sans-bold-22","color":"3b82f6"},
+     "font":"Open-Sans-bold-22","color":"3b82f6"},
     {"name":"title","kind":"text","text":"{{title}}","x":"40","y":"140",
-     "width":"full-80","height":"220","font":"serif","color":"ffffff",
+     "width":"full-80","height":"220","font":"Liberation-Serif","color":"ffffff",
      "align":"low","max_size":84,"min_size":24}
   ],
   "values": {"eyebrow":"ENGINEERING","title":"…"}
@@ -177,11 +176,10 @@ Slots are applied in order, so later ones draw over earlier ones. Values fill
 literal `{{name}}`, which reads as a layout fault instead of a missing value.
 
 **A slot carrying its own `slots` is a canvas.** Its width and height become the canvas
-the inner slots lay out on, and the result draws at the outer slot's position. That is
-how text is centred on something narrower than the frame — see the centring rule below.
-The inner slots may be text, an image or a rect, so a canvas can hold a coloured panel
-or a photograph as well as a label. A nested canvas is transparent, so it adds only what
-it draws.
+the inner slots lay out on, and the result draws at the outer slot's position — the way
+to centre text on something narrower than the frame. Inner slots may be text, an image
+or a rect, so a canvas holds a panel or a photograph as well as a label. It is
+transparent: it adds only what it draws.
 
 ### Geometry forms
 
@@ -196,11 +194,10 @@ it draws.
 | `38p` | 38% of the canvas dimension |
 | `6p+34p` | a percentage, plus a percentage of the same dimension |
 
-imagor has no fraction and no percentage form for a dimension, so those are the
-template layer's own and are resolved to pixels. `full` and `full-N` imagor does
-have, so they survive to the path. The template resolves **positions** to pixels
-too, and passes everything else imagor accepts for one (`center`, `top`,
-`bottom`, `right`, `left` and their offset forms) straight through.
+imagor has no fraction or percentage form for a dimension, so those are the template
+layer's own and resolve to pixels. `full` and `full-N` imagor does have, so they reach
+the path. Positions resolve to pixels too; everything else imagor accepts for one
+(`center`, `top`, `bottom`, `left`, `right` and their offsets) passes through.
 
 ## Editing a path you already have
 
