@@ -698,6 +698,19 @@ func (c Config) VerifyURLTool(ctx context.Context, _ *mcp.CallToolRequest, in Ve
 	previewParams := p
 	previewParams.Image = out.AbsoluteURL
 	previewParams.Path = ""
+	// The composition is the source of the preview, so the preview's own filter
+	// list must not repeat the composition's. Carrying p.Filters here applied the
+	// overlays and text a second time, on top of the already-composed source, and
+	// the nested path's arguments then read as filter arguments of the outer path.
+	previewParams.Filters = nil
+	// preview() is added to the preview request and never to the composition. It
+	// tells imagor this is a look rather than the result: the render is not
+	// written to result storage, and the request opts into the in-memory cache so
+	// a second look at the same composition does not decode it again. The caller's
+	// own URL is untouched, so a preview never becomes the artifact.
+	//
+	// It is not exposed as a parameter. Whether a deployment caches is its own
+	// configuration, and a caller composing a banner has no business deciding it.
 	if region := in.PreviewRegion; region != "" {
 		// A region is attached at native resolution, so there is no scaling and
 		// no fit-in: the caller asked for a part of the result in order to read
@@ -706,7 +719,8 @@ func (c Config) VerifyURLTool(ctx context.Context, _ *mcp.CallToolRequest, in Ve
 		if err != nil {
 			return nil, out, nil
 		}
-		previewParams.Filters = append(append(imagorpath.Filters{}, p.Filters...), sel)
+		// Only the crop: the composition already carries its own filters.
+		previewParams.Filters = imagorpath.Filters{sel}
 	} else {
 		// The whole result is attached scaled down, because images cost tokens by
 		// area and a layout question is answered at preview size. The composition
@@ -715,6 +729,8 @@ func (c Config) VerifyURLTool(ctx context.Context, _ *mcp.CallToolRequest, in Ve
 		previewParams.FitIn = true
 		previewParams.Width, previewParams.Height = previewMaxEdge, previewMaxEdge
 	}
+	previewParams.Filters = append(append(imagorpath.Filters{}, previewParams.Filters...),
+		imagorpath.Filter{Name: "preview"})
 	data, mime, previewNote := c.previewImage(ctx, c.BaseURL+"/"+pathgen.BuildURL(previewParams, signer))
 	// The caller is told how much the preview was scaled, so it knows which
 	// coordinate system it is looking at when it asks for a region.
