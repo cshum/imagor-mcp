@@ -60,6 +60,17 @@ parameters are four flat fields, not a nested object:
 - `trim()` only removes a uniform border, so on a product on a panel it is a no-op
   with byte-identical output.
 
+**A fitted image is centred in its box**, because the template adds `fill(none)` to
+its filters: the letterbox becomes transparent and the image sits in the middle rather
+than at the top. Without it a fitted image hangs at the top of its box with the gap
+below, which reads as misalignment in a row of tiles.
+
+**`fit` is for a cell, not for a frame.** Fitting an image into a box that is a
+different shape leaves it smaller than the box on one side. That is right when the box
+is fixed — a grid cell the image has to sit inside — and wrong when the frame can be
+shaped to the source, where the image just comes out undersized. Shape the frame to the
+source's aspect instead, or use `full-fit-in` if it has to cover.
+
 ## Overlays and text
 
 `image(path, x, y[, alpha[, blend_mode]])` composites a processed image and its

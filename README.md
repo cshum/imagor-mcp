@@ -135,6 +135,31 @@ cards, product grids, quotes, announcements. Take the closest, change the values
 render it. They are rendered by the test suite at three canvas sizes, so a recipe
 that no longer works fails CI rather than teaching a shape that fails.
 
+## Templates, nesting and the cookbook
+
+`render_template` takes a layout and a canvas size, so one layout serves 1200×630 and
+1080×1080: geometry is relative to the canvas, and text with a height is **fitted** to
+the box its geometry resolves to, which is what keeps type legible as the frame grows.
+`parse_template` reads a path back into a layout, so one you already have can be edited
+rather than retyped.
+
+**A slot carrying its own `slots` is a canvas.** Its width and height become the canvas
+the inner slots are laid out on, and the result draws at the outer slot's position. That
+is how text is centred on something narrower than the frame — a label under a product, a
+caption in a cell — because a numeric `x` leaves text hanging left and `x=center` only
+resolves against the canvas it is on.
+
+**A slot's `filters` field applies filters to that slot's own source**, written the way
+imagor writes them: `smart/filters:round_corner(230,230,f4f1e8)`. The `image` field is
+data rather than syntax, so a path written there is encoded as a source — this is where
+it belongs. The signature is minted at render time, so a layout stays portable.
+
+`cookbook/` holds twelve ready-made layouts for the formats that come up most — OG
+cards, a product grid, a profile card, quotes, announcements, an event, a tip. Take the
+closest, change the values, render it. They are rendered by the test suite at three
+canvas sizes, so a layout that no longer works fails CI rather than teaching a shape
+that fails.
+
 ## Security model
 
 **A trusted client of imagor, not a new surface on it.** It holds the signing
