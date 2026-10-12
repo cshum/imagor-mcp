@@ -1,0 +1,207 @@
+{
+  "name": "og-modern",
+  "note": "A dark, restrained Open Graph card with a soft blurred glow, split headline, and fitted product grid.",
+  "canvas": [
+    1200,
+    630
+  ],
+  "background": "color:090b10",
+  "slots": [
+    {
+      "name": "texture",
+      "kind": "image",
+      "image": "{{texture}}",
+      "x": "0p",
+      "y": "0p",
+      "width": "full",
+      "height": "full"
+    },
+    {
+      "name": "brand",
+      "kind": "text",
+      "text": "{{brand}}",
+      "x": "6p+10",
+      "y": "10p+5",
+      "font": "sans-bold",
+      "size": 20,
+      "color": "F3F1EC"
+    },
+    {
+      "name": "headline_lead",
+      "kind": "text",
+      "text": "{{headline_lead}}",
+      "x": "6p+10",
+      "y": "30p+1",
+      "width": "53p+4",
+      "height": "15p+2",
+      "font": "sans-bold",
+      "max_size": 80,
+      "min_size": 70,
+      "color": "F3F1EC"
+    },
+    {
+      "name": "headline_accent",
+      "kind": "text",
+      "text": "{{headline_accent}}",
+      "x": "6p+10",
+      "y": "44p+4",
+      "width": "53p+4",
+      "height": "15p+4",
+      "font": "sans-bold",
+      "max_size": 82,
+      "min_size": 70,
+      "color": "C5A575"
+    },
+    {
+      "name": "supporting",
+      "kind": "text",
+      "text": "{{supporting}}",
+      "x": "7p+1",
+      "y": "65p+4",
+      "width": "50p",
+      "height": "6p+4",
+      "font": "sans",
+      "max_size": 24,
+      "min_size": 19,
+      "color": "A5A6AA"
+    },
+    {
+      "name": "domain",
+      "kind": "text",
+      "text": "{{domain}}",
+      "x": "6p+10",
+      "y": "86p+4",
+      "font": "sans",
+      "size": 17,
+      "color": "85878D"
+    },
+    {
+      "name": "tile1_bg",
+      "kind": "rect",
+      "image": "color:17191e",
+      "x": "64p+2",
+      "y": "26p+2",
+      "width": "10p",
+      "height": "22p+1"
+    },
+    {
+      "name": "tile1",
+      "kind": "image",
+      "image": "{{photo1}}",
+      "x": "64p+10",
+      "y": "27p+4",
+      "width": "8p+8",
+      "height": "19p+4",
+      "fit": true
+    },
+    {
+      "name": "tile2_bg",
+      "kind": "rect",
+      "image": "color:17191e",
+      "x": "75p+6",
+      "y": "26p+2",
+      "width": "10p",
+      "height": "22p+1"
+    },
+    {
+      "name": "tile2",
+      "kind": "image",
+      "image": "{{photo2}}",
+      "x": "76p+2",
+      "y": "27p+4",
+      "width": "8p+8",
+      "height": "19p+4",
+      "fit": true
+    },
+    {
+      "name": "tile3_bg",
+      "kind": "rect",
+      "image": "color:17191e",
+      "x": "86p+10",
+      "y": "26p+2",
+      "width": "10p",
+      "height": "22p+1"
+    },
+    {
+      "name": "tile3",
+      "kind": "image",
+      "image": "{{photo3}}",
+      "x": "87p+6",
+      "y": "27p+4",
+      "width": "8p+8",
+      "height": "19p+4",
+      "fit": true
+    },
+    {
+      "name": "tile4_bg",
+      "kind": "rect",
+      "image": "color:17191e",
+      "x": "64p+2",
+      "y": "51p+1",
+      "width": "10p",
+      "height": "22p+1"
+    },
+    {
+      "name": "tile4",
+      "kind": "image",
+      "image": "{{photo4}}",
+      "x": "64p+10",
+      "y": "52p+2",
+      "width": "8p+8",
+      "height": "19p+4",
+      "fit": true
+    },
+    {
+      "name": "tile5_bg",
+      "kind": "rect",
+      "image": "color:17191e",
+      "x": "75p+6",
+      "y": "51p+1",
+      "width": "10p",
+      "height": "22p+1"
+    },
+    {
+      "name": "tile5",
+      "kind": "image",
+      "image": "{{photo5}}",
+      "x": "76p+2",
+      "y": "52p+2",
+      "width": "8p+8",
+      "height": "19p+4",
+      "fit": true
+    },
+    {
+      "name": "tile6_bg",
+      "kind": "rect",
+      "image": "color:17191e",
+      "x": "86p+10",
+      "y": "51p+1",
+      "width": "10p",
+      "height": "22p+1"
+    },
+    {
+      "name": "tile6",
+      "kind": "image",
+      "image": "{{photo6}}",
+      "x": "87p+6",
+      "y": "52p+2",
+      "width": "8p+8",
+      "height": "19p+4",
+      "fit": true
+    }
+  ],
+  "values": {
+    "texture": "http://localhost:8123/D7fOhdvEAXK4pb7aBoI8SjwY3SM=/1200x630/filters:blur(180):brightness(-65)/http://localhost:8198/src_life.png",
+    "brand": "MAISON",
+    "headline_lead": "Built for the",
+    "headline_accent": "long run",
+    "supporting": "Autumn 2026, available now",
+    "domain": "maison.example",
+    "photo1": "http://localhost:8123/veamE1CborRKQ9vhpN7hIQSbzww=/filters:brightness(-18)/http://localhost:8198/src_p1.png",
+    "photo2": "http://localhost:8123/xeHr6hDySR_PgoK86ZjCZ9jlhnw=/filters:brightness(-18)/http://localhost:8198/src_p2.png",
+    "photo3": "http://localhost:8123/ni20hfZQnYsDUz8O2FO3wdlh3Ek=/filters:brightness(-18)/http://localhost:8198/src_p3.png",
+    "photo4": "http://localhost:8123/X9s1PN9CZh0rBg3eo0pCbHPsdQo=/filters:brightness(-18)/http://localhost:8198/src_p4.png",
+    "photo5": "http://localhost:8123/fXU7fMfEvTsIZLee3e0bqFljCJE=/filters:brightness(-18)/http://localhost:8198/src_p5.png",
+    "photo6": "http://localhost:8123/UmsDOEiaq17sLitMlLi8HCWwdyQ=/filters:brightness(-18)/http://localhost:8198/src_life.png"
+  }
+}

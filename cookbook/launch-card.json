@@ -1,0 +1,104 @@
+{
+  "name": "launch-card",
+  "note": "Editorial split layout for a seasonal accessories collection announcement.",
+  "canvas": [
+    1200,
+    630
+  ],
+  "background": "color:f5f1e9",
+  "slots": [
+    {
+      "name": "hero-photo",
+      "kind": "image",
+      "image": "{{photo}}",
+      "x": "61p+6",
+      "y": "8p+5",
+      "width": "32p",
+      "height": "82p+3",
+      "fit": true
+    },
+    {
+      "name": "brand",
+      "kind": "text",
+      "text": "{{brand}}",
+      "x": "7p+11",
+      "y": "14p+3",
+      "font": "sans",
+      "size": 17,
+      "color": "302a25"
+    },
+    {
+      "name": "brand-rule",
+      "kind": "rect",
+      "image": "color:a7654b",
+      "x": "7p+11",
+      "y": "22p",
+      "width": "4p+4",
+      "height": "0p+2"
+    },
+    {
+      "name": "headline",
+      "kind": "text",
+      "text": "{{headline}}",
+      "x": "7p+8",
+      "y": "32p+5",
+      "width": "49p+8",
+      "height": "19p",
+      "font": "serif",
+      "color": "302a25",
+      "align": "low",
+      "max_size": 76,
+      "min_size": 54
+    },
+    {
+      "name": "supporting",
+      "kind": "text",
+      "text": "{{supporting}}",
+      "x": "7p+11",
+      "y": "55p+2",
+      "width": "46p+3",
+      "font": "sans",
+      "size": 19,
+      "color": "746b61"
+    },
+    {
+      "name": "cta-button",
+      "kind": "rect",
+      "image": "color:302a25",
+      "x": "7p+11",
+      "y": "68p+5",
+      "width": "20p",
+      "height": "8p+4"
+    },
+    {
+      "name": "cta-label",
+      "kind": "text",
+      "text": "{{cta}}",
+      "x": "9p+8",
+      "y": "71p+4",
+      "width": "17p",
+      "font": "sans",
+      "size": 15,
+      "color": "f5f1e9"
+    },
+    {
+      "name": "availability",
+      "kind": "text",
+      "text": "{{availability}}",
+      "x": "7p+11",
+      "y": "86p+2",
+      "width": "46p+3",
+      "font": "sans",
+      "size": 15,
+      "color": "746b61"
+    }
+  ],
+  "values": {
+    "photo": "http://localhost:8198/src_life.png",
+    "brand": "MAISON",
+    "headline": "The Autumn Edit",
+    "supporting": "Twelve pieces in vegetable-tanned leather",
+    "cta": "Explore the collection",
+    "availability": "Available from 14 November"
+  }
+}

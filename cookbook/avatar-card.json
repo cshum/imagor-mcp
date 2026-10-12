@@ -21,7 +21,7 @@
       "kind": "text",
       "text": "{{name}}",
       "x": "center",
-      "y": "510",
+      "y": "540",
       "font": "sans-bold-52",
       "color": "ffffff"
     },
@@ -30,9 +30,9 @@
       "kind": "text",
       "text": "{{role}}",
       "x": "80",
-      "y": "full-420",
+      "y": "610",
       "width": "full-160",
-      "height": "220",
+      "height": "44",
       "font": "sans",
       "color": "cbd5e1",
       "align": "low",
@@ -44,7 +44,7 @@
       "kind": "text",
       "text": "{{handle}}",
       "x": "80",
-      "y": "full-110",
+      "y": "full-120",
       "font": "sans-26",
       "color": "3b82f6"
     }

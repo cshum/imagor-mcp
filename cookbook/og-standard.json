@@ -1,0 +1,79 @@
+{
+  "name": "og-standard",
+  "note": "A text-first 1200x630 Open Graph layout with a small brand mark, prominent title, supporting description, and quiet domain footer.",
+  "canvas": [
+    1200,
+    630
+  ],
+  "background": "color:f4f0e7",
+  "slots": [
+    {
+      "name": "brand",
+      "kind": "text",
+      "text": "{{brand}}",
+      "x": "7p+8",
+      "y": "11p+3",
+      "font": "sans-bold-24",
+      "color": "263a32"
+    },
+    {
+      "name": "brand_rule",
+      "kind": "rect",
+      "image": "color:c58b4b",
+      "x": "7p+8",
+      "y": "18p+3",
+      "width": "4p+6",
+      "height": "0p+3"
+    },
+    {
+      "name": "title",
+      "kind": "text",
+      "text": "{{title}}",
+      "x": "7p+8",
+      "y": "30p+3",
+      "width": "80p+10",
+      "height": "26p+2",
+      "font": "serif",
+      "color": "263a32",
+      "max_size": 82,
+      "min_size": 60
+    },
+    {
+      "name": "description",
+      "kind": "text",
+      "text": "{{description}}",
+      "x": "7p+8",
+      "y": "59p",
+      "width": "81p+8",
+      "height": "13p",
+      "font": "sans",
+      "color": "4e5b52",
+      "max_size": 32,
+      "min_size": 30
+    },
+    {
+      "name": "footer_rule",
+      "kind": "rect",
+      "image": "color:d8d0c1",
+      "x": "7p+8",
+      "y": "84p+2",
+      "width": "84p+8",
+      "height": "0p+1"
+    },
+    {
+      "name": "domain",
+      "kind": "text",
+      "text": "{{domain}}",
+      "x": "7p+8",
+      "y": "87p+4",
+      "font": "sans-20",
+      "color": "58645b"
+    }
+  ],
+  "values": {
+    "brand": "MAISON",
+    "title": "The Autumn Edit is here",
+    "description": "Twelve pieces in vegetable-tanned leather, made in small batches",
+    "domain": "maison.example"
+  }
+}
