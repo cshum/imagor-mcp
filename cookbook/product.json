@@ -49,9 +49,9 @@
     }
   ],
   "values": {
-    "image": "http://localhost:8198/src_p1.png",
     "name": "Intrecciato 19 leather shoulder bag",
     "price": "HKD$18500",
-    "cta": "Free delivery"
+    "cta": "Free delivery",
+    "image": "http://localhost:8198/src_p1.png"
   }
 }

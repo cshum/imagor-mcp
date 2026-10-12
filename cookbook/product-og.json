@@ -57,12 +57,12 @@
     }
   ],
   "values": {
-    "title": "",
+    "name": "Intrecciato 19 shoulder bag",
     "price": "HKD$18500",
-    "collection": "",
+    "collection": "Autumn 2026",
+    "cta": "Free delivery",
     "featured_image": "http://localhost:8198/src_p1.png",
     "logo": "http://localhost:8198/src_p1.png",
-    "name": "Intrecciato 19 shoulder bag",
-    "cta": "Free delivery"
+    "title": "Intrecciato 19 shoulder bag"
   }
 }

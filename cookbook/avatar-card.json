@@ -50,10 +50,10 @@
     }
   ],
   "values": {
-    "name": "Adrian Shum",
-    "role": "imagor",
-    "handle": "@cshum",
-    "avatar": "http://localhost:8198/src_p1.png",
-    "quote": "The same bytes in, the same bytes out."
+    "name": "Mei Lam",
+    "role": "Platform engineering",
+    "handle": "@meilam",
+    "quote": "The same bytes in, the same bytes out.",
+    "avatar": "http://localhost:8198/src_p1.png"
   }
 }

@@ -61,9 +61,9 @@
   ],
   "values": {
     "quote": "The same bytes in, the same bytes out.",
-    "attribution": "",
+    "who": "Mei Lam",
+    "role": "Platform engineering, Harbour",
     "background_image": "http://localhost:8198/src_life.png",
-    "who": "Adrian Shum",
-    "role": "imagor"
+    "attribution": "Mei Lam, Harbour"
   }
 }

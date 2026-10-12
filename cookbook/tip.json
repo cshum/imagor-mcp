@@ -41,7 +41,7 @@
   ],
   "values": {
     "number": "01",
-    "tip": "Pin the version, not the tag.",
-    "mark": "imagor-mcp"
+    "tip": "A signature covers the whole path, not the source.",
+    "mark": "imagor"
   }
 }

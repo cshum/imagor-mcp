@@ -62,9 +62,9 @@
     }
   ],
   "values": {
-    "eyebrow": "NEW IN IMAGOR",
-    "headline": "Deterministic image pipelines, from a signed URL",
-    "supporting": "One definition, every canvas size.",
-    "mark": "imagor-mcp"
+    "eyebrow": "IMAGOR 1.9.8",
+    "headline": "Every filter now reports whether it ran",
+    "supporting": "A filter that did nothing used to look like one that worked.",
+    "mark": "imagor"
   }
 }

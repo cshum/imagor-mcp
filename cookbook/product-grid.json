@@ -277,8 +277,8 @@
   ],
   "values": {
     "mark": "MAISON",
-    "c1r1_name": "Padded shoulder bag",
-    "c1r1_price": "HKD$7000",
+    "c1r1_name": "Padded leather shoulder bag",
+    "c1r1_price": "HKD$18500",
     "c2r1_name": "Coated-canvas messenger bag",
     "c2r1_price": "HKD$11540",
     "c3r1_name": "Leather messenger bag",
@@ -287,7 +287,7 @@
     "c1r2_price": "HKD$13625",
     "c2r2_name": "Logo-embossed leather tote bag",
     "c2r2_price": "HKD$15170",
-    "c3r2_name": "Small structured top-handle bag",
+    "c3r2_name": "Structured top-handle bag",
     "c3r2_price": "HKD$8200"
   }
 }
