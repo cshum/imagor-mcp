@@ -231,9 +231,6 @@ shape that fails.
 
 Text lands wherever the font's own metrics put it, and nothing reports those.
 
-- Render **one glyph** on its own, fetch it, and find the ink: that is where the
-  pen starts for that font at that size. Two or three probes give the offset for
-  a whole label.
 - **Use `sans`, `serif` or `monospace` — lowercase, and that is the whole
   choice.** `sans-40` is sans at 40, `sans-bold-40` bold, `monospace-18` a mono
   face. Case is ignored by the parser, so lowercase is a convention rather than a
@@ -249,26 +246,35 @@ Text lands wherever the font's own metrics put it, and nothing reports those.
   family and still returns `200`, so the render succeeds and the type is not what
   was asked for. A generic family is the safe choice; a named face is only safe
   once you have seen it render.
+- **To centre text, give it a canvas of its own: a slot carrying its own `slots`.**
+  A numeric `x` leaves text hanging left whatever `align` says, and `x=center`
+  resolves against whatever canvas it is on — so the banner is too wide to centre
+  a label against. The outer slot's width and height become that canvas, the inner
+  slots lay out on it, and the result draws where the outer slot is placed. A label
+  measured this way landed at centre 921 against a product centre of 922.
 - **A wordmark is one `text()` call, even though that loses the tracking.** `text()`
   has no letter-spacing and its `spacing` argument is line spacing, applied
-  vertically. One glyph per call does reach the reference's spacing, but it hard-codes
-  the string: six glyph slots spell one word, and a different word breaks them. In a
-  reusable layout the copy comes from a value, so **prefer one call and accept the
-  tighter wordmark** — the rest of the layout can still be exact.
-- **`x=center` is the only form that centres text**, and it resolves against the
-  canvas it is on. A numeric `x` leaves text hanging left whatever `align` says.
-  So to centre a label under a product, give the label a canvas of its own — see
-  nested slots below.
-- **A slot with its own `slots` is a canvas**, which is how text is centred on
-  something narrower than the banner. The outer slot's width and height are that
-  canvas, the inner slots are laid out on it, and `x=center` inside resolves
-  against it. A label under a product is a canvas as wide as the label, centred on
-  the product, with the text centred in it — a label measured this way landed at
-  centre 921 against a product centre of 922.
+  vertically. One glyph per call reaches the reference's spacing but hard-codes the
+  string, so a different value breaks the layout. **Prefer one call** — the rest of
+  the layout can still be exact.
 - Measure the region you changed, not the whole image: a whole-image number hides
   a label that is 40px out, because most of the canvas did not move. When the
   sources are exact crops, the whole residual is text, so measure the text bands
   separately or you will tune placement against a number placement cannot move.
+
+## Grids of images
+
+Sources are whatever shape they are, and sizing each panel to its own source gives
+panels of different shapes — which reads as unrelated pictures, not a grid. No
+amount of position tuning fixes it.
+
+- **Give every cell the same size, laid out on even rows and columns, and fit the
+  image inside its cell** (`fit`). The cells align; the images inside them do not
+  fill them. The result is centred in the cell with even space around it, and
+  nothing is distorted.
+- **Write the cells as one identical size, not five similar ones.** Percentage
+  forms make this checkable: five cells of `16p+12 x 26p+5` stay one size at every
+  canvas, five cells of 300x250 do not.
 
 ## Responsive compositions
 
