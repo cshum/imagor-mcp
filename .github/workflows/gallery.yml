@@ -74,8 +74,14 @@ jobs:
           cp /tmp/gallery/cookbook.md docs/gallery/cookbook.md
           # every card is published, not just the three heroes: the page lists each
           # one with the path that produced it, and a broken image there is a broken
-          # link in the documentation
-          cp /tmp/gallery/*.png docs/gallery/
+          # link in the documentation. The sheet is excluded because it is copied
+          # under its own name above, and a second copy under _sheet.png is dead
+          # weight that reads as a file nobody meant to add.
+          for f in /tmp/gallery/*.png; do
+            base="$(basename "$f")"
+            [ "$base" = "_sheet.png" ] && continue
+            cp "$f" docs/gallery/
+          done
 
       - name: Commit if it changed
         run: |
