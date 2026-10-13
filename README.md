@@ -1,30 +1,49 @@
 # imagor-template
 
-**A layout format for [imagor](https://github.com/cshum/imagor), and a compiler that
-turns it into a URL.** Write a card once — `1200×630`, `1080×1080`, a story frame —
-and render it at any canvas size, with no image library and no design tool.
+**A layout format for [imagor](https://github.com/cshum/imagor), for agents that
+compose and check their own work.**
+
+A layout is a template; a template compiles to one imagor URL. That makes an image
+composition something an agent can **write, render, look at, and correct** — not a
+document it has to hand to someone with a design tool.
 
 ```sh
 $ imagor-template compile cookbook/event.json
 1200x628/filters:image(252x451/color:174c43,64,87):text(14,96,219,Open-Sans-bold-118,fffaf1):...
 ```
 
-Compiling is total and deterministic: the same layout gives the same path, every
-time, with no model in the loop. **There is also an MCP server**, so an agent can
-compose a layout, render it, *look at the result* and correct it — but the format and
-the compiler stand on their own.
+**Compiling is total and deterministic** — the same layout gives the same path every
+time. That is not a claim about avoiding models; **it is what lets an agent reason**:
+diff two versions, cache a render, tell whether its own edit did what it intended. A
+compiler that varied run to run would break the loop.
+
+Two things in the format exist only because the reader is an agent: **`note`**, which
+says what a card is *for* so a change has something to be judged against, and
+**`verify_imagor_url` returning the image itself** rather than a report. A person
+writing JSON by hand needs neither.
 
 ![Fourteen cards, each one a single imagor URL](docs/gallery/contact-sheet.png)
 
 *Every card above is one imagor URL. No design file, no template editor, no image
-library — composed by an agent through these tools. **[Every path is listed here »](docs/gallery/cookbook.md)***
+library — composed by an agent through these tools. **[Every template, and the path it
+resolves to, is here »](docs/gallery/cookbook.md)***
+
+**The same engine ships as a CLI**, for the cases with no agent in them — a backend
+resolving a stored layout, a script checking the cookbook.
 
 ## The two directions are not symmetrical
 
 | | |
 |---|---|
-| **template → path** | total, deterministic, needs no agent. This is the compiler. |
+| **template → path** | total and deterministic. This is the compiler, and this is the source of truth. |
 | **path → template** | **lossy.** A path holds what a layout *resolved to*, not the decisions that produced it. |
+
+**Which direction is the source matters for an agent more than for a person**, because
+an agent edits the thing it was given: hand it a template and it keeps the names and
+re-fills the `{{values}}`; hand it a path and what comes back renders once and no
+longer adapts. Three delegated runs were given one or the other — **the ones given the
+template kept the design; the ones given only the path rebuilt something that looked
+the same and couldn't be reused.**
 
 Reading a path back gives you the geometry, the colours and the text — but **the slot
 names are gone, `{{values}}` are gone, and a relative form like `38p` or `half` has
@@ -80,14 +99,14 @@ docker run -d -p 8000:8000 \
 
 Already running imagor? Skip this and point the config below at it.
 
-**2. Install.** Two binaries ship together — the compiler, and the MCP server:
+**2. Install.** Two front ends on one engine, and both ship together:
 
 ```sh
-# the compiler: a layout in, an imagor path out. No MCP client involved.
-imagor-template compile cookbook/event.json
-
-# the MCP server: the same engine, for an agent
+# the MCP server: the same engine, so an agent can compose, render and check
 imagor-mcp
+
+# and the compiler on its own, for everything with no agent in it
+imagor-template compile cookbook/event.json
 ```
 
 Both come prebuilt for six platforms, or build from source:
@@ -136,8 +155,8 @@ service that constructs compositions but should never hold the key.
 
 | Tool | Purpose |
 |---|---|
-| `render_template` | Render a layout at a canvas size, with values filled in. **Start here.** |
-| `verify_imagor_url` | Fetch the rendered result and report which filters applied. **Returns the image.** |
+| `render_template` | Render a layout at a canvas size, with values filled in. **Start here — half the loop.** |
+| `verify_imagor_url` | Fetch the rendered result and report which filters applied. **Returns the image, so the agent can look at what it built — the other half.** |
 | `parse_template` | Read a path back into a layout, so one you have can be edited. |
 | `fit_text` | Find the font size at which a string fits a box, by measuring. |
 | `build_imagor_url` | Build a request path ready to send to imagor, signed as configured. |
@@ -152,10 +171,11 @@ invented parameters and no generic "sign this string" tool.
 
 ## Templates
 
-`render_template` takes a layout and a canvas size, so **one layout serves 1200×630
-and 1080×1080**: geometry is relative to the canvas, and text with a height is
-**fitted** to the box its geometry resolves to, which keeps type legible as the
-frame grows.
+A template carries a layout and no canvas size, so **one layout serves 1200×630 and
+1080×1080**: geometry is relative to the canvas, and text with a height is **fitted**
+to the box its geometry resolves to, which keeps type legible as the frame grows.
+**That is what makes a layout worth an agent's time** — it composes once and renders at
+every format instead of redrawing per size.
 
 **A slot carrying its own `slots` is a canvas.** Its width and height become the
 canvas the inner slots are laid out on, and the result draws at the outer slot's
@@ -175,10 +195,10 @@ the pixels a box resolved to, not whether it was written `38p` or `half`.
 — OG cards, a product grid, a profile card, quotes, testimonials, an event, a
 comparison table, a price ladder. Take the closest, change the values, render it.
 
-**Every card, with the imagor path that produced it, is on the
-[cookbook page](docs/gallery/cookbook.md).** Copy a path and hand it to an agent —
-that is the whole workflow: a URL is something it can read, edit and render
-again, which a picture is not.
+**Every card, its template, and the path that template resolves to are on the
+[cookbook page](docs/gallery/cookbook.md).** Hand an agent the template — it is the
+source, and it is what an agent can edit and re-render. The path is there to show what
+the template compiles to, and to render without a client.
 
 Every recipe is rendered by the test suite **at three canvas sizes on every
 commit**, and the contact sheet above is generated from them by the same code path,
