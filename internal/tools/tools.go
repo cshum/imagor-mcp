@@ -1550,6 +1550,19 @@ func Register(s *mcp.Server, cfg Config) {
 			"200 response will not tell you.",
 	}, cfg.SkillTool)
 
+	// A recipe is the agent's intermediate channel: it is what gets handed to
+	// render_template, not what a reader of the cookbook page wants. So it arrives
+	// by name from the binary rather than being pasted around, which also means a
+	// client cannot hold a template from a version the server is not running.
+	mcp.AddTool(s, &mcp.Tool{
+		Name: "get_cookbook_recipe",
+		Description: "Fetch a ready-made layout by name: canvas, slots and values, ready " +
+			"for render_template. Read the " + CookbookURI + " resource first to choose " +
+			"one - it lists what each is for and which values it takes. Prefer starting " +
+			"from a recipe over composing from nothing: they encode spacing and type " +
+			"sizes that took iteration to get right.",
+	}, cfg.CookbookTool)
+
 	// The skill travels with the server. A client that only reads tools/list
 	// never sees it, and it carries what a tool description cannot: the order a
 	// path is written in, how overlays and text are placed, and a working method.
@@ -1584,6 +1597,25 @@ func Register(s *mcp.Server, cfg Config) {
 			}},
 		}, nil
 	})
+
+	// The cookbook index: names, what each recipe is for, and the values it takes. The
+	// templates are not in here - a reader choosing a layout wants the table, and the
+	// one that renders wants the recipe, which arrives through the tool.
+	s.AddResource(&mcp.Resource{
+		URI:  CookbookURI,
+		Name: "imagor cookbook",
+		Description: "Fourteen ready-made layouts with what each is for, its size, and " +
+			"which values it takes. Fetch one with get_cookbook_recipe.",
+		MIMEType: "text/markdown",
+	}, func(_ context.Context, _ *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {
+		return &mcp.ReadResourceResult{
+			Contents: []*mcp.ResourceContents{{
+				URI:      CookbookURI,
+				MIMEType: "text/markdown",
+				Text:     imagormcp.CookbookIndex,
+			}},
+		}, nil
+	})
 }
 
 // SkillURI is where the server serves its own skill.
@@ -1594,3 +1626,8 @@ const SkillURI = "imagor-mcp://skill"
 // skill, while only an agent choosing what to put in an image field wants sixteen rows
 // of names and dimensions.
 const SourcesURI = "imagor-mcp://sources"
+
+// CookbookURI is the index of ready-made layouts: the names and what each is for.
+// The recipe itself comes from get_cookbook_recipe, because a template is an
+// intermediate channel rather than something a reader wants to see.
+const CookbookURI = "imagor-mcp://cookbook"

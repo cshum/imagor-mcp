@@ -6,7 +6,7 @@
 // and served as a resource, and the server's instructions point at it.
 package imagormcp
 
-import _ "embed"
+import "embed"
 
 // The skill travels with the server: a client that reads only the tool list never sees
 // a file, and these carry what a tool description cannot.
@@ -20,3 +20,13 @@ var Skill string
 //
 //go:embed references/sources.md
 var Sources string
+
+// Cookbook is the recipe set. A recipe is the agent's intermediate channel - it is what
+// gets handed to render_template, not what a reader of the cookbook page wants - so the
+// page carries the name and what the card is for, and the template arrives by name.
+//
+//go:embed cookbook/*.json
+var Cookbook embed.FS
+
+//go:embed references/cookbook.md
+var CookbookIndex string

@@ -66,6 +66,7 @@ jobs:
         run: |
           pip install --quiet Pillow
           python3 cookbook/render.py /tmp/gallery
+          python3 cookbook/index.py
 
       - name: Copy the sheet and the hero cards
         run: |

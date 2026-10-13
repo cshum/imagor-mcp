@@ -235,10 +235,13 @@ path and a URL both work, signed or not.
 
 ## Cookbook
 
-`cookbook/` holds ready-made `render_template` payloads for the formats that come
-up most. Take the closest one, change the values, render it. They are rendered by
-the test suite at three canvas sizes — a recipe that no longer works teaches a
-shape that fails.
+There are fourteen ready-made layouts. **Read the `imagor-mcp://cookbook` resource to
+choose one, then fetch it with `get_cookbook_recipe`** — a recipe is the channel between
+you and `render_template`, so it arrives by name rather than being reproduced by hand.
+
+Take the closest and change the values. They carry spacing and type sizes that took
+iteration to get right, and they are rendered by the test suite at three canvas sizes,
+so a recipe that no longer works cannot reach the list.
 
 The recipes reference their images from **`s.imagor.net`**, so they render as they are.
 For the full set with dimensions and what each is for, read the `imagor-mcp://sources`

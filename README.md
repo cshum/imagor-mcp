@@ -181,8 +181,9 @@ It travels with the server, so a client that reads only the tool list never sees
 card, quotes, testimonials, an event, a comparison table, a price ladder. Take the
 closest, change the values, render it.
 
-**[Every card, its template, and the path it resolves to »](docs/gallery/cookbook.md)**
-Hand an agent the **template**; the path is there to show what it compiles to.
+**[Every card, and the path it resolves to »](docs/gallery/cookbook.md)** The template
+is not on that page: a recipe is the channel between an agent and the renderer, so it
+travels in the server and arrives by name.
 
 Every recipe renders **at three canvas sizes on every commit**, and the contact sheet
 above comes from that same code path — so it cannot drift.
