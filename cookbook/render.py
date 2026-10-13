@@ -100,8 +100,10 @@ def main():
             with urllib.request.urlopen(url, timeout=60) as rr:
                 im = Image.open(io.BytesIO(rr.read())).convert("RGB")
             im.save(os.path.join(OUT, f[:-5] + ".png"))
-            # the unsigned path, which is what a caller copies and edits
-            paths[f[:-5]] = (t.get("path", ""), w, h)
+            # everything the page needs: the unsigned path to render, the recipe
+            # to edit, and the note saying what the card is for
+            paths[f[:-5]] = (t.get("path", ""), w, h,
+                             recipe.get("note", ""), recipe)
             ok += 1
             print(f"  {f[:-5]:20} {w}x{h}  {bg}")
         except Exception as e:
@@ -128,18 +130,26 @@ def main():
         d.text((x, y + CELL_H + 4), name, fill=(60, 60, 70))
     sheet.save(os.path.join(OUT, "_sheet.png"))
 
-    # A page listing each card with the imagor path that produced it, unsigned.
+    # A page listing each card with everything an agent needs to iterate on it.
     #
-    # The cards are the documentation: a path is what someone hands to an agent to
-    # iterate on, and it is more useful than a picture because it can be edited.
-    # Generated rather than written by hand so it cannot drift from the recipes.
+    # A path alone is not enough, and this was measured rather than assumed: reading
+    # one back gives the geometry, colours and text, but every slot name is gone,
+    # there is no statement of what the card is for, and forms like 38p have already
+    # become numbers. So each card carries three things - what it is meant to be, the
+    # template to edit, and the path to render.
     lines = [
         "# Cookbook",
         "",
-        "Fourteen layouts, each one a single imagor URL. The path under every card is",
-        "what produced it — **copy one and hand it to an agent**, or to `render_template`,",
-        "and iterate from there. They are unsigned, so add a signature for your own",
-        "imagor or prefix `unsafe/` to try one against a development instance.",
+        "Fourteen layouts, each one a single imagor URL. Every card below comes with the",
+        "three things it takes to work on it:",
+        "",
+        "- **What it is** — so a change can be judged against something.",
+        "- **The template** — what `render_template` takes. **Copy this to iterate.** It",
+        "  keeps the slot names and the relative geometry, so a layout still adapts to",
+        "  another canvas size.",
+        "- **The path** — what imagor renders. **Copy this to render**, or to hand",
+        "  straight to a browser as a URL. It is unsigned: prefix `unsafe/` for a",
+        "  development instance, or sign it for your own.",
         "",
         "[Back to the README](../README.md) · [All fourteen, one image](contact-sheet.png)",
         "",
@@ -148,13 +158,21 @@ def main():
         row = paths.get(name)
         if not row:
             continue
-        path, w, h = row
+        path, w, h, note, recipe = row
         lines += [
             f"## {name}",
             "",
             f"![{name}]({name}.png)",
             "",
-            f"*{w}×{h}*",
+            f"*{w}×{h}* — {note}",
+            "",
+            "**Template** — copy this to iterate:",
+            "",
+            "```json",
+            json.dumps(recipe, indent=2),
+            "```",
+            "",
+            "**Path** — copy this to render:",
             "",
             "```",
             path,

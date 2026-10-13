@@ -1,5 +1,6 @@
 {
   "name": "Quote card",
+  "note": "A pull quote on deep green: the quotation in serif, attributed below a rule.",
   "source": "A daily quote card with a flat, typographic treatment (quote, attribution, role)",
   "canvas": {
     "width": 1200,
@@ -28,7 +29,7 @@
     {
       "name": "mark",
       "kind": "text",
-      "text": "“",
+      "text": "\u201c",
       "x": "11p+4",
       "y": "13p",
       "font": "Liberation-Serif",
