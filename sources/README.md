@@ -4,6 +4,10 @@ Ready-made images for the recipes in `../`, served from **`https://s.imagor.net`
 at `sources/<name>.svg` serves at `<base>/<name>.svg`, so the repo layout and the URLs map
 one for one.
 
+Cloudflare serves these with `max-age=31536000, immutable`, so a fixture that is removed
+keeps answering from the edge cache long after the origin has stopped serving it. Adding or
+changing one is immediate; removing one is not.
+
 Every one is a pure-vector SVG, a few hundred bytes each, and the whole set is under 4 KB.
 
 ## Why URLs
