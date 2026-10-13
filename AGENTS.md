@@ -77,6 +77,25 @@ plausible card with the picture missing.
 Its children are laid out relative to that canvas, which is what makes `x: center`
 mean something. A numeric x leaves text hanging left of its box whatever `align` says.
 
+## Sources, photographs and trademarks
+
+The cookbook is committed and its contact sheet is the README's hero image, so
+everything in a recipe is **published**, not just rendered locally.
+
+**Photographs are from Unsplash**, whose licence permits commercial use,
+modification and distribution with no attribution. That covers committing them and
+showing them. It does **not** permit compiling them to replicate a stock-image
+service, which this is not.
+
+**Names, brands and products are invented.** `SABLON`, `Mei Lam`, `Jon Ho`,
+`Harbour`, every price. Keep it that way. A real brand term is not a neutral
+placeholder — it is a trademark use, and in a project whose whole subject is
+plausible-looking labels that are not what they claim to be, it is also the wrong
+joke. `Intrecciato` was written into a recipe once and had to be removed.
+
+When adding a recipe: invent the brand, invent the people, and if a caption needs a
+material, describe it generically — *hand-woven*, *vegetable-tanned*, *grained*.
+
 ## Filters on a slot's own source
 
 An `image` field is data, not syntax, so a value that looks like a path is encoded and
