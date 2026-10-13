@@ -1557,10 +1557,10 @@ func Register(s *mcp.Server, cfg Config) {
 	mcp.AddTool(s, &mcp.Tool{
 		Name: "get_cookbook_recipe",
 		Description: "Fetch a ready-made layout by name: canvas, slots and values, ready " +
-			"for render_template. Read the " + CookbookURI + " resource first to choose " +
-			"one - it lists what each is for and which values it takes. Prefer starting " +
-			"from a recipe over composing from nothing: they encode spacing and type " +
-			"sizes that took iteration to get right.",
+			"for render_template. **Call it with no name first** to get the list - what " +
+			"each layout is for, its size, and which values it takes - then call it again " +
+			"with the one you want. Prefer starting from a recipe over composing from " +
+			"nothing: they encode spacing and type sizes that took iteration to get right.",
 	}, cfg.CookbookTool)
 
 	// The skill travels with the server. A client that only reads tools/list

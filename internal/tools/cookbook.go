@@ -20,7 +20,9 @@ import (
 
 // CookbookInput names a recipe to fetch.
 type CookbookInput struct {
-	Name string `json:"name" jsonschema:"a recipe name from the cookbook, for example event or og-standard. Read the imagor-mcp://cookbook resource for the list, what each one is for, and which values it takes."`
+	// omitempty matters: without it the derived schema marks name required, and the
+	// no-name call that returns the index is refused before the handler runs.
+	Name string `json:"name,omitempty" jsonschema:"a recipe name from the cookbook, for example event or og-standard. Leave it out to get the list of recipes, with what each is for and which values it takes."`
 }
 
 // CookbookOutput is one recipe, ready to hand to render_template.
@@ -34,7 +36,10 @@ type CookbookOutput struct {
 	// A map rather than json.RawMessage: the tool's output schema is derived from this
 	// struct, and RawMessage is a []byte to the schema generator, which then rejects the
 	// object it was handed. A map has no such problem and gives the caller real JSON.
-	Template map[string]any `json:"template"`
+	Template map[string]any `json:"template,omitempty"`
+	// Index is set instead of Template when no name is given: the list of recipes with
+	// what each is for, so a caller can choose one without already knowing its name.
+	Index string `json:"index,omitempty"`
 	// Render is the call that uses it, so a caller does not have to reconstruct the
 	// shape of a render_template invocation from the template alone.
 	Render string `json:"render,omitempty"`
@@ -64,9 +69,11 @@ func CookbookNames() []string {
 func (c Config) CookbookTool(_ context.Context, _ *mcp.CallToolRequest, in CookbookInput) (*mcp.CallToolResult, CookbookOutput, error) {
 	name := strings.TrimSpace(strings.ToLower(in.Name))
 	name = strings.TrimSuffix(name, ".json")
+	// No name means "show me what there is". The same content is served as the
+	// imagor-mcp://cookbook resource, but a client that reads only tools/list never sees
+	// a resource - a delegated run reported exactly that and had to guess from names.
 	if name == "" {
-		return nil, CookbookOutput{}, fmt.Errorf("no recipe name given; available: %s",
-			strings.Join(CookbookNames(), ", "))
+		return nil, CookbookOutput{Index: imagormcp.CookbookIndex}, nil
 	}
 	// path.Clean and the explicit check keep a name like ../../etc/passwd from reaching
 	// the embedded filesystem, which would otherwise be a read primitive.

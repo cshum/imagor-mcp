@@ -235,9 +235,19 @@ path and a URL both work, signed or not.
 
 ## Cookbook
 
-There are fourteen ready-made layouts. **Read the `imagor-mcp://cookbook` resource to
-choose one, then fetch it with `get_cookbook_recipe`** — a recipe is the channel between
-you and `render_template`, so it arrives by name rather than being reproduced by hand.
+There are fourteen ready-made layouts. **Call `get_cookbook_recipe` with no name** and it
+returns the list: what each layout is for, its size, and which values it takes. Then call
+it again with the name you want.
+
+```
+get_cookbook_recipe                      ->  the list, to choose from
+get_cookbook_recipe  name: "event"       ->  the template, ready for render_template
+```
+
+**Start with the no-name call rather than guessing a name**, and rather than reading the
+`imagor-mcp://cookbook` resource: the resource carries the same list, but a client that
+surfaces only tools never shows it, and a run that tried reported exactly that. Match on
+what a layout *is for* — the note — not on its name, which will not resemble the request.
 
 Take the closest and change the values. They carry spacing and type sizes that took
 iteration to get right, and they are rendered by the test suite at three canvas sizes,
