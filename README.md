@@ -1,24 +1,29 @@
 # imagor-template
 
-**Layouts for [imagor](https://github.com/cshum/imagor), in a format an agent can
-write.**
+**Template work for [imagor](https://github.com/cshum/imagor) — the fast, self-hosted,
+open-source image server — with agent capabilities on top.**
 
-JSON in, one imagor URL out:
+imagor renders images from a URL, on your own infrastructure, **4–8× faster** than the
+quickest ImageMagick settings. What it has never had is a **layout**: a card you can
+pass around, edit, and render at any size. That is what this adds, in a form an **agent
+can write, render, look at, and correct.**
 
 ```sh
 $ imagor-template compile cookbook/event.json
 1200x628/filters:image(252x451/color:174c43,64,87):text(14,96,219,Open-Sans-bold-118,fffaf1):.../color:f3f0e8
 ```
 
-**The URL renders anywhere imagor runs.** Paste it in a browser, store it, put it in a
-page — no library, no template editor, no design file.
+Three things follow from that, and they are the whole idea:
 
-**The JSON is what you pass around.** It keeps the slot names and the `{{values}}`, so
-one layout re-fills for a different person, product or event — and one layout serves
-1200×630 and 1080×1080, because geometry is relative to the canvas.
+**The output is one imagor URL.** It renders anywhere imagor runs — paste it in a
+browser, store it, put it in a page. No image library, no template editor, no design file.
 
-**Compiling is deterministic.** The same JSON gives the same URL every time, which is
-what lets an agent diff two versions and tell whether its own edit did what it intended.
+**The layout is portable.** One card carries slot names and `{{values}}`, so it re-fills
+for a different person, product or event — and renders at 1200×630 *and* 1080×1080,
+because the geometry is relative to the canvas.
+
+**It compiles deterministically.** The same layout gives the same URL every time, which
+is what lets an agent diff two versions and tell whether its own edit did what it intended.
 
 ![Fourteen cards, each one a single imagor URL](docs/gallery/contact-sheet.png)
 
