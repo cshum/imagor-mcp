@@ -29,6 +29,13 @@ fi
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 
+# Resolve dest to an absolute path before anything changes directory. The packing step
+# below runs inside $work, so a relative dest like "dist" would be created there and then
+# removed by the trap on exit - the bundle builds, reports its size, and is gone. CI
+# passes "dist", so this is the difference between shipping the bundle and not.
+mkdir -p "$dest"
+dest="$(cd "$dest" && pwd)"
+
 mkdir -p "$work/server"
 
 # One binary per platform the manifest declares. The manifest's mcp_config names
@@ -57,7 +64,6 @@ cd "$work"
 npx --yes @anthropic-ai/mcpb pack
 
 artifact="$(ls "$work"/*.mcpb | head -1)"
-mkdir -p "$dest"
 cp "$artifact" "$dest/imagor-mcp-${out}.mcpb"
 echo
 echo "  imagor-mcp-${out}.mcpb  $(du -h "$dest/imagor-mcp-${out}.mcpb" | cut -f1)"
