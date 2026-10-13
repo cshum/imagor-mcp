@@ -13,9 +13,11 @@ Each card also carries the URL it resolves to, for rendering without an agent.
 
 *1200×628* — Headline, one supporting line, one visual. The tech/startup announcement card.
 
-**Ask your agent:**
+**Ask your agent** — copy this into your client:
 
-> Use the imagor cookbook recipe `announcement`, at 1200x628.
+```
+Use the imagor cookbook recipe announcement, at 1200x628.
+```
 
 **Or render it directly:**
 
@@ -29,9 +31,11 @@ Each card also carries the URL it resolves to, for rendering without an agent.
 
 *1200×630* — A landscape profile card with a circular portrait and a left-aligned identity block.
 
-**Ask your agent:**
+**Ask your agent** — copy this into your client:
 
-> Use the imagor cookbook recipe `avatar-card`, at 1200x630.
+```
+Use the imagor cookbook recipe avatar-card, at 1200x630.
+```
 
 **Or render it directly:**
 
@@ -45,9 +49,11 @@ Each card also carries the URL it resolves to, for rendering without an agent.
 
 *1200×630* — A row of contributors as circular portraits with names and roles beneath. The portraits should be images on a plain or transparent ground - a source with its own background shows that background as a square block around the circle, which is the source's shape and not a fault in the corner.
 
-**Ask your agent:**
+**Ask your agent** — copy this into your client:
 
-> Use the imagor cookbook recipe `circles`, at 1200x630.
+```
+Use the imagor cookbook recipe circles, at 1200x630.
+```
 
 **Or render it directly:**
 
@@ -61,9 +67,11 @@ Each card also carries the URL it resolves to, for rendering without an agent.
 
 *1200×630* — Two matched columns of points, for a before and after.
 
-**Ask your agent:**
+**Ask your agent** — copy this into your client:
 
-> Use the imagor cookbook recipe `comparison`, at 1200x630.
+```
+Use the imagor cookbook recipe comparison, at 1200x630.
+```
 
 **Or render it directly:**
 
@@ -77,9 +85,11 @@ Each card also carries the URL it resolves to, for rendering without an agent.
 
 *1200×628* — Date block, title, venue. The open-house / meetup format.
 
-**Ask your agent:**
+**Ask your agent** — copy this into your client:
 
-> Use the imagor cookbook recipe `event`, at 1200x628.
+```
+Use the imagor cookbook recipe event, at 1200x628.
+```
 
 **Or render it directly:**
 
@@ -93,9 +103,11 @@ Each card also carries the URL it resolves to, for rendering without an agent.
 
 *1200×630* — Editorial split layout for a seasonal accessories collection announcement.
 
-**Ask your agent:**
+**Ask your agent** — copy this into your client:
 
-> Use the imagor cookbook recipe `launch-card`, at 1200x630.
+```
+Use the imagor cookbook recipe launch-card, at 1200x630.
+```
 
 **Or render it directly:**
 
@@ -109,9 +121,11 @@ Each card also carries the URL it resolves to, for rendering without an agent.
 
 *1200×630* — A restrained, editorial announcement for a product return, pairing a prominent headline with a supporting quote and dateline.
 
-**Ask your agent:**
+**Ask your agent** — copy this into your client:
 
-> Use the imagor cookbook recipe `news-announcement`, at 1200x630.
+```
+Use the imagor cookbook recipe news-announcement, at 1200x630.
+```
 
 **Or render it directly:**
 
@@ -125,9 +139,11 @@ Each card also carries the URL it resolves to, for rendering without an agent.
 
 *1200×630* — A dark, restrained Open Graph card with a textured navy ground, split headline, and fitted product grid.
 
-**Ask your agent:**
+**Ask your agent** — copy this into your client:
 
-> Use the imagor cookbook recipe `og-modern`, at 1200x630.
+```
+Use the imagor cookbook recipe og-modern, at 1200x630.
+```
 
 **Or render it directly:**
 
@@ -141,9 +157,11 @@ Each card also carries the URL it resolves to, for rendering without an agent.
 
 *1200×630* — A text-first 1200x630 Open Graph layout with a small brand mark, prominent title, supporting description, and quiet domain footer.
 
-**Ask your agent:**
+**Ask your agent** — copy this into your client:
 
-> Use the imagor cookbook recipe `og-standard`, at 1200x630.
+```
+Use the imagor cookbook recipe og-standard, at 1200x630.
+```
 
 **Or render it directly:**
 
@@ -157,9 +175,11 @@ Each card also carries the URL it resolves to, for rendering without an agent.
 
 *1800×942* — Lifestyle-led editorial product grid with a tall campaign panel and product captions nested in each image canvas.
 
-**Ask your agent:**
+**Ask your agent** — copy this into your client:
 
-> Use the imagor cookbook recipe `product-grid`, at 1800x942.
+```
+Use the imagor cookbook recipe product-grid, at 1800x942.
+```
 
 **Or render it directly:**
 
@@ -173,9 +193,11 @@ Each card also carries the URL it resolves to, for rendering without an agent.
 
 *1200×630* — An editorial product share card with a featured product photograph and concise offer details.
 
-**Ask your agent:**
+**Ask your agent** — copy this into your client:
 
-> Use the imagor cookbook recipe `product-og`, at 1200x630.
+```
+Use the imagor cookbook recipe product-og, at 1200x630.
+```
 
 **Or render it directly:**
 
@@ -189,9 +211,11 @@ Each card also carries the URL it resolves to, for rendering without an agent.
 
 *1200×630* — A pull quote on deep green: the quotation in serif, attributed below a rule.
 
-**Ask your agent:**
+**Ask your agent** — copy this into your client:
 
-> Use the imagor cookbook recipe `quote-card`, at 1200x630.
+```
+Use the imagor cookbook recipe quote-card, at 1200x630.
+```
 
 **Or render it directly:**
 
@@ -205,9 +229,11 @@ Each card also carries the URL it resolves to, for rendering without an agent.
 
 *1200×628* — B2B customer quote with an inset forest panel, warm paper margins and restrained brass accents.
 
-**Ask your agent:**
+**Ask your agent** — copy this into your client:
 
-> Use the imagor cookbook recipe `testimonial`, at 1200x628.
+```
+Use the imagor cookbook recipe testimonial, at 1200x628.
+```
 
 **Or render it directly:**
 
@@ -221,9 +247,11 @@ Each card also carries the URL it resolves to, for rendering without an agent.
 
 *1200×628* — One actionable tip per card. The educational format.
 
-**Ask your agent:**
+**Ask your agent** — copy this into your client:
 
-> Use the imagor cookbook recipe `tip`, at 1200x628.
+```
+Use the imagor cookbook recipe tip, at 1200x628.
+```
 
 **Or render it directly:**
 
