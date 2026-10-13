@@ -487,6 +487,10 @@ func TestVerifyURLTool(t *testing.T) {
 	}
 	args := map[string]any{
 		"image": "example.com/a.jpg", "width": 400, "height": 300, "fit_in": true,
+		// rotate() with no angle is a filter that declines by design, so the
+		// caller says so here: this test is about the shape of the report, and a
+		// decline is an error otherwise.
+		"allow_declined": true,
 		"filters": []map[string]any{
 			{"name": "image", "args": "fit-in/100x100/filters:blur(3):rotate()/example.com/b.jpg,10,10"},
 			{"name": "quality", "args": "80"},
@@ -553,8 +557,10 @@ func TestVerifyURLTool(t *testing.T) {
 		if out.Results[1].Outcome != "applied" {
 			t.Errorf("quality outcome = %q, want applied", out.Results[1].Outcome)
 		}
-		if !strings.Contains(out.Note, "3 applied") || !strings.Contains(out.Note, "1 recognised") {
-			t.Errorf("note %q does not summarise the result", out.Note)
+		// The declined filter is named, not counted: "1 recognised" does not say
+		// which one, and identifying it is the point of the report.
+		if !strings.Contains(out.Note, "3 applied") || !strings.Contains(out.Note, "rotate") {
+			t.Errorf("note %q does not summarise the result and name the declined filter", out.Note)
 		}
 	})
 

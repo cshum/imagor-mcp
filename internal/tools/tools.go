@@ -544,6 +544,13 @@ type VerifyInput struct {
 	// and loses small text, so this is how a caller checks a label or a price
 	// without paying for the whole render.
 	PreviewRegion string `json:"preview_region,omitempty" jsonschema:"attach part of the result at native resolution as x,y,w,h in result pixels, for checking text and fine detail that a scaled preview cannot show. Takes precedence over preview"`
+	// A filter the server recognised and left the image unchanged is the failure
+	// this tool exists to catch: the request succeeds, the image is wrong, and
+	// nothing says so. It is an error by default, because a caller that checks
+	// the result should not have to also read a note. Set this when a filter is
+	// deliberately conditional - one that applies only to some inputs - so the
+	// decline is expected rather than a fault.
+	AllowDeclined *bool `json:"allow_declined,omitempty" jsonschema:"return the report instead of an error when a filter was recognised but left the image unchanged. Set this for a filter that is deliberately conditional; leave it unset to treat a decline as the failure it usually is"`
 }
 
 // FilterOutcome is what the server reported for one filter in the URL.
@@ -740,6 +747,23 @@ func (c Config) VerifyURLTool(ctx context.Context, _ *mcp.CallToolRequest, in Ve
 	out.Verified = true
 	out.Results = outcomes(p.Filters, reported, OutcomeNotReported)
 	out.Note = summarizeOutcomes(out.Results)
+	// The server recognised the filter and left the image unchanged. This is the
+	// failure the whole tool exists to catch: a 200, a plausible image, and
+	// nothing to say the filter did not run. Reporting it in a note leaves the
+	// caller to notice, and a caller checking for an error would not - so it is
+	// an error, and the opt-out is for a filter that is genuinely conditional.
+	if in.AllowDeclined == nil || !*in.AllowDeclined {
+		if declined := declinedNames(out.Results); len(declined) > 0 {
+			return nil, out, fmt.Errorf(
+				"%s recognised but left the image unchanged: %s. imagor applied every other filter "+
+					"and returned 200, so the result is a valid image and not the one this path "+
+					"describes. Either the filter's arguments do not apply to this source - a blur "+
+					"with no effect, a trim on an image with nothing to trim - or it needs an "+
+					"argument it did not get. Set allow_declined when the filter is deliberately "+
+					"conditional and the decline is expected",
+				plural(len(declined), "filter"), strings.Join(declined, ", "))
+		}
+	}
 	// The report says what the server did; the preview says what it looks like.
 	// A caller that can see images can compare the result against its reference
 	// and fix a composition that succeeded but came out wrong, which the report
@@ -863,10 +887,43 @@ func outcomes(requested []imagorpath.Filter, reported []reportedFilter, missing 
 	return out
 }
 
+// declinedNames lists the filters the server recognised and left the image
+// unchanged, walking nested outcomes so a decline inside a loaded path counts
+// too. A filter inside image() that did nothing is the same failure as one at
+// the top level, and harder to see.
+func declinedNames(results []FilterOutcome) []string {
+	var out []string
+	var walk func([]FilterOutcome)
+	walk = func(rs []FilterOutcome) {
+		for _, r := range rs {
+			if r.Outcome == OutcomeDeclined {
+				out = append(out, r.Name)
+			}
+			if nested, ok := r.Filters.([]FilterOutcome); ok {
+				walk(nested)
+			}
+		}
+	}
+	walk(results)
+	return out
+}
+
+// plural picks the singular or plural form for a count, so a message about one
+// filter does not read as if it were about several.
+func plural(n int, word string) string {
+	if n == 1 {
+		return fmt.Sprintf("%d %s", n, word)
+	}
+	return fmt.Sprintf("%d %ss", n, word)
+}
+
 // summarizeOutcomes states what was found in one line, so a caller that reads
-// only the note still gets the answer.
+// only the note still gets the answer. A decline is named rather than counted:
+// "1 recognised but left the image unchanged" does not say which one, and the
+// point of the report is to identify the filter that did nothing.
 func summarizeOutcomes(results []FilterOutcome) string {
-	var applied, declined, missing int
+	var applied, missing int
+	var declined []string
 	var walk func([]FilterOutcome)
 	walk = func(rs []FilterOutcome) {
 		for _, r := range rs {
@@ -874,7 +931,7 @@ func summarizeOutcomes(results []FilterOutcome) string {
 			case OutcomeApplied:
 				applied++
 			case OutcomeDeclined:
-				declined++
+				declined = append(declined, r.Name)
 			default:
 				missing++
 			}
@@ -885,15 +942,16 @@ func summarizeOutcomes(results []FilterOutcome) string {
 	}
 	walk(results)
 	switch {
-	case applied == 0 && declined == 0 && missing == 0:
+	case applied == 0 && len(declined) == 0 && missing == 0:
 		return "no filters were requested, so there is nothing to verify"
-	case missing == 0 && declined == 0:
+	case missing == 0 && len(declined) == 0:
 		return fmt.Sprintf("all %d filter(s) applied", applied)
 	case missing == 0:
-		return fmt.Sprintf("%d applied, %d recognised but left the image unchanged", applied, declined)
+		return fmt.Sprintf("%d applied, %s recognised but left the image unchanged: %s",
+			applied, plural(len(declined), "filter"), strings.Join(declined, ", "))
 	default:
-		return fmt.Sprintf("%d applied, %d declined, %d not reported by this processor",
-			applied, declined, missing)
+		return fmt.Sprintf("%d applied, %d declined (%s), %d not reported by this processor",
+			applied, len(declined), strings.Join(declined, ", "), missing)
 	}
 }
 

@@ -122,3 +122,96 @@ func TestVerifyBlamesTheModeWhenThisServerIsUnsafe(t *testing.T) {
 		t.Errorf("it advised a signer this server is not using:\n%s", out.Note)
 	}
 }
+
+// A filter the server recognised and left the image unchanged is the failure
+// this whole tool exists to catch: the request succeeds, the image comes back,
+// and the filter did not run. A note is not enough, because a caller checking
+// for an error would not read it.
+func TestVerifyRefusesADeclinedFilter(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(`{"width":300,"height":300,"filters":[{"name":"blur","processed":false}]}`))
+	}))
+	defer srv.Close()
+
+	c := Config{Secret: "a-secret", BaseURL: srv.URL}
+	_, _, err := c.VerifyURLTool(context.Background(), nil, VerifyInput{
+		Image:   "http://x/a.png",
+		Filters: []FilterInput{{Name: "blur", Args: "0"}},
+	})
+	if err == nil {
+		t.Fatal("a declined filter did not fail the verify, so a caller checking for an error sees success")
+	}
+	for _, want := range []string{"blur", "left the image unchanged", "200", "allow_declined"} {
+		if !strings.Contains(err.Error(), want) {
+			t.Errorf("the error does not mention %q:\n%s", want, err)
+		}
+	}
+}
+
+// A filter that applied is not a fault, and must not be reported as one.
+func TestVerifyAcceptsAnAppliedFilter(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(`{"width":300,"height":300,"filters":[{"name":"blur","processed":true}]}`))
+	}))
+	defer srv.Close()
+
+	c := Config{Secret: "a-secret", BaseURL: srv.URL}
+	_, out, err := c.VerifyURLTool(context.Background(), nil, VerifyInput{
+		Image:   "http://x/a.png",
+		Filters: []FilterInput{{Name: "blur", Args: "5"}},
+	})
+	if err != nil {
+		t.Fatalf("an applied filter failed the verify: %v", err)
+	}
+	if !strings.Contains(out.Note, "applied") {
+		t.Errorf("the note does not say it applied:\n%s", out.Note)
+	}
+}
+
+// A filter can be deliberately conditional, and the caller has to be able to say
+// so without losing the report.
+func TestVerifyAllowsADeclineWhenTheCallerSaysSo(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(`{"width":300,"height":300,"filters":[{"name":"trim","processed":false}]}`))
+	}))
+	defer srv.Close()
+
+	allow := true
+	c := Config{Secret: "a-secret", BaseURL: srv.URL}
+	_, out, err := c.VerifyURLTool(context.Background(), nil, VerifyInput{
+		Image:         "http://x/a.png",
+		Filters:       []FilterInput{{Name: "trim", Args: ""}},
+		AllowDeclined: &allow,
+	})
+	if err != nil {
+		t.Fatalf("the caller allowed a decline and still got an error: %v", err)
+	}
+	if !out.Verified {
+		t.Error("the report was dropped when the decline was allowed")
+	}
+	if !strings.Contains(out.Note, "trim") {
+		t.Errorf("the note does not name the declined filter:\n%s", out.Note)
+	}
+}
+
+// A decline inside a loaded path is the same failure as one at the top level,
+// and harder to see: image() nests its own filters, so the walk has to descend.
+func TestVerifyRefusesADeclineInsideALoadedPath(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(`{"width":300,"height":300,"filters":[` +
+			`{"name":"image","processed":true,"filters":[{"name":"blur","processed":false}]}]}`))
+	}))
+	defer srv.Close()
+
+	c := Config{Secret: "a-secret", BaseURL: srv.URL}
+	_, _, err := c.VerifyURLTool(context.Background(), nil, VerifyInput{
+		Image:   "http://x/a.png",
+		Filters: []FilterInput{{Name: "image", Args: "100x100/filters:blur(0)/http://x/b.png,0,0"}},
+	})
+	if err == nil {
+		t.Fatal("a decline nested inside a loaded path was not reported as a fault")
+	}
+	if !strings.Contains(err.Error(), "blur") {
+		t.Errorf("the error does not name the nested filter:\n%s", err)
+	}
+}
