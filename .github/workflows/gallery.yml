@@ -1,0 +1,91 @@
+name: gallery
+
+# Renders the cookbook and commits the contact sheet the README shows.
+#
+# The point is that the image on the front page is produced by the same code path
+# the tests exercise, on every commit. If a recipe breaks, the README shows it
+# broken rather than a picture from months ago - which is the whole argument this
+# project makes, applied to its own front page.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "cookbook/**"
+      - "internal/**"
+      - "cmd/**"
+      - "sources/**"
+      - ".github/workflows/gallery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  gallery:
+    name: Render the gallery
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      # The fonts live in the published image and nowhere else. A runner has its
+      # own, and would substitute them silently - every card would render in a
+      # system face and the contact sheet would look fine while proving nothing.
+      - name: Start imagor
+        run: |
+          docker run -d --name imagor -p 8197:8000 \
+            -e IMAGOR_UNSAFE=1 ghcr.io/cshum/imagor:1.9.9
+
+      - name: Wait for it
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS -o /dev/null "http://localhost:8197/unsafe/1x1/color:ffffff"; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "::error::imagor did not come up"
+          docker logs imagor
+          exit 1
+
+      - name: Build the server
+        run: go build -o /tmp/imagor-mcp ./cmd/imagor-mcp
+
+      - name: Render the cookbook
+        env:
+          IMAGOR_BASE_URL: http://localhost:8197
+          IMAGOR_UNSAFE: "1"
+          IMAGOR_MCP_BIN: /tmp/imagor-mcp
+        run: |
+          pip install --quiet Pillow
+          python3 cookbook/render.py /tmp/gallery
+
+      - name: Copy the sheet and the hero cards
+        run: |
+          mkdir -p docs/gallery
+          cp /tmp/gallery/_sheet.png docs/gallery/contact-sheet.png
+          for n in quote-card product-grid circles; do
+            cp "/tmp/gallery/$n.png" "docs/gallery/$n.png"
+          done
+
+      - name: Commit if it changed
+        run: |
+          if git diff --quiet -- docs/gallery; then
+            echo "the gallery is unchanged"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/gallery
+          git commit -m "gallery: re-render the contact sheet
+
+          Rendered from the cookbook on $(date -u +%Y-%m-%d). Committed so the image
+          the README shows is produced by the same code path the tests exercise."
+          git push
