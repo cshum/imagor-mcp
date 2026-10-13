@@ -42,6 +42,36 @@ def canvas_of(recipe):
     return 1200, 630, recipe.get("background", "color:ffffff")
 
 
+
+def dump_template(recipe):
+    """The template as JSON, with the structure indented and each slot on one line.
+
+    A slot is a flat record of a dozen short fields, and there are up to twenty of
+    them, so one per line is what a reader scans - but blown out to two spaces per
+    field it is thirty lines each, and the shape of the layout disappears into the
+    middle of it. The structure keeps its indentation; the slots collapse.
+    """
+    flat = lambda o: json.dumps(o, separators=(", ", ": "))
+    out = ["{"]
+    keys = list(recipe.keys())
+    for i, k in enumerate(keys):
+        v = recipe[k]
+        tail = "," if i < len(keys) - 1 else ""
+        if k == "slots" and isinstance(v, list):
+            out.append(f'  "slots": [')
+            for j, slot in enumerate(v):
+                out.append(f"    {flat(slot)}" + ("," if j < len(v) - 1 else ""))
+            out.append("  ]" + tail)
+        elif isinstance(v, (dict, list)):
+            body = json.dumps(v, indent=2)
+            body = "\n".join("  " + line for line in body.split("\n"))
+            out.append(f'  "{k}": {body.lstrip()}{tail}')
+        else:
+            out.append(f"  {json.dumps(k)}: {json.dumps(v)}{tail}")
+    out.append("}")
+    return "\n".join(out)
+
+
 def main():
     # The published image runs unsafe, and the binary refuses a secret alongside
     # IMAGOR_UNSAFE - both set makes it exit without answering, which surfaces as a
@@ -173,11 +203,7 @@ def main():
             "**Template** — copy this to iterate:",
             "",
             "```json",
-            # indent=0 rather than 2: the page is 71% JSON, and two spaces per level of
-            # nesting cost 26% of its length while buying nothing. The longest line is
-            # the same either way - it is a source URL, not a level of nesting - so a
-            # reader can still follow the structure and a caller can still copy it.
-            json.dumps(recipe, indent=0),
+            dump_template(recipe),
             "```",
             "",
 
