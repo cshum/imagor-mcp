@@ -168,6 +168,46 @@ goes stale, and the fix is to generate it or delete it.
 
 ---
 
+## The round trip that isn't
+
+`parse_template` is meant to be the inverse of `render_template`: take a path and get back
+something you can edit. It is documented as lossy in one direction — a path holds the numbers
+a layout resolved to, not the forms it was written in, so `38p` comes back as `684`. What it
+does not say, and what I did not know until I measured it, is that **a nested layout does not
+come back at all.** Reading a path back flattened every nested slot into an unrelated
+top-level one: a grid of six products, each with a photo, a name and a price inside it,
+returned as six slots all called `image`.
+
+Measured across the cookbook, `render → parse → render` was stable for one recipe out of five.
+The paths that came out were longer than the ones that went in — 3,132 characters to 4,146 —
+because each nested slot was re-expressed at the top level with absolute numbers.
+
+I tried to fix it twice. Both attempts are reverted.
+
+**The first** split the inner path by hand. It cut a URL source in half at its last slash —
+`https://images.unsplash.com/photo-169…` came back as `photo-169…` — and read a dimension
+segment of `176x176/smart` as a height. It also broke three existing tests.
+
+**The second** did the right thing and handed the inner path to `imagorpath.Parse`, which
+already knows every form a path takes. That fixed the URL and the `smart`, and `comparison`
+became stable. But three recipes still moved, and the same three tests still failed.
+
+**What the tests were telling me, and I did not read:** they assert that a slot's parts come
+back *individually* — `img.Height == "full"`, `txt.Width == "600"` — which is the whole point
+of the tool. A parser that returns a plausible-looking template is not enough; it has to return
+the same template. I was checking that the path round-tripped and not that the fields did.
+
+**The real bug, found on the way:** the emitter writes a text slot's box width as a *form* —
+`full-144`, not `144`. The parser read it with `strconv.Atoi`, which failed silently and took
+the align and the rest of the argument tail with it. One `if err == nil` around a value that
+was never a number.
+
+Two attempts, no fix, and the lesson is the one this document keeps arriving at. I was reading
+the path — a plausible artifact that looked right — instead of the fields, which are the thing
+the tool exists to produce.
+
+---
+
 ## What the pattern is
 
 Every entry above is a wrong answer that looked right. Not one of them errored. The
