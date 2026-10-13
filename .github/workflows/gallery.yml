@@ -71,9 +71,11 @@ jobs:
         run: |
           mkdir -p docs/gallery
           cp /tmp/gallery/_sheet.png docs/gallery/contact-sheet.png
-          for n in quote-card product-grid circles; do
-            cp "/tmp/gallery/$n.png" "docs/gallery/$n.png"
-          done
+          cp /tmp/gallery/cookbook.md docs/gallery/cookbook.md
+          # every card is published, not just the three heroes: the page lists each
+          # one with the path that produced it, and a broken image there is a broken
+          # link in the documentation
+          cp /tmp/gallery/*.png docs/gallery/
 
       - name: Commit if it changed
         run: |

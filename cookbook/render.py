@@ -77,6 +77,8 @@ def main():
 
     os.makedirs(OUT, exist_ok=True)
     ok, failed = 0, []
+    # name -> (unsigned path, width, height), collected as each recipe renders
+    paths = {}
     for f in sorted(os.listdir(SRC)):
         if not f.endswith(".json") or f.startswith("_"):
             continue
@@ -98,6 +100,8 @@ def main():
             with urllib.request.urlopen(url, timeout=60) as rr:
                 im = Image.open(io.BytesIO(rr.read())).convert("RGB")
             im.save(os.path.join(OUT, f[:-5] + ".png"))
+            # the unsigned path, which is what a caller copies and edits
+            paths[f[:-5]] = (t.get("path", ""), w, h)
             ok += 1
             print(f"  {f[:-5]:20} {w}x{h}  {bg}")
         except Exception as e:
@@ -123,9 +127,46 @@ def main():
         sheet.paste(t, (x + (CELL_W - t.size[0]) // 2, y + (CELL_H - t.size[1]) // 2))
         d.text((x, y + CELL_H + 4), name, fill=(60, 60, 70))
     sheet.save(os.path.join(OUT, "_sheet.png"))
+
+    # A page listing each card with the imagor path that produced it, unsigned.
+    #
+    # The cards are the documentation: a path is what someone hands to an agent to
+    # iterate on, and it is more useful than a picture because it can be edited.
+    # Generated rather than written by hand so it cannot drift from the recipes.
+    lines = [
+        "# Cookbook",
+        "",
+        "Fourteen layouts, each one a single imagor URL. The path under every card is",
+        "what produced it — **copy one and hand it to an agent**, or to `render_template`,",
+        "and iterate from there. They are unsigned, so add a signature for your own",
+        "imagor or prefix `unsafe/` to try one against a development instance.",
+        "",
+        "[Back to the README](../README.md) · [All fourteen, one image](contact-sheet.png)",
+        "",
+    ]
+    for name, _ in ims:
+        row = paths.get(name)
+        if not row:
+            continue
+        path, w, h = row
+        lines += [
+            f"## {name}",
+            "",
+            f"![{name}]({name}.png)",
+            "",
+            f"*{w}×{h}*",
+            "",
+            "```",
+            path,
+            "```",
+            "",
+        ]
+    with open(os.path.join(OUT, "cookbook.md"), "w") as fh:
+        fh.write("\n".join(lines))
     print(f"\n  {ok} of {ok + len(failed)} rendered"
           + (f"   failed: {failed}" if failed else "")
-          + f"\n  sheet: {OUT}/_sheet.png")
+          + f"\n  sheet: {OUT}/_sheet.png"
+          + f"\n  page:  {OUT}/cookbook.md")
 
 
 if __name__ == "__main__":

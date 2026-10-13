@@ -8,7 +8,7 @@ correct it.
 ![Fourteen cards, each one a single imagor URL](docs/gallery/contact-sheet.png)
 
 *Every card above is one imagor URL. No design file, no template editor, no image
-library — composed by an agent through these tools.*
+library — composed by an agent through these tools. **[Every path is listed here »](docs/gallery/cookbook.md)***
 
 ## What you get
 
@@ -129,6 +129,11 @@ the pixels a box resolved to, not whether it was written `38p` or `half`.
 `cookbook/` holds **fourteen ready-made layouts** for the formats that come up most
 — OG cards, a product grid, a profile card, quotes, testimonials, an event, a
 comparison table, a price ladder. Take the closest, change the values, render it.
+
+**Every card, with the imagor path that produced it, is on the
+[cookbook page](docs/gallery/cookbook.md).** Copy a path and hand it to an agent —
+that is the whole workflow: a URL is something it can read, edit and render
+again, which a picture is not.
 
 Every recipe is rendered by the test suite **at three canvas sizes on every
 commit**, and the contact sheet above is generated from them by the same code path,
