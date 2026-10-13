@@ -1,35 +1,21 @@
 # imagor-template
 
-**Template work for [imagor](https://github.com/cshum/imagor) — the fast, self-hosted,
+**Templates for [imagor](https://github.com/cshum/imagor) — the fast, self-hosted,
 open-source image server — with agent capabilities on top.**
 
-imagor renders images from a URL, on your own infrastructure, **4–8× faster** than the
-quickest ImageMagick settings. What it has never had is a **layout**: a card you can
-pass around, edit, and render at any size. That is what this adds, in a form an **agent
-can write, render, look at, and correct.**
-
-```sh
-$ imagor-template compile cookbook/event.json
-1200x628/filters:image(252x451/color:174c43,64,87):text(14,96,219,Open-Sans-bold-118,fffaf1):.../color:f3f0e8
-```
-
-Three things follow from that, and they are the whole idea:
-
-**The output is one imagor URL.** It renders anywhere imagor runs — paste it in a
-browser, store it, put it in a page. No image library, no template editor, no design file.
-
-**The layout is portable.** One card carries slot names and `{{values}}`, so it re-fills
-for a different person, product or event — and renders at 1200×630 *and* 1080×1080,
-because the geometry is relative to the canvas.
-
-**It compiles deterministically.** The same layout gives the same URL every time, which
-is what lets an agent diff two versions and tell whether its own edit did what it intended.
+**An agent writes the layout; you get back one imagor URL.** Paste it in a browser, store
+it, serve it from a CDN, put it in a page — no image library, no template editor, no
+design file.
 
 ![Fourteen cards, each one a single imagor URL](docs/gallery/contact-sheet.png)
 
-*Every card above is one imagor URL. No design file, no template editor, no image
-library — composed by an agent through these tools. **[Every template, and the path it
-resolves to, is here »](docs/gallery/cookbook.md)***
+*Every card above is one imagor URL, composed by an agent from a brief. **[All fourteen,
+with the template behind each »](docs/gallery/cookbook.md)***
+
+Reusable here means **programmable**: the output is a URL, so your code can hold one,
+template it, or hand it to an `<img>` tag, and imagor renders it at 4–8× the speed of the
+quickest ImageMagick settings. The layout an agent writes is how you get one — it is not
+something you have to read.
 
 ## What an agent does with it
 
@@ -77,13 +63,16 @@ docker run -d -p 8000:8000 \
 
 Already running imagor? Skip this and point the config below at it.
 
-**2. Install.** Two front ends on one engine, and both ship together:
+**2. Install.** Two front ends on one engine, and both ship together. **If you are
+driving it from an agent you only need the server**; the compiler is there for the cases
+with no agent in them — a backend resolving a stored layout, a script checking the
+cookbook:
 
 ```sh
-# the MCP server: the same engine, so an agent can compose, render and check
+# the MCP server: an agent composes, renders, looks at the result and revises
 imagor-mcp
 
-# and the compiler on its own, for everything with no agent in it
+# the compiler on its own: a layout in, one imagor URL out
 imagor-template compile cookbook/event.json
 ```
 

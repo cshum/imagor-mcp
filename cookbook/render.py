@@ -44,35 +44,17 @@ def canvas_of(recipe):
 
 
 def dump_template(recipe):
-    """The template as JSON, with the structure indented and each slot on one line.
+    """The template as JSON on one line.
 
-    A slot is a flat record of a dozen short fields, and there are up to twenty of
-    them, so one per line is what a reader scans - but blown out to two spaces per
-    field it is thirty lines each, and the shape of the layout disappears into the
-    middle of it. The structure keeps its indentation; the slots collapse.
+    The template is an agent's channel: it is what gets handed over, not what a reader
+    scans. The page around it is for a person - the card, what it is for, and the URL it
+    resolves to - and a template blown out to forty indented lines buries the card it
+    belongs to. On one line it is copyable, and the reader who wants the shape of a
+    layout reads the note rather than the JSON.
     """
-    flat = lambda o: json.dumps(o, separators=(", ", ": "))
-    out = ["{"]
-    keys = list(recipe.keys())
-    for i, k in enumerate(keys):
-        v = recipe[k]
-        tail = "," if i < len(keys) - 1 else ""
-        if k == "slots" and isinstance(v, list):
-            out.append(f'  "slots": [')
-            for j, slot in enumerate(v):
-                out.append(f"    {flat(slot)}" + ("," if j < len(v) - 1 else ""))
-            out.append("  ]" + tail)
-        elif isinstance(v, (dict, list)) and len(json.dumps(v)) <= 72:
-            out.append(f"  {json.dumps(k)}: {flat(v)}{tail}")
-        elif isinstance(v, (dict, list)):
-            body = json.dumps(v, indent=2)
-            body = "\n".join("  " + line for line in body.split("\n"))
-            out.append(f'  "{k}": {body.lstrip()}{tail}')
-        else:
-            out.append(f"  {json.dumps(k)}: {json.dumps(v)}{tail}")
-    out.append("}")
-    return "\n".join(out)
-
+    # ensure_ascii off: a template is read and copied, and a curly quote turned into
+    # \u201c is the kind of detail that makes a copy-paste look broken
+    return json.dumps(recipe, separators=(",", ":"), ensure_ascii=False)
 
 def main():
     # The published image runs unsafe, and the binary refuses a secret alongside
