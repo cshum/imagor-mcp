@@ -99,31 +99,44 @@ func (c Config) slotFromFilter(f imagorpath.Filter) (TemplateSlot, bool) {
 		}
 		inner, x, y := args[0], args[1], args[2]
 		slot := TemplateSlot{Name: "image", Kind: "image", X: x, Y: y}
-		// the inner path is [fit-in/]WxH/source
-		rest := inner
-		if strings.HasPrefix(rest, "fit-in/") {
-			slot.Fit = true
-			rest = strings.TrimPrefix(rest, "fit-in/")
+		dims, middle, src := splitInnerPath(inner)
+		slot.Fit = strings.HasPrefix(inner, "fit-in/")
+		if w, h, ok := splitDims(dims); ok {
+			slot.Width, slot.Height = w, h
 		}
-		if i := strings.Index(rest, "/"); i > 0 {
-			dims := rest[:i]
-			src := rest[i+1:]
-			// A fitted image is written fit-in/WxH/filters:fill(none)/source,
-			// because fill(none) is what centres it in its box. The fill is the
-			// template's own, so it is stripped here - otherwise the slot reads
-			// back as an image whose source is a filter, and the round trip is
-			// not stable.
-			if slot.Fit {
-				src = strings.TrimPrefix(src, "filters:fill(none)/")
+		slot.Filters = middle
+		slot.Image = decodeTextValue(src)
+		_ = middle
+		// The inner filters that are themselves slots are the slot's children,
+		// which is what stops a nested canvas flattening into unrelated top-level
+		// slots. They are read from the middle, where they sit.
+		if strings.Contains(middle, "filters:") || strings.Contains(middle, "text(") ||
+			strings.Contains(middle, "image(") {
+			parsed := imagorpath.Parse("/filters:" + strings.TrimPrefix(middle, "filters:"))
+			for _, child := range parsed.Filters {
+				if child.Name != "image" && child.Name != "text" && child.Name != "label" {
+					continue
+				}
+				cs, ok := c.slotFromFilter(child)
+				if !ok {
+					continue
+				}
+				cs.Name = child.Name
+				slot.Slots = append(slot.Slots, InnerSlot{
+					Name: cs.Name, Kind: cs.Kind, Image: cs.Image, Text: cs.Text,
+					X: cs.X, Y: cs.Y, Width: cs.Width, Height: cs.Height,
+					Font: cs.Font, Size: cs.Size, Color: cs.Color,
+					Align: cs.Align, Fit: cs.Fit, Filters: cs.Filters,
+				})
+				// The filter that became a child is the child now. Leaving it in
+				// Filters as well would carry it twice: once nested, once as a
+				// filter on the slot's own source.
+				if k := strings.Index(slot.Filters, child.Name+"("); k >= 0 {
+					if e := matchingParen(slot.Filters, k+len(child.Name)); e > k {
+						slot.Filters = strings.Trim(slot.Filters[:k]+slot.Filters[e+1:], ":")
+					}
+				}
 			}
-			// a source carrying ? or , was encoded on the way in, and has to be
-			// decoded on the way back or the round trip is not stable
-			slot.Image = decodeTextValue(src)
-			if w, h, ok := splitDims(dims); ok {
-				slot.Width, slot.Height = w, h
-			}
-		} else {
-			slot.Image = decodeTextValue(rest)
 		}
 		if strings.HasPrefix(slot.Image, "color:") {
 			slot.Kind = "rect"
@@ -144,10 +157,10 @@ func (c Config) slotFromFilter(f imagorpath.Filter) (TemplateSlot, bool) {
 			slot.Color = args[4]
 		}
 		// colour, alpha, blend, wrap width, align, justify, wrap mode, spacing
+		// The wrap width is a form, not a number: the emitter writes "full-144",
+		// and reading it with Atoi dropped it and the align that follows it.
 		if len(args) > 7 {
-			if w, err := strconv.Atoi(args[7]); err == nil {
-				slot.Width = strconv.Itoa(w)
-			}
+			slot.Width = args[7]
 		}
 		if len(args) > 8 {
 			slot.Align = args[8]
@@ -173,6 +186,97 @@ func (c Config) slotFromFilter(f imagorpath.Filter) (TemplateSlot, bool) {
 		return slot, true
 	}
 	return TemplateSlot{}, false
+}
+
+// splitInnerPath takes an image slot's inner path apart into its three parts:
+// the dimensions, whatever sits between them and the source, and the source.
+//
+// Neither imagor's parser nor a plain slash split can do this. imagor cannot read
+// the dimension segment, because here it is the template layer's vocabulary:
+// "full", "full-144" and "38p" are forms this layer resolves before a path is
+// written, and imagor has never heard of them. A plain split on the last slash is
+// worse, because a nested image() carries its own source and its own slashes.
+//
+// So the path is walked once, tracking parenthesis depth. The source is the last
+// slash at depth zero: everything after it is the slot's own source, everything
+// between the dimensions and it is the slot's own filters, and the filter groups
+// in between are left intact for the caller to read.
+func splitInnerPath(inner string) (dims, middle, src string) {
+	rest := strings.TrimPrefix(inner, "fit-in/")
+	i := strings.Index(rest, "/")
+	if i < 0 {
+		return rest, "", ""
+	}
+	dims, rest = rest[:i], rest[i+1:]
+
+	// Walk once, tracking depth. A source is found either at a scheme at depth
+	// zero - a URL carries slashes of its own, so the last slash is inside it -
+	// or, failing that, at the last slash at depth zero.
+	depth, last, scheme := 0, -1, -1
+	for k := 0; k < len(rest); k++ {
+		switch rest[k] {
+		case '(':
+			depth++
+		case ')':
+			if depth > 0 {
+				depth--
+			}
+		case '/':
+			if depth == 0 {
+				last = k
+			}
+		}
+		if depth != 0 || scheme >= 0 {
+			continue
+		}
+		// a boundary: the start, or just after a slash
+		if k != 0 && rest[k-1] != '/' {
+			continue
+		}
+		for _, marker := range []string{"http://", "https://", "b64:", "color:", "file://"} {
+			if strings.HasPrefix(rest[k:], marker) {
+				scheme = k
+				break
+			}
+		}
+	}
+	cut := last
+	if scheme >= 0 {
+		cut = scheme
+	}
+	if cut < 0 {
+		return dims, "", rest
+	}
+	middle, src = rest[:cut], rest[cut:]
+	middle = strings.TrimSuffix(middle, "/")
+	middle = strings.TrimPrefix(middle, "filters:")
+	// fill(none) is the template layer's own centring, not the slot's own filter
+	middle = strings.TrimPrefix(middle, "fill(none):")
+	middle = strings.TrimPrefix(middle, "fill(none)/")
+	if middle == "none" || middle == "fill(none)" {
+		middle = ""
+	}
+	return dims, middle, src
+}
+
+// matchingParen returns the index of the ")" that closes the "(" at open, or -1.
+func matchingParen(s string, open int) int {
+	if open < 0 || open >= len(s) || s[open] != '(' {
+		return -1
+	}
+	depth := 0
+	for k := open; k < len(s); k++ {
+		switch s[k] {
+		case '(':
+			depth++
+		case ')':
+			depth--
+			if depth == 0 {
+				return k
+			}
+		}
+	}
+	return -1
 }
 
 // splitFont separates a font argument into a family and a size, if it carries one.
