@@ -62,6 +62,8 @@ def dump_template(recipe):
             for j, slot in enumerate(v):
                 out.append(f"    {flat(slot)}" + ("," if j < len(v) - 1 else ""))
             out.append("  ]" + tail)
+        elif isinstance(v, (dict, list)) and len(json.dumps(v)) <= 72:
+            out.append(f"  {json.dumps(k)}: {flat(v)}{tail}")
         elif isinstance(v, (dict, list)):
             body = json.dumps(v, indent=2)
             body = "\n".join("  " + line for line in body.split("\n"))
@@ -170,20 +172,19 @@ def main():
     lines = [
         "# Cookbook",
         "",
-        "Fourteen layouts, each one a single imagor URL. Every card below comes with the",
-        "three things it takes to work on it:",
+        "Fourteen layouts, each one a single imagor URL. **The template is the whole",
+        "input** — it is complete on its own:",
         "",
-        "- **What it is** — so a change can be judged against something.",
-        "- **The template** — what `render_template` takes. **Copy this to iterate.** It",
-        "  keeps the slot names and the `values` placeholders, so a card can be re-filled",
-        "  for someone else.",
+        "- **The `note`** says what the card is for, so a change has something to be",
+        "  judged against.",
+        "- **The `slots`** are the layout. Names, geometry relative to the canvas, and",
+        "  the type.",
+        "- **The `values`** are the content, filled into the `{{placeholders}}`.",
         "",
-        "Render one and it comes back as a single imagor URL. Every card here is that and",
-        "nothing else - no design file, no template editor. **The template is the source;",
-        "the URL is what it resolves to:** pass a template to `render_template` and the",
-        "path is returned. A path can be read back with `parse_template`, but what comes",
-        "back renders once rather than re-filling - the names and the `values`",
-        "placeholders are the part a path cannot hold.",
+        "Hand that to `render_template` and it resolves to one imagor URL, shown under",
+        "each card. A path can be read back with `parse_template`, but what comes back",
+        "renders once rather than re-filling: the names and the `values` are the part a",
+        "path cannot hold.",
         "",
         "[Back to the README](../README.md) · [All fourteen, one image](contact-sheet.png)",
         "",
@@ -200,10 +201,16 @@ def main():
             "",
             f"*{w}×{h}* — {note}",
             "",
-            "**Template** — copy this to iterate:",
+            "**Template** — the source. Copy it and iterate:",
             "",
             "```json",
             dump_template(recipe),
+            "```",
+            "",
+            "**Resolves to** — the one imagor URL it produces. Copy it to render:",
+            "",
+            "```",
+            path,
             "```",
             "",
 
