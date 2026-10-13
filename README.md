@@ -1,14 +1,49 @@
 # imagor-template
 
-**Give an AI agent an image pipeline it can actually see.** An MCP server that
-exposes [imagor](https://github.com/cshum/imagor)'s URL language as typed tools —
-and hands the rendered result back, so the agent can look at what it built and
-correct it.
+**A layout format for [imagor](https://github.com/cshum/imagor), and a compiler that
+turns it into a URL.** Write a card once — `1200×630`, `1080×1080`, a story frame —
+and render it at any canvas size, with no image library and no design tool.
+
+```sh
+$ imagor-template compile cookbook/event.json
+1200x628/filters:image(252x451/color:174c43,64,87):text(14,96,219,Open-Sans-bold-118,fffaf1):...
+```
+
+Compiling is total and deterministic: the same layout gives the same path, every
+time, with no model in the loop. **There is also an MCP server**, so an agent can
+compose a layout, render it, *look at the result* and correct it — but the format and
+the compiler stand on their own.
 
 ![Fourteen cards, each one a single imagor URL](docs/gallery/contact-sheet.png)
 
 *Every card above is one imagor URL. No design file, no template editor, no image
 library — composed by an agent through these tools. **[Every path is listed here »](docs/gallery/cookbook.md)***
+
+## The two directions are not symmetrical
+
+| | |
+|---|---|
+| **template → path** | total, deterministic, needs no agent. This is the compiler. |
+| **path → template** | **lossy.** A path holds what a layout *resolved to*, not the decisions that produced it. |
+
+Reading a path back gives you the geometry, the colours and the text — but **the slot
+names are gone, `{{values}}` are gone, and a relative form like `38p` or `half` has
+already become the number it resolved to.** So the path is a compiled artifact, not
+the source:
+
+```
+template   names, {{values}}, relative forms, the note
+   |       compile: total, deterministic
+   v
+path       resolved geometry, no names, no values, literal numbers
+   |       decompile: lossy, like running strip on a binary
+   v
+template'  renders the same once, and no longer adapts
+```
+
+**One caveat worth knowing up front:** a text slot with a height is *fitted* by
+measuring, and measuring renders a probe through imagor. So a compile needs a running
+imagor — the pure-function part is everything else.
 
 ## What you get
 
@@ -45,7 +80,17 @@ docker run -d -p 8000:8000 \
 
 Already running imagor? Skip this and point the config below at it.
 
-**2. Install the server.** A prebuilt binary, or build from source:
+**2. Install.** Two binaries ship together — the compiler, and the MCP server:
+
+```sh
+# the compiler: a layout in, an imagor path out. No MCP client involved.
+imagor-template compile cookbook/event.json
+
+# the MCP server: the same engine, for an agent
+imagor-mcp
+```
+
+Both come prebuilt for six platforms, or build from source:
 
 ```sh
 # pick your platform from the releases page
