@@ -11,20 +11,44 @@ Served from **`https://s.imagor.net/<name>.svg`** — Cloudflare Pages builds th
 this directory, so the repo layout and the URLs map one for one and the deployed set can
 be checked against the committed one.
 
-## Generic material, and subjects
+## Reusable material
 
-**Eleven of the sixteen are generic**: they test what a fit does, or provide a ground, and
-any recipe can use them. **The other five are subjects** — a bag, a box, a bottle, a tall
-scene, a wide scene — and a card that needs a bag needs *that* bag, so they are used once
-and never shared.
+**This is what the set is for.** Most of these are generic: they test what a fit does, or
+provide a ground, and any recipe can use them.
 
-| kind | count | what it is | reuse |
-|---|---|---|---|
-| `edge` | 6 | a size or shape that breaks a naive fit | any recipe |
-| `texture` | 2 | a gradient ground | any recipe |
-| `product` | 3 | a bag, a box, a bottle | one card each |
-| `scene` | 2 | a subject in a frame | one card each |
-| `portrait` | 3 | abstract head-and-shoulders geometry | **none yet** |
+| kind | count | what it is |
+|---|---|---|
+| `edge` | 6 | a size or shape that breaks a naive fit |
+| `texture` | 2 | a gradient ground |
+| `portrait` | 3 | abstract head-and-shoulders geometry |
+
+**The `edge` six are the reason the set is worth having** — they exist to break things
+rather than to look good:
+
+| fixture | dimensions | what it exposes |
+|---|---|---|
+| `tiny` | 64x64 | a fit must not upscale it |
+| `huge` | 4000x4000 | a fit must downscale it |
+| `wide` | 1600x200 | extreme letterboxing |
+| `tall` | 200x1600 | the other extreme |
+| `square` | 600x600 | a shape nothing else has, for crop |
+| `transparent` | 400x400, no ground | what a card does over nothing |
+
+Measured through imagor: `fit-in/400x400` gives `64x64` for `tiny`, `400x50` for `wide`
+and `50x400` for `tall`.
+
+## Subjects
+
+**Five are not reusable material** — a bag, a box, a bottle, a tall scene, a wide scene.
+A card that needs a bag needs *that* bag, so each is used by one recipe and never shared.
+
+| kind | count | what it is |
+|---|---|---|
+| `product` | 3 | a bag, a box, a bottle |
+| `scene` | 2 | a subject in a frame |
+
+They live here because a recipe needs a source and a fixture is the only kind that needs
+no configuration, not because anything else should reuse them.
 
 ## The rules these follow
 
@@ -32,11 +56,6 @@ and never shared.
 point at happens to carry, and a face that is not installed falls back silently — a
 fixture with letters would look right on one image and wrong on another. Shapes,
 gradients and geometry only.
-
-**No faces.** The portraits are geometry, not photographs of people. A stock photograph of
-a person carries a likeness right that the photographer's model release covers, not the
-reader's use of the recipe — and an abstract placeholder makes the point that the image is
-standing in for something.
 
 **Pixels, never physical units.** An SVG at `width="2.667in"` has no intrinsic pixel
 size; imagor reads it at 72dpi and returns 192x144 rather than the 267x200 anyone meant.
@@ -64,31 +83,6 @@ python3 generate.py
 
 It rewrites every fixture and `manifest.json`. Edit the `FIXTURES` table rather than the
 output — the generated files are overwritten.
-
-## The `edge` fixtures
-
-Six of these exist to break things rather than to look good, and they are the reason the
-set is worth having:
-
-| fixture | dimensions | what it exposes |
-|---|---|---|
-| `tiny` | 64x64 | a fit must not upscale it |
-| `huge` | 4000x4000 | a fit must downscale it |
-| `wide` | 1600x200 | extreme letterboxing |
-| `tall` | 200x1600 | the other extreme |
-| `square` | 600x600 | a shape nothing else has, for crop |
-| `transparent` | 400x400, no ground | what a card does over nothing |
-
-Measured through imagor: `fit-in/400x400` gives `64x64` for `tiny`, `400x50` for `wide`
-and `50x400` for `tall`.
-
-## Photographs, in one recipe
-
-`product-grid` is the exception: it draws on six **Unsplash** photographs rather than
-fixtures, to show the recipes working with real product photography. Unsplash permits
-commercial use without attribution and hotlinking their CDN is their documented approach,
-**but it makes that one recipe depend on a third party staying up where the rest of the
-cookbook is self-contained.** The other thirteen use these fixtures.
 
 ## Brands and copy
 
