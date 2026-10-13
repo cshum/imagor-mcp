@@ -23,9 +23,12 @@ from PIL import Image, ImageDraw
 # that way), and use the tag the recipes target:
 #
 #   docker run -d -p 8197:8000 -e IMAGOR_UNSAFE=1 ghcr.io/cshum/imagor:1.9.9
-MCP = os.environ.get("IMAGOR_MCP_BIN", "/tmp/imagor-mcp-e2e")
+MCP = os.environ.get("IMAGOR_MCP_BIN", "imagor-mcp")
 BASE = os.environ.get("IMAGOR_BASE_URL", "http://localhost:8197")
-SRC = os.path.expanduser("~/Developer/imagor-mcp/cookbook")
+# The recipes live beside this script. An absolute path here works on one machine
+# and nowhere else - CI checked out to /home/runner/work, not ~/Developer, and the
+# job failed on a directory that only exists on a laptop.
+SRC = os.environ.get("IMAGOR_COOKBOOK_DIR", os.path.dirname(os.path.abspath(__file__)))
 OUT = sys.argv[1] if len(sys.argv) > 1 else "/tmp/gallery3"
 
 
