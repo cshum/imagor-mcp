@@ -96,26 +96,36 @@ joke. `Intrecciato` was written into a recipe once and had to be removed.
 When adding a recipe: invent the brand, invent the people, and if a caption needs a
 material, describe it generically — *hand-woven*, *vegetable-tanned*, *grained*.
 
-## Pushing `sources/` deploys it — there is no publish step
+## `sources/` deploys from this repo, and takes its time about it
 
-`s.imagor.net` is a Cloudflare Pages project **connected to this repository**, serving
-`sources/` as its root. A file at `sources/photos/x.jpg` is live at
-`https://s.imagor.net/photos/x.jpg` once the push lands. There is no `wrangler` command
-to run, no `CLOUDFLARE_API_TOKEN` to find, and no deploy workflow — looking for one
-wastes time, because the absence looks like a missing credential rather than a step
-that does not exist.
+`s.imagor.net` is the **`imagor-mcp-sources`** Cloudflare Pages project, connected to this
+repository with `sources/` as its root and `main` as its production branch. **A push
+deploys it — there is no `wrangler` command to run for a normal change.**
 
-The catch is that it cuts both ways: since the origin is the repository, a recipe can
-be committed pointing at a file that was never pushed, and nothing in CI notices. The
-gallery job renders against whatever the base URL names, so it will pass against a
-local server while the public URL 404s.
+Two things make that hard to confirm if you try:
 
-A `.svg` is served `max-age=31536000, immutable`, so **adding or changing a file is
-immediate and removing one is not** — the edge keeps answering a deleted fixture for a
-year. Never repoint a recipe at a path that has not been pushed, and treat a rename as
-an add plus a permanent tombstone.
+- **It is slow, and the deployments list is misleading.** Most entries read `Skipped`,
+  and a `Skipped` entry sits alongside a `Production` one for the same commit. A check
+  made a few minutes after a push will 404 and look like a broken connection. **Wait,
+  and check again before concluding anything** — a probe file that 404s at +8 minutes
+  may be live at +20.
+- **`wrangler whoami` says the OAuth token expired and cannot be refreshed**, which
+  reads as "not authenticated" and sends you looking for an API token. The refresh
+  token has a lifetime of its own, so a long-idle machine genuinely is logged out —
+  `npx wrangler login` fixes it, and it needs a browser.
 
-## `IMAGOR_BASE_URL` has to be reachable from inside imagor
+Useful commands once authenticated:
+
+```
+npx wrangler pages project list
+npx wrangler pages deployment list --project-name imagor-mcp-sources
+```
+
+**The edge caches hard.** A `.svg` is served `max-age=31536000, immutable`, so adding or
+changing a file is immediate while removing one is not — a deleted fixture keeps
+answering for a year. Treat a rename as an add plus a permanent tombstone.
+
+## `IMAGOR_BASE_URL` has to be reachable from inside imagor## `IMAGOR_BASE_URL` has to be reachable from inside imagor
 
 The preview nests the absolute URL as a source, so imagor fetches the composed
 image back **from inside its own container** to scale it. A base URL that only the
