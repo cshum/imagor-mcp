@@ -96,6 +96,23 @@ joke. `Intrecciato` was written into a recipe once and had to be removed.
 When adding a recipe: invent the brand, invent the people, and if a caption needs a
 material, describe it generically — *hand-woven*, *vegetable-tanned*, *grained*.
 
+## `IMAGOR_BASE_URL` has to be reachable from inside imagor
+
+The preview nests the absolute URL as a source, so imagor fetches the composed
+image back **from inside its own container** to scale it. A base URL that only the
+MCP process can reach therefore verifies fine and previews nothing:
+
+```
+IMAGOR_BASE_URL=http://localhost:8197   ->  preview 500, dial tcp [::1]:8197 refused
+IMAGOR_BASE_URL=http://127.0.0.1:8197   ->  preview 500, the container's own loopback
+```
+
+Both are the container talking to itself. Use a host that resolves on both sides —
+a public origin in production, `host.docker.internal` or the Docker host's LAN
+address locally. The failure arrives as a note (*"no preview: the image request
+returned 500"*) rather than an error, so a report can be perfect while the picture
+never comes back.
+
 ## Filters on a slot's own source
 
 An `image` field is data, not syntax, so a value that looks like a path is encoded and

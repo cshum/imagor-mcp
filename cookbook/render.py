@@ -106,17 +106,22 @@ def main():
 
     ims = [(f[:-4], Image.open(os.path.join(OUT, f)))
            for f in sorted(os.listdir(OUT)) if f.endswith(".png") and not f.startswith("_")]
-    COLS, CELL, PAD, LABEL = 4, 300, 12, 22
+    # The cell is landscape because every card is. A square cell held a 300x157
+    # thumbnail in 300 pixels of height, which left 143 pixels of dead space per
+    # row and made the sheet a third taller than its content.
+    COLS, CELL_W, CELL_H, PAD, LABEL = 4, 300, 158, 12, 22
     rows = (len(ims) + COLS - 1) // COLS
-    sheet = Image.new("RGB", (COLS * CELL + (COLS + 1) * PAD,
-                              rows * (CELL + LABEL) + (rows + 1) * PAD), (245, 245, 247))
+    sheet = Image.new("RGB", (COLS * CELL_W + (COLS + 1) * PAD,
+                              rows * (CELL_H + LABEL) + (rows + 1) * PAD), (245, 245, 247))
     d = ImageDraw.Draw(sheet)
     for i, (name, im) in enumerate(ims):
         r, c = divmod(i, COLS)
-        x = PAD + c * (CELL + PAD); y = PAD + r * (CELL + LABEL + PAD)
-        t = im.copy(); t.thumbnail((CELL, CELL), Image.LANCZOS)
-        sheet.paste(t, (x + (CELL - t.size[0]) // 2, y))
-        d.text((x, y + CELL + 4), name, fill=(60, 60, 70))
+        x = PAD + c * (CELL_W + PAD); y = PAD + r * (CELL_H + LABEL + PAD)
+        t = im.copy(); t.thumbnail((CELL_W, CELL_H), Image.LANCZOS)
+        # centred on both axes, so a card that is not exactly the cell's aspect
+        # sits in the middle of its cell rather than against the top
+        sheet.paste(t, (x + (CELL_W - t.size[0]) // 2, y + (CELL_H - t.size[1]) // 2))
+        d.text((x, y + CELL_H + 4), name, fill=(60, 60, 70))
     sheet.save(os.path.join(OUT, "_sheet.png"))
     print(f"\n  {ok} of {ok + len(failed)} rendered"
           + (f"   failed: {failed}" if failed else "")
