@@ -46,6 +46,24 @@ regions to read the small text it had drawn.
 That is the difference from editor-first image tooling: there is no canvas to design in.
 A layout *is* a URL, and a URL is something an agent can write, check and rewrite.
 
+## Where this fits
+
+Three ways to get a dynamic image, and what each costs:
+
+| | how | marginal cost | trade |
+|---|---|---|---|
+| **Chromium** (Puppeteer, Satori) | screenshot an HTML page per image | free | **slow.** A browser to start, then a page render — [they say so themselves](https://www.bannerbear.com/blog/how-to-make-a-custom-open-graph-image-using-puppeteer/) |
+| **Hosted template APIs** (Bannerbear, Placid, APITemplate) | send values, get an image back | **$0.019–0.049 per image**, from $49/mo | fast enough, no ops — but **your images render on someone else's servers**, and the bill scales with your traffic |
+| **imagor-template** | a layout compiles to an imagor URL | **nothing beyond the imagor you already run** | you host it; no browser, no per-image fee, no third party |
+
+**The point is not that this is cheaper than a competitor — it is that if you already run
+imagor, the marginal cost of a template is zero.** imagor is already doing the image work
+at 4–8× the quickest ImageMagick settings; this only adds the layout layer it was missing.
+
+Published rates as of October 2026: Bannerbear $49/mo for 1,000 images ($0.049 each),
+Placid $19/mo for 500, APITemplate.io $29/mo for 1,500. **None of these are benchmarks I
+ran** — the costs are from their pricing pages, and the speed claim is their own.
+
 ## Quick start
 
 **1. You need an imagor to render with.** The official image is the one the
