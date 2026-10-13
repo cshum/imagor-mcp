@@ -96,7 +96,28 @@ joke. `Intrecciato` was written into a recipe once and had to be removed.
 When adding a recipe: invent the brand, invent the people, and if a caption needs a
 material, describe it generically — *hand-woven*, *vegetable-tanned*, *grained*.
 
-## `sources/` deploys from this repo, and takes its time about it
+## Two front ends, one engine — keep them in step
+
+`cmd/imagor-template` and `cmd/imagor-mcp` are bindings on the same code in
+`internal/tools`. The CLI exists because compiling is deterministic, so the common case
+should not need an MCP client or a model.
+
+**`cmd/imagor-template/main_test.go` pins this**: `TestCompileMatchesTheServer` compiles
+every recipe through both front ends and fails if they disagree. If a change to the
+engine makes the two diverge, that test names the recipe. Add a recipe and it is covered
+without touching the test.
+
+**Compiling is deterministic given an imagor, not pure.** A text slot with a height is
+fitted by measuring, and measuring renders a probe through imagor, so `IMAGOR_BASE_URL`
+has to resolve or every recipe with a fitted slot fails. **The CLI tests skip rather
+than fail without it** — a skip is the honest outcome, and CI provides a base URL.
+
+**The cookbook carries three canvas shapes** (`[w, h]`, `{width, height, background}`
+and `{width, height}` with the background alongside). `templateFile.canvas()` accepts
+all three so a recipe cannot become unusable through a front end that handles one. They
+should be normalised to one shape, but until then this is the compatibility layer.
+
+## `sources/` deploys from this repo, and takes its time about it, and takes its time about it
 
 `s.imagor.net` is the **`imagor-mcp-sources`** Cloudflare Pages project, connected to this
 repository with `sources/` as its root and `main` as its production branch. **A push
