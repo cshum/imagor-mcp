@@ -5,7 +5,7 @@
     1200,
     628
   ],
-  "background": "color:111c24",
+  "background": "color:142e2b",
   "slots": [
     {
       "name": "eyebrow",
@@ -54,7 +54,7 @@
     {
       "name": "status-panel",
       "kind": "rect",
-      "image": "color:1b2d37",
+      "image": "color:1d3b34",
       "x": "68p+4",
       "y": "22p",
       "width": "300",
@@ -76,12 +76,12 @@
       "x": "78p+4",
       "y": "30p",
       "font": "Open-Sans-bold-72",
-      "color": "1b2d37"
+      "color": "1d3b34"
     },
     {
       "name": "status-track-one",
       "kind": "rect",
-      "image": "color:3a4b52",
+      "image": "color:2f4a42",
       "x": "71p+4",
       "y": "58p",
       "width": "204",
@@ -108,7 +108,7 @@
     {
       "name": "status-track-two",
       "kind": "rect",
-      "image": "color:3a4b52",
+      "image": "color:2f4a42",
       "x": "71p+4",
       "y": "64p",
       "width": "204",
@@ -135,7 +135,7 @@
     {
       "name": "status-track-three",
       "kind": "rect",
-      "image": "color:3a4b52",
+      "image": "color:2f4a42",
       "x": "71p+4",
       "y": "70p",
       "width": "204",
