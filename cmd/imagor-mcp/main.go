@@ -17,7 +17,7 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"github.com/cshum/imagor-mcp/internal/tools"
+	"github.com/cshum/imagor-template/internal/tools"
 )
 
 // version is the release tag, injected by -ldflags "-X main.version=...".

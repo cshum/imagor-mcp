@@ -25,12 +25,12 @@ import (
 	"strings"
 	"time"
 
-	imagormcp "github.com/cshum/imagor-mcp"
+	imagormcp "github.com/cshum/imagor-template"
 	"github.com/cshum/imagor/imagorpath"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	filtercat "github.com/cshum/imagor-mcp/internal/filters"
-	"github.com/cshum/imagor-mcp/internal/pathgen"
+	filtercat "github.com/cshum/imagor-template/internal/filters"
+	"github.com/cshum/imagor-template/internal/pathgen"
 )
 
 // Mode is how the server produces request paths.

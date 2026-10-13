@@ -1,4 +1,4 @@
-# imagor-mcp
+# imagor-template
 
 **Give an AI agent an image pipeline it can actually see.** An MCP server that
 exposes [imagor](https://github.com/cshum/imagor)'s URL language as typed tools —
@@ -49,15 +49,15 @@ Already running imagor? Skip this and point the config below at it.
 
 ```sh
 # pick your platform from the releases page
-curl -L -o imagor-mcp https://github.com/cshum/imagor-mcp/releases/latest/download/imagor-mcp_v0.3.0_darwin_arm64
+curl -L -o imagor-mcp https://github.com/cshum/imagor-template/releases/latest/download/imagor-mcp_v0.3.0_darwin_arm64
 chmod +x imagor-mcp
 
 # or, with Go installed
-go install github.com/cshum/imagor-mcp@latest
+go install github.com/cshum/imagor-template@latest
 ```
 
 Pure Go, with no libvips and no cgo — unlike imagor itself. Every platform is on the
-[releases page](https://github.com/cshum/imagor-mcp/releases).
+[releases page](https://github.com/cshum/imagor-template/releases).
 
 **3. Add it to your MCP client.**
 
