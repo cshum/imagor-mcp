@@ -72,20 +72,12 @@ docker run -d -p 8000:8000 \
 
 Already running imagor? Skip this and point the config below at it.
 
-**2. Install.** Two binaries ship together, and **the server is the one that matters**.
-Templates are authored by an agent — a fitted text slot is measured by rendering, so even
-compiling one wants a live imagor. The CLI exists to run a template you *already have*,
-in a place with no agent in it:
+**2. Install.** **The server is the one you need** — templates are authored by an agent,
+and a fitted text slot is measured by rendering, so even compiling one wants a live
+imagor. A second binary, `imagor-template`, runs a template you already have; it is
+covered in [Development](#development).
 
-```sh
-# the MCP server: an agent composes, renders, looks at the result and revises
-imagor-mcp
-
-# the CLI: runs a template you already have - a stored layout, a build step
-imagor-template compile cookbook/event.json
-```
-
-Both come prebuilt for six platforms, or build from source:
+Both ship prebuilt for six platforms, or build from source:
 
 ```sh
 # pick your platform from the releases page
@@ -266,7 +258,24 @@ Do not host this multi-tenant for users whose keys you would then hold.
 docker run -d -p 8197:8000 -e IMAGOR_UNSAFE=1 ghcr.io/cshum/imagor:1.9.9
 IMAGOR_BASE_URL=http://localhost:8197 IMAGOR_UNSAFE=1 go test ./...
 python3 cookbook/render.py /tmp/gallery   # render every recipe, build the sheet
+python3 cookbook/index.py                 # regenerate the embedded recipe index
 ```
+
+### The CLI
+
+`imagor-template` is the second binary, for running a template with no agent and no MCP
+client in the path — a stored layout, a build step, a script checking the cookbook:
+
+```sh
+imagor-template compile cookbook/event.json   # a layout in, one imagor URL out
+imagor-template decompile '<path>'            # a path back to a layout
+```
+
+Compiling is total and deterministic, so the same layout gives the same path every time.
+**Decompiling is lossy** — see [One direction is the source](#one-direction-is-the-source)
+for what a path cannot carry. Both call the same engine the server does, and
+`cmd/imagor-template/main_test.go` compiles every recipe through both front ends and
+fails if they ever disagree.
 
 Use the published image rather than one built for your machine: it is the only place
 the declared font families exist, and a host binary substitutes a system face

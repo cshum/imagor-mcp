@@ -11,7 +11,7 @@ get_cookbook_recipe  name: "event"
 ```
 
 What is on this page is what a reader wants: the card, what it is for, and
-the URL it resolves to. The name under each card is the handle.
+the URL it resolves to. **The heading above each card is the name to fetch it by.**
 
 [Back to the README](../README.md) · [All fourteen, one image](contact-sheet.png)
 
