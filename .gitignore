@@ -17,3 +17,6 @@ coverage.txt
 cookbook/.aspect-cache
 __pycache__/
 *.pyc
+
+# wrangler's local state; never belongs in the repo
+.wrangler/
