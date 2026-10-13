@@ -1,8 +1,11 @@
 ## Sample sources
 
-Ready-made images, served from **`https://s.imagor.net`**. A file at `sources/<name>.svg`
-in this repo serves at `<base>/<name>.svg`. They are pure-vector SVG, so one file
-rasterises crisply at any size, and the sizes below are the files' own.
+Ready-made images, served from **`https://s.imagor.net`**. A file at `sources/<name>.svg` in this repo
+serves at `<base>/<name>.svg`. They are pure-vector SVG, so one file rasterises crisply at
+any size, and the sizes below are the files' own.
+
+This table is generated from `sources/manifest.json` by `sources/generate.py` - edit that,
+not this.
 
 | name | size | for |
 |---|---|---|
@@ -10,13 +13,6 @@ rasterises crisply at any size, and the sizes below are the files' own.
 | `product-bag` | 400×400 | Soft and rounded. The default for a grid cell. |
 | `product-bottle` | 300×480 | Tall and narrow. A different aspect to the others. |
 | `product-box` | 400×400 | Rigid with a lid. Sits well beside a bag. |
-| | | ***Portrait** — circles and avatar cards; abstract geometry, no face* |
-| `portrait-a` | 400×400 | A dark ground and a light subject. |
-| `portrait-b` | 400×400 | A light ground and a dark subject. |
-| `portrait-c` | 400×400 | A grey ground and a warm subject. |
-| | | ***Texture** — a ground with depth* |
-| `texture-navy` | 1200×800 | A dark diagonal gradient, for a hero ground. |
-| `texture-warm` | 1200×800 | A warm gradient, light to dark. |
 | | | ***Scene** — a subject in a frame, for copy beside an image* |
 | `scene-tall` | 700×900 | A subject in a tall frame, for a launch card. |
 | `scene-wide` | 1600×600 | A subject in a wide frame, for a banner. |
@@ -34,11 +30,9 @@ Put one in a slot's `image`, or in `values`:
 "values": { "photo": "https://s.imagor.net/product-bag.svg" }
 ```
 
-`python3 sources/generate.py` rewrites the files and the manifest — edit its
+`python3 sources/generate.py` rewrites the files, the manifest and this table — edit its
 `FIXTURES` table rather than the output.
 
-
-`cookbook/` holds ready-made `render_template` payloads for the formats that come
-up most. Take the closest one, change the values, render it. They are rendered by
-the test suite at three canvas sizes — a recipe that no longer works teaches a
-shape that fails.
+`cookbook/` holds ready-made `render_template` payloads for the formats that come up most.
+Take the closest one, change the values, render it. They are rendered by the test suite at
+three canvas sizes — a recipe that no longer works teaches a shape that fails.

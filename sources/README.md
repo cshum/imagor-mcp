@@ -19,8 +19,6 @@ provide a ground, and any recipe can use them.
 | kind | count | what it is |
 |---|---|---|
 | `edge` | 6 | a size or shape that breaks a naive fit |
-| `texture` | 2 | a gradient ground |
-| `portrait` | 3 | abstract head-and-shoulders geometry |
 
 **The `edge` six are the reason the set is worth having** — they exist to break things
 rather than to look good:
@@ -46,6 +44,13 @@ A card that needs a bag needs *that* bag, so each is used by one recipe and neve
 |---|---|---|
 | `product` | 3 | a bag, a box, a bottle |
 | `scene` | 2 | a subject in a frame |
+
+There were portraits and textures here too, abstract geometry for the people cards and
+gradients for a hero ground. Both are gone: the cards that wanted people use photographs,
+and a background is a colour rather than an asset. Removing them from the `FIXTURES` table
+is enough - `generate.py` deletes any `.svg` the table no longer lists, and regenerates
+`references/sources.md` from the manifest, so a removed fixture cannot linger on disk or in
+the table the skill reads.
 
 They live here because a recipe needs a source and a fixture is the only kind that needs
 no configuration, not because anything else should reuse them.

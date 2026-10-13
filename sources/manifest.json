@@ -10,36 +10,6 @@
     "note": "Much larger than any box, so a fit has to downscale."
   },
   {
-    "name": "portrait-a",
-    "file": "portrait-a.svg",
-    "kind": "portrait",
-    "url": "https://s.imagor.net/portrait-a.svg",
-    "width": 400,
-    "height": 400,
-    "aspect": 1.0,
-    "note": "A dark ground and a light subject."
-  },
-  {
-    "name": "portrait-b",
-    "file": "portrait-b.svg",
-    "kind": "portrait",
-    "url": "https://s.imagor.net/portrait-b.svg",
-    "width": 400,
-    "height": 400,
-    "aspect": 1.0,
-    "note": "A light ground and a dark subject."
-  },
-  {
-    "name": "portrait-c",
-    "file": "portrait-c.svg",
-    "kind": "portrait",
-    "url": "https://s.imagor.net/portrait-c.svg",
-    "width": 400,
-    "height": 400,
-    "aspect": 1.0,
-    "note": "A grey ground and a warm subject."
-  },
-  {
     "name": "product-bag",
     "file": "product-bag.svg",
     "kind": "product",
@@ -108,26 +78,6 @@
     "height": 1600,
     "aspect": 0.125,
     "note": "The other extreme."
-  },
-  {
-    "name": "texture-navy",
-    "file": "texture-navy.svg",
-    "kind": "texture",
-    "url": "https://s.imagor.net/texture-navy.svg",
-    "width": 1200,
-    "height": 800,
-    "aspect": 1.5,
-    "note": "A dark diagonal gradient, for a hero ground."
-  },
-  {
-    "name": "texture-warm",
-    "file": "texture-warm.svg",
-    "kind": "texture",
-    "url": "https://s.imagor.net/texture-warm.svg",
-    "width": 1200,
-    "height": 800,
-    "aspect": 1.5,
-    "note": "A warm gradient, light to dark."
   },
   {
     "name": "tiny",

@@ -55,17 +55,6 @@ fill="{accent}" opacity="0.18"/>
         """)
 
 
-def portrait(size, ground, accent):
-    """An abstract portrait: a head and shoulders as geometry, no face and no letters."""
-    r = size / 2
-    return svg(size, size, f"""
-        <rect width="{size}" height="{size}" fill="{ground}"/>
-        <circle cx="{r:.0f}" cy="{size*0.40:.0f}" r="{size*0.19:.0f}" fill="{accent}"/>
-        <path d="M {size*0.20:.0f} {size} Q {r:.0f} {size*0.60:.0f} {size*0.80:.0f} {size} Z" \
-fill="{accent}"/>
-        """)
-
-
 def texture(w, h, stops):
     """A gradient: for cards that want a ground with depth rather than a flat colour."""
     grad = "".join(
@@ -100,20 +89,6 @@ FIXTURES = {
                        product(300, 480, CREAM, "M 120 120 L 180 120 L 185 200 L 195 460 "
                                                 "L 105 460 L 115 200 Z", "#2b4a3f")),
 
-    # Portraits: geometry, so no face is being faked and no font is needed.
-    "portrait-a": ("portrait", "A dark ground and a light subject.",
-                   portrait(400, GREEN, "#c9b79c")),
-    "portrait-b": ("portrait", "A light ground and a dark subject.",
-                   portrait(400, TAN, "#173f34")),
-    "portrait-c": ("portrait", "A grey ground and a warm subject.",
-                   portrait(400, SLATE, "#c36c4a")),
-
-    # Textures: for cards that want depth behind their copy.
-    "texture-navy": ("texture", "A dark diagonal gradient, for a hero ground.",
-                     texture(1200, 800, [("0", NAVY), ("1", "#1e3a5f")])),
-    "texture-warm": ("texture", "A warm gradient, light to dark.",
-                     texture(1200, 800, [("0", CREAM), ("1", TAN)])),
-
     # Scenes: a subject in a frame, for the cards that place copy beside an image.
     "scene-tall": ("scene", "A subject in a tall frame, for a launch card.",
                    scene(700, 900, CREAM, "#173f34")),
@@ -135,6 +110,55 @@ FIXTURES = {
                     svg(400, 400, f'<circle cx="200" cy="200" r="140" fill="{GREEN}" '
                                   f'opacity="0.75"/>')),
 }
+
+
+KIND_TITLE = {
+    "product": ("Product", "a grid cell or a product card"),
+    "scene": ("Scene", "a subject in a frame, for copy beside an image"),
+    "edge": ("Edge cases", "these exist to break things, not to look good"),
+}
+KIND_ORDER = ["product", "scene", "edge"]
+
+
+def write_resource(manifest, base):
+    """Write references/sources.md from the manifest."""
+    out = [f"""## Sample sources
+
+Ready-made images, served from **`{base}`**. A file at `sources/<name>.svg` in this repo
+serves at `<base>/<name>.svg`. They are pure-vector SVG, so one file rasterises crisply at
+any size, and the sizes below are the files' own.
+
+This table is generated from `sources/manifest.json` by `sources/generate.py` - edit that,
+not this.
+
+| name | size | for |
+|---|---|---|"""]
+    for kind in KIND_ORDER:
+        rows = [m for m in manifest if m["kind"] == kind]
+        if not rows:
+            continue
+        title, blurb = KIND_TITLE[kind]
+        out.append(f"| | | ***{title}** — {blurb}* |")
+        for m in rows:
+            out.append(f"| `{m['name']}` | {m['width']}×{m['height']} | {m['note']} |")
+    out.append("""
+Put one in a slot's `image`, or in `values`:
+
+```json
+"values": { "photo": "%s/product-bag.svg" }
+```
+
+`python3 sources/generate.py` rewrites the files, the manifest and this table — edit its
+`FIXTURES` table rather than the output.
+
+`cookbook/` holds ready-made `render_template` payloads for the formats that come up most.
+Take the closest one, change the values, render it. They are rendered by the test suite at
+three canvas sizes — a recipe that no longer works teaches a shape that fails.
+""" % base)
+    path = os.path.join(HERE, "..", "references", "sources.md")
+    with open(os.path.normpath(path), "w") as f:
+        f.write("\n".join(out))
+    print(f"  wrote references/sources.md ({len(manifest)} fixtures)")
 
 
 def main():
@@ -162,9 +186,23 @@ def main():
         })
         print(f"  {name:14} {w:>5}x{h:<5} {os.path.getsize(path):>5} bytes  {kind}")
 
+    # Remove any .svg the table no longer lists. Writing alone leaves a fixture that was
+    # deleted from the table still on disk and still served, so the deployed set and the
+    # committed set disagree - and nothing says which is right.
+    keep = {m["file"] for m in manifest}
+    for f in sorted(os.listdir(HERE)):
+        if f.endswith(".svg") and f not in keep:
+            os.remove(os.path.join(HERE, f))
+            print(f"  removed {f}, no longer in the table")
+
     with open(os.path.join(HERE, "manifest.json"), "w") as f:
         json.dump(manifest, f, indent=2)
         f.write("\n")
+
+    # references/sources.md is the imagor-mcp://sources resource. It was a hand-written
+    # copy of this table and had already gone stale - it still listed fixtures that had
+    # been removed. Generated from the manifest, it cannot disagree with the set.
+    write_resource(manifest, base)
     total = sum(os.path.getsize(os.path.join(HERE, m["file"])) for m in manifest)
     print(f"\n  {len(manifest)} fixtures, {total} bytes total")
 
