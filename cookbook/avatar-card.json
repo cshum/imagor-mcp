@@ -28,7 +28,7 @@
     {
       "name": "circular portrait",
       "kind": "image",
-      "image": "https://images.unsplash.com/photo-1586297135537-94bc9ba060aa?auto=format&fit=crop&crop=faces&facepad=30&w=400&h=400&q=80",
+      "image": "https://s.imagor.net/photos/photo-1586297135537-94bc9ba060aa.jpg",
       "filters": "smart/filters:round_corner(160,160,173f34)",
       "x": "135",
       "y": "155",

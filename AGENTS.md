@@ -96,6 +96,25 @@ joke. `Intrecciato` was written into a recipe once and had to be removed.
 When adding a recipe: invent the brand, invent the people, and if a caption needs a
 material, describe it generically — *hand-woven*, *vegetable-tanned*, *grained*.
 
+## Pushing `sources/` deploys it — there is no publish step
+
+`s.imagor.net` is a Cloudflare Pages project **connected to this repository**, serving
+`sources/` as its root. A file at `sources/photos/x.jpg` is live at
+`https://s.imagor.net/photos/x.jpg` once the push lands. There is no `wrangler` command
+to run, no `CLOUDFLARE_API_TOKEN` to find, and no deploy workflow — looking for one
+wastes time, because the absence looks like a missing credential rather than a step
+that does not exist.
+
+The catch is that it cuts both ways: since the origin is the repository, a recipe can
+be committed pointing at a file that was never pushed, and nothing in CI notices. The
+gallery job renders against whatever the base URL names, so it will pass against a
+local server while the public URL 404s.
+
+A `.svg` is served `max-age=31536000, immutable`, so **adding or changing a file is
+immediate and removing one is not** — the edge keeps answering a deleted fixture for a
+year. Never repoint a recipe at a path that has not been pushed, and treat a rename as
+an add plus a permanent tombstone.
+
 ## `IMAGOR_BASE_URL` has to be reachable from inside imagor
 
 The preview nests the absolute URL as a source, so imagor fetches the composed
