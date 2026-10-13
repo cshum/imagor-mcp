@@ -7,15 +7,10 @@ self-hosted, open-source image server.**
 it, serve it from a CDN, put it in a page — no image library, no template editor, no
 design file.
 
-![Fourteen cards, each one a single imagor URL](docs/gallery/contact-sheet.png)
+[![Fourteen cards, each one a single imagor URL](docs/gallery/contact-sheet.png)](docs/gallery/cookbook.md)
 
 *Every card above is one imagor URL, composed by an agent from a brief. **[All fourteen,
-with the template behind each »](docs/gallery/cookbook.md)***
-
-Reusable here means **programmable**: the output is a URL, so your code can hold one,
-template it, or hand it to an `<img>` tag, and imagor renders it at 4–8× the speed of the
-quickest ImageMagick settings. The layout an agent writes is how you get one — it is not
-something you have to read.
+with the URL each resolves to, and a prompt to ask for it »](docs/gallery/cookbook.md)***
 
 ## What an agent does with it
 
@@ -42,22 +37,18 @@ Three ways to get a dynamic image:
 | **Hosted template APIs** (Bannerbear, Placid, APITemplate) | send values, **get a blob back** | $0.019–0.049 per image, from $49/mo | the per-image fee, and the transfer every time you serve it |
 | **imagor-template** | a layout compiles to an imagor URL | nothing beyond the imagor you already run | nothing per image — **you serve a URL** |
 
-**The difference is not that this is cheaper. It is that the output is a URL.**
+**The difference is not that this is cheaper. It is that the output is a URL.** A hosted
+API hands you bytes, so every render is a call you pay for and a transfer you carry. This
+hands you a URL, and imagor serves it as one — `Cache-Control: max-age=168h` by default,
+so a CDN, a proxy or a browser holds it without asking again. **A deterministic URL is a
+cacheable one, and the transfer is the part that scales with traffic.**
 
-A hosted API hands you bytes, so every render is a call you pay for and a transfer you
-carry. **This hands you a URL**, and imagor serves it as one: **`Cache-Control:
-max-age=168h` by default**, so a CDN, a proxy or a browser holds it without asking you
-again. Turn on result storage and the origin renders it once for the life of the entry.
+imagor is fast — its own benchmark puts it ahead of thumbor overall and level with
+imgproxy, which is libvips-based too, so the floor is the same. **The saving is
+architectural, not a faster loop.**
 
-**imagor does the image work at libvips speed** — its own benchmark puts it ahead of
-thumbor overall and level with imgproxy across common formats, and both are libvips-based,
-so the floor is the same. **The saving is architectural, not a faster loop:** a
-deterministic URL is a cacheable one, and the byte transfer is the part that actually
-scales with traffic.
-
-Rates are Bannerbear, Placid and APITemplate's published pricing as of October 2026
-($49/mo for 1,000 images at the top of that range). The benchmark figures are imagor's,
-not measurements I ran.
+*Rates are the three providers' published pricing, October 2026; the benchmark figures are
+imagor's, not measurements I ran.*
 
 ## Quick start
 
@@ -80,16 +71,17 @@ covered in [Development](#development).
 Both ship prebuilt for six platforms, or build from source:
 
 ```sh
-# pick your platform from the releases page
-curl -L -o imagor-mcp https://github.com/cshum/imagor-template/releases/latest/download/imagor-mcp_v0.3.0_darwin_arm64
+# prebuilt for six platforms — pick yours from the releases page
+curl -L -o imagor-mcp \
+  https://github.com/cshum/imagor-template/releases/latest/download/imagor-mcp_v<VERSION>_darwin_arm64
 chmod +x imagor-mcp
 
-# or, with Go installed
-go install github.com/cshum/imagor-template@latest
+# or, with Go installed — note the ./cmd/ path: the module root is a library
+go install github.com/cshum/imagor-template/cmd/imagor-mcp@latest
 ```
 
-Pure Go, with no libvips and no cgo — unlike imagor itself. Every platform is on the
-[releases page](https://github.com/cshum/imagor-template/releases).
+Pure Go, with no libvips and no cgo — unlike imagor itself. Every platform, with its
+exact filename, is on the [releases page](https://github.com/cshum/imagor-template/releases).
 
 **3. Add it to your MCP client.**
 
@@ -132,26 +124,20 @@ service that constructs compositions but should never hold the key.
 | `validate_imagor_path` | Parse a path, report whether it round-trips, and summarize the transformation. |
 | `list_imagor_filters` | Accepted filters with signature, description and argument forms. |
 | `describe_imagor` | The supported path grammar and the current signing mode. |
+| `get_cookbook_recipe` | Fetch a ready-made layout by name. **Call it with no name first** to get the list. |
 | `get_imagor_skill` | The skill, for a client that reads it as a tool rather than a resource. |
 
 Every parameter maps onto a concept in the imagor path grammar. There are no
 invented parameters and no generic "sign this string" tool.
 
-## Templates
+## One layout, every format
 
-A template has **no canvas size in it**. Geometry is relative, so one layout serves
-1200×630 and 1080×1080, and text with a `height` is **fitted** to its box — it composes
-once and renders at every format.
+A template carries **no canvas size**. Geometry is relative and text with a `height` is
+**fitted** to its box, so the same layout serves 1200×630 and 1080×1080 — write it once,
+render it anywhere. That is what makes a layout worth keeping.
 
-Three things worth knowing:
-
-- **A slot with its own `slots` is a canvas.** Its width and height become the canvas the
-  inner slots lay out on, and the result draws at the outer slot's position. This is how
-  a label sits under a product, or a caption inside a cell.
-- **A slot's `filters` apply to that slot's own source**, written as imagor writes them:
-  `smart/filters:round_corner(230,230,f4f1e8)`.
-- **`parse_template` reads a path back** — useful for a layout you already have. It cannot
-  recover a *form*: `38p` comes back as the number it resolved to.
+The rest of the format — nested canvases, filters on a slot's own source, what a path can
+and cannot carry — is in the skill, where the reader is an agent that has to write one.
 
 ## The skill
 
