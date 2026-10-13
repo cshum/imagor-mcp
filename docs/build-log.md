@@ -182,29 +182,40 @@ Measured across the cookbook, `render → parse → render` was stable for one r
 The paths that came out were longer than the ones that went in — 3,132 characters to 4,146 —
 because each nested slot was re-expressed at the top level with absolute numbers.
 
-I tried to fix it twice. Both attempts are reverted.
+I tried to fix it three times.
 
 **The first** split the inner path by hand. It cut a URL source in half at its last slash —
 `https://images.unsplash.com/photo-169…` came back as `photo-169…` — and read a dimension
 segment of `176x176/smart` as a height. It also broke three existing tests.
 
 **The second** did the right thing and handed the inner path to `imagorpath.Parse`, which
-already knows every form a path takes. That fixed the URL and the `smart`, and `comparison`
-became stable. But three recipes still moved, and the same three tests still failed.
+knows every form a path takes. That fixed the URL and the `smart`, and `comparison` became
+stable. But three recipes still moved, and the same three tests still failed. `Parse` is right
+for imagor's own vocabulary and this is not imagor's vocabulary: the dimension segment here is
+`full` and `full-144`, forms the template layer resolves *before* a path is written, and
+imagor has never heard of them.
 
-**What the tests were telling me, and I did not read:** they assert that a slot's parts come
-back *individually* — `img.Height == "full"`, `txt.Width == "600"` — which is the whole point
-of the tool. A parser that returns a plausible-looking template is not enough; it has to return
-the same template. I was checking that the path round-tripped and not that the fields did.
+**The third started from the instrument instead of the parser.** A test that walks
+render → parse and checks **every field by name**, so a failure says *which* one rather than
+"the path changed". It named five failures in one run, and four were the same one: the
+boundary between a slot's own filters and its source was being guessed. It is now found by
+walking the path once at parenthesis depth zero — a source begins at a scheme, or failing
+that at the last slash that is not inside a filter.
 
-**The real bug, found on the way:** the emitter writes a text slot's box width as a *form* —
-`full-144`, not `144`. The parser read it with `strconv.Atoi`, which failed silently and took
-the align and the rest of the argument tail with it. One `if err == nil` around a value that
-was never a number.
+**The lesson is the one this document keeps arriving at, and I had to be shown it twice.** I
+was comparing *paths* — a plausible artifact that looked right — instead of the *fields*,
+which are the thing the tool exists to produce. The tests were asserting the fields all
+along, and I was not reading them. Two attempts "made progress" and failed the same three
+tests because I had no instrument that could tell me which field broke.
 
-Two attempts, no fix, and the lesson is the one this document keeps arriving at. I was reading
-the path — a plausible artifact that looked right — instead of the fields, which are the thing
-the tool exists to produce.
+**Two other bugs fell out of the third attempt.** A text slot's box width is written as a
+form, `full-144`, and the parser read it with `strconv.Atoi`, which failed silently and
+dropped the align and the rest of the argument tail with it. And a filter that became a child
+was also left in the slot's own `Filters`, so the path carried it twice.
+
+**What still does not survive is what the doc comment always said.** A box width and height
+are resolved to pixels before a path is written, so they come back as numbers. The tests now
+say so where they assert it, rather than leaving it to be discovered.
 
 ---
 
