@@ -34,21 +34,30 @@ A layout *is* a URL, and a URL is something an agent can write, check and rewrit
 
 ## Where this fits
 
-Three ways to get a dynamic image, and what each costs:
+Three ways to get a dynamic image:
 
-| | how | marginal cost | trade |
+| | how | what it costs you | what limits you |
 |---|---|---|---|
-| **Chromium** (Puppeteer, Satori) | screenshot an HTML page per image | free | **slow.** A browser to start, then a page render — [they say so themselves](https://www.bannerbear.com/blog/how-to-make-a-custom-open-graph-image-using-puppeteer/) |
-| **Hosted template APIs** (Bannerbear, Placid, APITemplate) | send values, get an image back | **$0.019–0.049 per image**, from $49/mo | fast enough, no ops — but **your images render on someone else's servers**, and the bill scales with your traffic |
-| **imagor-template** | a layout compiles to an imagor URL | **nothing beyond the imagor you already run** | you host it; no browser, no per-image fee, no third party |
+| **Chromium** (Puppeteer, Satori) | screenshot an HTML page per image | nothing, but a browser to run | **slow** — [they say so themselves](https://www.bannerbear.com/blog/how-to-make-a-custom-open-graph-image-using-puppeteer/) |
+| **Hosted template APIs** (Bannerbear, Placid, APITemplate) | send values, **get a blob back** | $0.019–0.049 per image, from $49/mo | the per-image fee, and the transfer every time you serve it |
+| **imagor-template** | a layout compiles to an imagor URL | nothing beyond the imagor you already run | nothing per image — **you serve a URL** |
 
-**The point is not that this is cheaper than a competitor — it is that if you already run
-imagor, the marginal cost of a template is zero.** imagor is already doing the image work
-at 4–8× the quickest ImageMagick settings; this only adds the layout layer it was missing.
+**The difference is not that this is cheaper. It is that the output is a URL.**
 
-Published rates as of October 2026: Bannerbear $49/mo for 1,000 images ($0.049 each),
-Placid $19/mo for 500, APITemplate.io $29/mo for 1,500. **None of these are benchmarks I
-ran** — the costs are from their pricing pages, and the speed claim is their own.
+A hosted API hands you bytes, so every render is a call you pay for and a transfer you
+carry. **This hands you a URL**, and imagor serves it as one: **`Cache-Control:
+max-age=168h` by default**, so a CDN, a proxy or a browser holds it without asking you
+again. Turn on result storage and the origin renders it once for the life of the entry.
+
+**imagor does the image work at libvips speed** — its own benchmark puts it ahead of
+thumbor overall and level with imgproxy across common formats, and both are libvips-based,
+so the floor is the same. **The saving is architectural, not a faster loop:** a
+deterministic URL is a cacheable one, and the byte transfer is the part that actually
+scales with traffic.
+
+Rates are Bannerbear, Placid and APITemplate's published pricing as of October 2026
+($49/mo for 1,000 images at the top of that range). The benchmark figures are imagor's,
+not measurements I ran.
 
 ## Quick start
 
