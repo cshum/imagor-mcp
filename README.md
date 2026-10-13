@@ -72,16 +72,16 @@ docker run -d -p 8000:8000 \
 
 Already running imagor? Skip this and point the config below at it.
 
-**2. Install.** Two front ends on one engine, and both ship together. **If you are
-driving it from an agent you only need the server**; the compiler is there for the cases
-with no agent in them — a backend resolving a stored layout, a script checking the
-cookbook:
+**2. Install.** Two binaries ship together, and **the server is the one that matters**.
+Templates are authored by an agent — a fitted text slot is measured by rendering, so even
+compiling one wants a live imagor. The CLI exists to run a template you *already have*,
+in a place with no agent in it:
 
 ```sh
 # the MCP server: an agent composes, renders, looks at the result and revises
 imagor-mcp
 
-# the compiler on its own: a layout in, one imagor URL out
+# the CLI: runs a template you already have - a stored layout, a build step
 imagor-template compile cookbook/event.json
 ```
 
