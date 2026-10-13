@@ -1,6 +1,6 @@
 {
   "name": "Mei Lam landscape profile card",
-  "note": "A landscape profile card with a smart-cropped circular portrait and a left-aligned identity block.",
+  "note": "A landscape profile card with a circular portrait and a left-aligned identity block.",
   "canvas": {
     "width": 1200,
     "height": 630,
@@ -28,7 +28,7 @@
     {
       "name": "circular portrait",
       "kind": "image",
-      "image": "https://images.unsplash.com/photo-1586297135537-94bc9ba060aa?auto=format&fit=crop&w=400&h=400&q=80",
+      "image": "https://images.unsplash.com/photo-1586297135537-94bc9ba060aa?auto=format&fit=crop&crop=faces&facepad=30&w=400&h=400&q=80",
       "filters": "smart/filters:round_corner(160,160,173f34)",
       "x": "135",
       "y": "155",

@@ -5,11 +5,14 @@ three things it takes to work on it:
 
 - **What it is** — so a change can be judged against something.
 - **The template** — what `render_template` takes. **Copy this to iterate.** It
-  keeps the slot names and the relative geometry, so a layout still adapts to
-  another canvas size.
+  keeps the slot names and the `values` placeholders, so a card can be re-filled
+  for someone else.
 - **The path** — what imagor renders. **Copy this to render**, or to hand
   straight to a browser as a URL. It is unsigned: prefix `unsafe/` for a
-  development instance, or sign it for your own.
+  development instance, or sign it for your own. **A path is a render, not a
+  template:** `parse_template` reads one back, but the names and the values
+  come back as whatever the path happened to hold, so the result renders once
+  rather than re-filling.
 
 [Back to the README](../README.md) · [All fourteen, one image](contact-sheet.png)
 
@@ -212,14 +215,14 @@ three things it takes to work on it:
 
 ![avatar-card](avatar-card.png)
 
-*1200×630* — A landscape profile card with a smart-cropped circular portrait and a left-aligned identity block.
+*1200×630* — A landscape profile card with a circular portrait and a left-aligned identity block.
 
 **Template** — copy this to iterate:
 
 ```json
 {
   "name": "Mei Lam landscape profile card",
-  "note": "A landscape profile card with a smart-cropped circular portrait and a left-aligned identity block.",
+  "note": "A landscape profile card with a circular portrait and a left-aligned identity block.",
   "canvas": {
     "width": 1200,
     "height": 630,
@@ -247,7 +250,7 @@ three things it takes to work on it:
     {
       "name": "circular portrait",
       "kind": "image",
-      "image": "https://images.unsplash.com/photo-1586297135537-94bc9ba060aa?auto=format&fit=crop&w=400&h=400&q=80",
+      "image": "https://images.unsplash.com/photo-1586297135537-94bc9ba060aa?auto=format&fit=crop&crop=faces&facepad=30&w=400&h=400&q=80",
       "filters": "smart/filters:round_corner(160,160,173f34)",
       "x": "135",
       "y": "155",
@@ -314,7 +317,7 @@ three things it takes to work on it:
 **Path** — copy this to render:
 
 ```
-1200x630/filters:image(full-68xfull-68/color:f4f1e8,34,34):image(full-80xfull-80/color:173f34,40,40):image(320x320/smart/filters:round_corner(160,160,173f34)/b64:aHR0cHM6Ly9pbWFnZXMudW5zcGxhc2guY29tL3Bob3RvLTE1ODYyOTcxMzU1MzctOTRiYzliYTA2MGFhP2F1dG89Zm9ybWF0JmZpdD1jcm9wJnc9NDAwJmg9NDAwJnE9ODA,135,155):image(2x310/color:d8c79b,500,160):text(b64:TWVpIExhbQ,555,207,Open-Sans-bold-64,f4f1e8):text(b64:UGxhdGZvcm0gZW5naW5lZXJpbmc,558,302,Open-Sans-34,cbd4ce):text(b64:QG1laWxhbQ,558,365,Open-Sans-30,d8c79b):image(500x2/color:d8c79b,558,430)/color:173f34
+1200x630/filters:image(full-68xfull-68/color:f4f1e8,34,34):image(full-80xfull-80/color:173f34,40,40):image(320x320/smart/filters:round_corner(160,160,173f34)/b64:aHR0cHM6Ly9pbWFnZXMudW5zcGxhc2guY29tL3Bob3RvLTE1ODYyOTcxMzU1MzctOTRiYzliYTA2MGFhP2F1dG89Zm9ybWF0JmZpdD1jcm9wJmNyb3A9ZmFjZXMmZmFjZXBhZD0zMCZ3PTQwMCZoPTQwMCZxPTgw,135,155):image(2x310/color:d8c79b,500,160):text(b64:TWVpIExhbQ,555,207,Open-Sans-bold-64,f4f1e8):text(b64:UGxhdGZvcm0gZW5naW5lZXJpbmc,558,302,Open-Sans-34,cbd4ce):text(b64:QG1laWxhbQ,558,365,Open-Sans-30,d8c79b):image(500x2/color:d8c79b,558,430)/color:173f34
 ```
 
 ## circles
