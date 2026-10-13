@@ -161,7 +161,21 @@ Three things worth knowing:
 - **`parse_template` reads a path back** — useful for a layout you already have. It cannot
   recover a *form*: `38p` comes back as the number it resolved to.
 
-## Cookbook and skill
+## The skill
+
+The server carries a skill, served at `imagor-mcp://skill`. It is the part of using
+this that does not fit in a tool description, and an agent that skips it composes badly:
+
+- **The path grammar** — the order a path is written in, and the two crops whose orders
+  are opposite.
+- **Where text lands** — placement is a *search*, not a calculation, and the skill says so.
+- **Awkward values** — colours, and what has to be encoded.
+- **A working method** — build small pieces, check each, then assemble.
+
+It travels with the server, so a client that reads only the tool list never sees it.
+`get_imagor_skill` returns it for a client that reads tools rather than resources.
+
+## The cookbook
 
 `cookbook/` holds **fourteen ready-made layouts** — OG cards, a product grid, a profile
 card, quotes, testimonials, an event, a comparison table, a price ladder. Take the
@@ -172,9 +186,6 @@ Hand an agent the **template**; the path is there to show what it compiles to.
 
 Every recipe renders **at three canvas sizes on every commit**, and the contact sheet
 above comes from that same code path — so it cannot drift.
-
-The server carries a **skill** at `imagor-mcp://skill`: the path grammar, where text
-lands, and a method that builds small pieces before assembling them.
 
 ## One direction is the source
 
