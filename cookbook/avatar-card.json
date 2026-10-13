@@ -28,7 +28,7 @@
     {
       "name": "circular portrait",
       "kind": "image",
-      "image": "https://s.imagor.net/scene-tall.svg",
+      "image": "https://s.imagor.net/portrait-c.svg",
       "filters": "smart/filters:round_corner(200,200,173f34)",
       "x": "31p+5",
       "y": "25p+12",

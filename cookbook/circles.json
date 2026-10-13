@@ -260,16 +260,16 @@
     "headline": "The people behind it",
     "person1_name": "Mei Lam",
     "person1_role": "Platform engineering",
-    "person1_image": "https://s.imagor.net/product-bag.svg",
+    "person1_image": "https://s.imagor.net/portrait-a.svg",
     "person2_name": "Jon Ho",
     "person2_role": "Image pipeline",
-    "person2_image": "https://s.imagor.net/product-box.svg",
+    "person2_image": "https://s.imagor.net/portrait-b.svg",
     "person3_name": "Ada Cheng",
     "person3_role": "Developer experience",
-    "person3_image": "https://s.imagor.net/product-bottle.svg",
+    "person3_image": "https://s.imagor.net/portrait-c.svg",
     "person4_name": "Sam Yuen",
     "person4_role": "Reliability",
-    "person4_image": "https://s.imagor.net/product-box.svg",
+    "person4_image": "https://s.imagor.net/portrait-a.svg",
     "footer": "imagor"
   }
 }
