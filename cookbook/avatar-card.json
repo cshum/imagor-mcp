@@ -1,9 +1,9 @@
 {
-  "name": "Mei Lam portrait profile card",
-  "note": "A balanced 4:5 profile card with a smart-cropped circular portrait and a centered identity block.",
+  "name": "Mei Lam landscape profile card",
+  "note": "A landscape profile card with a smart-cropped circular portrait and a left-aligned identity block.",
   "canvas": {
-    "width": 1080,
-    "height": 1350,
+    "width": 1200,
+    "height": 630,
     "background": "color:173f34"
   },
   "slots": [
@@ -11,69 +11,77 @@
       "name": "cream inset border",
       "kind": "rect",
       "image": "color:f4f1e8",
-      "x": "2p+10",
-      "y": "2p+5",
-      "width": "full-64",
-      "height": "full-64"
+      "x": "34",
+      "y": "34",
+      "width": "full-68",
+      "height": "full-68"
     },
     {
       "name": "green card panel",
       "kind": "rect",
       "image": "color:173f34",
-      "x": "4p+5",
-      "y": "3p+8",
-      "width": "full-96",
-      "height": "full-96"
+      "x": "40",
+      "y": "40",
+      "width": "full-80",
+      "height": "full-80"
     },
     {
       "name": "circular portrait",
       "kind": "image",
       "image": "https://images.unsplash.com/photo-1586297135537-94bc9ba060aa?auto=format&fit=crop&w=400&h=400&q=80",
-      "filters": "smart/filters:round_corner(200,200,173f34)",
-      "x": "31p+5",
-      "y": "25p+12",
-      "width": "37p",
-      "height": "29p+8"
+      "filters": "smart/filters:round_corner(160,160,173f34)",
+      "x": "135",
+      "y": "155",
+      "width": "320",
+      "height": "320"
     },
     {
-      "name": "centered profile text block",
-      "kind": "image",
-      "x": "0p",
-      "y": "58p+7",
-      "width": "full",
-      "height": "17p",
-      "slots": [
-        {
-          "name": "name",
-          "kind": "text",
-          "text": "{{name}}",
-          "x": "center",
-          "y": "0p",
-          "font": "Open-Sans-bold",
-          "size": 56,
-          "color": "f4f1e8"
-        },
-        {
-          "name": "role",
-          "kind": "text",
-          "text": "{{role}}",
-          "x": "center",
-          "y": "35p+2",
-          "font": "Open-Sans",
-          "size": 34,
-          "color": "cbd4ce"
-        },
-        {
-          "name": "handle",
-          "kind": "text",
-          "text": "{{handle}}",
-          "x": "center",
-          "y": "62p",
-          "font": "Open-Sans",
-          "size": 29,
-          "color": "d8c79b"
-        }
-      ]
+      "name": "gold divider",
+      "kind": "rect",
+      "image": "color:d8c79b",
+      "x": "500",
+      "y": "160",
+      "width": "2",
+      "height": "310"
+    },
+    {
+      "name": "name",
+      "kind": "text",
+      "text": "{{name}}",
+      "x": "555",
+      "y": "207",
+      "font": "Open-Sans-bold",
+      "size": 64,
+      "color": "f4f1e8"
+    },
+    {
+      "name": "role",
+      "kind": "text",
+      "text": "{{role}}",
+      "x": "558",
+      "y": "302",
+      "font": "Open-Sans",
+      "size": 34,
+      "color": "cbd4ce"
+    },
+    {
+      "name": "handle",
+      "kind": "text",
+      "text": "{{handle}}",
+      "x": "558",
+      "y": "365",
+      "font": "Open-Sans",
+      "size": 30,
+      "color": "d8c79b"
+    },
+    {
+      "name": "identity underline",
+      "kind": "rect",
+      "image": "color:d8c79b",
+      "x": "558",
+      "y": "430",
+      "width": "500",
+      "height": "2"
     }
   ],
   "values": {
