@@ -23,7 +23,14 @@ same host:
 ```
 IMAGOR_BASE_URL=http://localhost:8197 IMAGOR_MCP_BIN=./imagor-mcp \
   python3 cookbook/render.py /tmp/gallery
+python3 cookbook/index.py     # regenerate references/cookbook.md
 ```
+
+**`cookbook/index.py` generates `references/cookbook.md`, which is `go:embed`ed into the
+binary.** The server serves it at `imagor-mcp://cookbook` and returns it from
+`get_cookbook_recipe` with no name. Regenerate it whenever a recipe is added, renamed, or
+given a new value, or the list the agent chooses from goes stale — CI does this beside the
+gallery so a change cannot land without it.
 
 ## What CI checks, and what it does not
 
@@ -96,11 +103,35 @@ joke. `Intrecciato` was written into a recipe once and had to be removed.
 When adding a recipe: invent the brand, invent the people, and if a caption needs a
 material, describe it generically — *hand-woven*, *vegetable-tanned*, *grained*.
 
+## The cookbook is a channel, not a document
+
+**A recipe is what gets handed to `render_template`.** It travels in the binary and
+arrives by name through `get_cookbook_recipe`, and the cookbook page deliberately does not
+carry it — the page has the card, what it is for, and the URL it resolves to, because that
+is what a reader wants.
+
+Two things will look like improvements and are not:
+
+- **Putting the template back on the page.** It was there. It made a channel into a
+  document, and 71% of the page was JSON nobody was meant to read.
+- **Serving the index only as a resource.** It is served as `imagor-mcp://cookbook` *and*
+  returned by the tool with no name, because a client that surfaces only tools never shows
+  a resource. A delegated run reported exactly that — it chose correctly anyway, but
+  without the list it was meant to choose from.
+
+The page gives each card a sentence to paste instead of a tool call to understand. A
+reader knows how to ask their agent for something; they do not know what an MCP tool is.
+
 ## Two front ends, one engine — keep them in step
 
 `cmd/imagor-template` and `cmd/imagor-mcp` are bindings on the same code in
-`internal/tools`. The CLI exists because compiling is deterministic, so the common case
-should not need an MCP client or a model.
+`internal/tools`.
+
+**The CLI is a runner, not an authoring path.** A template has to be written, and writing
+one is what the agent does — so the CLI cannot stand in for the server. It compiles a
+template you already have, in a place with no agent in it: a stored layout, a build step,
+a script checking the cookbook. Describing it as an alternative to the agent was wrong and
+is worth not repeating.
 
 **`cmd/imagor-template/main_test.go` pins this**: `TestCompileMatchesTheServer` compiles
 every recipe through both front ends and fails if they disagree. If a change to the
@@ -117,7 +148,18 @@ and `{width, height}` with the background alongside). `templateFile.canvas()` ac
 all three so a recipe cannot become unusable through a front end that handles one. They
 should be normalised to one shape, but until then this is the compatibility layer.
 
-## `sources/` deploys from this repo, and takes its time about it, and takes its time about it
+## The `.mcpb` bundle: resolve paths before changing directory
+
+`mcpb/build.sh` runs `cd "$work"` to pack, and `dest` used to be resolved after that — so
+the relative `dist` CI passes became `$work/dist`, and the `EXIT` trap deleted the bundle
+on the way out. **Every release before v0.4.0 listed six binaries and no bundle**, while
+the build log printed `dist/imagor-mcp-v0.3.0.mcpb 7.1M` and a checksum for it, so the
+step looked like it had worked.
+
+Anything added to that script must resolve its paths **before** the `cd`. Reproduce with a
+*relative* output directory — an absolute one hides the bug, which is why it survived.
+
+## `sources/` deploys from this repo, and takes its time about it
 
 `s.imagor.net` is the **`imagor-mcp-sources`** Cloudflare Pages project, connected to this
 repository with `sources/` as its root and `main` as its production branch. **A push
@@ -146,7 +188,7 @@ npx wrangler pages deployment list --project-name imagor-mcp-sources
 changing a file is immediate while removing one is not — a deleted fixture keeps
 answering for a year. Treat a rename as an add plus a permanent tombstone.
 
-## `IMAGOR_BASE_URL` has to be reachable from inside imagor## `IMAGOR_BASE_URL` has to be reachable from inside imagor
+## `IMAGOR_BASE_URL` has to be reachable from inside imagor
 
 The preview nests the absolute URL as a source, so imagor fetches the composed
 image back **from inside its own container** to scale it. A base URL that only the
