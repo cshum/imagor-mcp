@@ -64,23 +64,98 @@ def overlaps(a, b):
     return not (a[2] <= b[0] or b[2] <= a[0] or a[3] <= b[1] or b[3] <= a[1])
 
 
-def hits_centre(a, b):
-    """Does box a cover the centre of box b?
+# Not *.json: two tests glob cookbook/*.json and read every match as a recipe.
+CACHE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".aspect-cache")
 
-    A fitted image centres in its box and fills only part of it, so a text box can
-    overlap the image's box by a little and still clear the picture. Comparing boxes
-    reports those as faults; comparing ink needs each source's aspect ratio, which a
-    photograph's URL does not carry.
 
-    The centre is the one point that is always inside the ink, whatever the source's
-    shape and whichever way fit-in letterboxes it. A text box covering an image's centre
-    is a caption sitting on a picture, which is the fault worth failing on.
+def load_cache():
+    try:
+        with open(CACHE_PATH) as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def save_cache(cache):
+    try:
+        with open(CACHE_PATH, "w") as f:
+            json.dump(cache, f, indent=2, sort_keys=True)
+            f.write("\n")
+    except Exception:
+        pass
+
+
+def source_aspect(url, cache, manifest):
+    """The source's width/height, or None when it cannot be known offline.
+
+    A fixture is in the manifest. A URL with a width and no height returns the source's
+    own aspect, so fetching it once tells us the shape - cached, because the check should
+    not depend on the network to run.
     """
-    cx, cy = (b[0] + b[2]) / 2, (b[1] + b[3]) / 2
-    return a[0] <= cx <= a[2] and a[1] <= cy <= a[3]
+    if url in cache:
+        return cache[url]
+    for entry in manifest:
+        if entry.get("url") == url:
+            cache[url] = entry.get("aspect")
+            return cache[url]
+    if "w=" in url and "h=" not in url:
+        try:
+            import urllib.request, io
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, timeout=20) as r:
+                data = r.read()
+            from PIL import Image
+            im = Image.open(io.BytesIO(data))
+            cache[url] = round(im.width / im.height, 4)
+            return cache[url]
+        except Exception:
+            return None
+    return None
 
 
-def collect(slots, ox, oy, W, H):
+def ink_box(box, aspect):
+    """Where a fitted image's pixels actually land inside its box.
+
+    fit-in centres the picture and fills only part of the box, so the ink is the box
+    narrowed to the source's aspect. Without an aspect there is nothing to narrow by, and
+    the box is returned - which is the conservative reading.
+    """
+    x1, y1, x2, y2 = box
+    bw, bh = x2 - x1, y2 - y1
+    if not aspect or bw <= 0 or bh <= 0:
+        return box
+    if bw / bh > aspect:          # box is wider than the source: letterbox left/right
+        iw = bh * aspect
+        return (x1 + (bw - iw) / 2, y1, x1 + (bw + iw) / 2, y2)
+    ih = bw / aspect              # box is taller: letterbox top/bottom
+    return (x1, y1 + (bh - ih) / 2, x2, y1 + (bh + ih) / 2)
+
+
+def hits_ink(a, b):
+    """Does text box a run into the picture in box b?
+
+    b is the ink box - the picture's own pixels inside its slot, computed from the
+    source's aspect - so any overlap is a real collision. Comparing the slot box instead
+    was wrong twice over: it reported a caption sitting in a fitted image's letterbox as
+    a fault, and it missed a caption running into a portrait source, whose ink fills the
+    full height and leaves no margin to sit in.
+    """
+    if not (a[2] <= b[0] or b[2] <= a[0] or a[3] <= b[1] or b[3] <= a[1]):
+        return "runs into"
+    return None
+
+
+def substitute(value, values):
+    """Resolve {{name}} against the recipe's values, as the renderer does."""
+    if not isinstance(value, str):
+        return value
+    out = value
+    for k, v in (values or {}).items():
+        out = out.replace("{{" + k + "}}", str(v))
+    return out
+
+
+def collect(slots, ox, oy, W, H, values=None):
     """Flatten a recipe to (texts, subjects), translating nested canvases.
 
     W and H are the canvas these slots lay out on - the recipe's for the top level, and
@@ -95,15 +170,18 @@ def collect(slots, ox, oy, W, H):
         b = (b[0] + ox, b[1] + oy, b[2] + ox, b[3] + oy)
         if s.get("text"):
             texts.append((s.get("name", "?"), b))
-        if s.get("image") and kind == "image":
-            # A full-canvas image is a background, not a subject.
+        src = substitute(s.get("image"), values)
+        if src and kind == "image" and not str(src).startswith("color:"):
+            # A full-canvas image is a background and a color: value is a panel; neither
+            # is a picture. What is left is a source a fit will letterbox, which is the
+            # only thing a caption can collide with.
             if not (px(s.get("width"), W) == W and px(s.get("height"), H) == H):
-                subjects.append((s.get("name", "?"), b))
+                subjects.append((s.get("name", "?"), b, src))
         if s.get("slots"):
             # The inner canvas is this slot's own box.
             iw = px(s.get("width"), W) or W
             ih = px(s.get("height"), H) or H
-            it, isub = collect(s["slots"], x + ox, y + oy, iw, ih)
+            it, isub = collect(s["slots"], x + ox, y + oy, iw, ih, values)
             texts += it
             subjects += isub
     return texts, subjects
@@ -122,22 +200,34 @@ def main():
     root = sys.argv[1] if len(sys.argv) > 1 else "cookbook"
     bad = 0
     checked = 0
+    cache = load_cache()
+    manifest = []
+    mpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "sources", "manifest.json")
+    try:
+        with open(mpath) as f:
+            manifest = json.load(f)
+    except Exception:
+        pass
     for path in sorted(glob.glob(os.path.join(os.path.expanduser(root), "*.json"))):
         name = os.path.splitext(os.path.basename(path))[0]
         d = json.load(open(path))
         W, H = canvas_of(d)
-        texts, subjects = collect(d.get("slots", []), 0, 0, W, H)
+        texts, subjects = collect(d.get("slots", []), 0, 0, W, H, d.get("values"))
         checked += len(texts)
         for tn, tb in texts:
             if tb[2] == tb[0] or tb[3] == tb[1]:
                 continue  # no explicit box: nothing to compare against
-            for sn, sb in subjects:
-                if hits_centre(tb, sb):
+            for sn, sb, surl in subjects:
+                aspect = source_aspect(surl, cache, manifest)
+                sb = ink_box(sb, aspect)
+                why = hits_ink(tb, sb)
+                if why:
                     ow = min(tb[2], sb[2]) - max(tb[0], sb[0])
                     oh = min(tb[3], sb[3]) - max(tb[1], sb[1])
-                    print(f"  {name:18} text {tn:18} covers the centre of {sn:18} "
+                    print(f"  {name:18} text {tn:18} {why} {sn:18} "
                           f"(boxes overlap {ow}x{oh}px)")
                     bad += 1
+    save_cache(cache)
     print(f"\n  {checked} text slots checked, {bad} overlaps")
 
 

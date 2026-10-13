@@ -11,3 +11,7 @@ coverage.txt
 
 # built MCP bundles
 *.mcpb
+
+# The overlap check caches each source aspect so it runs offline. A build
+# artefact, rebuilt on demand.
+cookbook/.aspect-cache

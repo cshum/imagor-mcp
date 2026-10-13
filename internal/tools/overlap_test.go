@@ -9,20 +9,17 @@ import (
 	"testing"
 )
 
-// A text slot must not cover the centre of an image slot.
+// No text may run into a picture.
 //
-// A gap is fine: a fitted image centres in its box and fills only part of it, so a
-// caption can overlap the image's *box* by a little and still clear the picture. What is
-// never fine is text over the picture itself, because the words lose.
+// The comparison is against the picture's own pixels, not its slot: a fitted image
+// centres in its box and fills only part of it, so a caption may overlap the slot and
+// still clear the picture, and a portrait source fills the full height and leaves the
+// caption no margin at all. The source's aspect gives the ink, and the aspect is known
+// offline - the fixtures are in the manifest.
 //
-// The centre is the proxy. It is the one point always inside the ink whatever the
-// source's aspect ratio and whichever way fit-in letterboxes it, so the check needs no
-// source metadata - which matters, because a photograph's URL does not carry its
-// dimensions and fetching each one would make the suite slow and flaky.
-//
-// Found by hand once: a caption written for one row's rhythm while the row's images
-// moved down independently. Nothing else would have caught it.
-func TestNoTextCoversAnImageCentre(t *testing.T) {
+// Found by hand once: a caption written for one row's rhythm while the row's images moved
+// down independently. Nothing else would have caught it.
+func TestNoTextRunsIntoAPicture(t *testing.T) {
 	files, err := filepath.Glob("../../cookbook/*.json")
 	if err != nil {
 		t.Fatalf("glob the cookbook: %v", err)
@@ -70,8 +67,9 @@ func TestNoTextCoversAnImageCentre(t *testing.T) {
 				continue // no explicit box: the ink goes where it goes
 			}
 			for _, sb := range subjects {
-				if tb.coversCentreOf(sb) {
-					t.Errorf("%s: text %q covers the centre of %q (boxes overlap by %.0fx%.0fpx)",
+				sb = inkBox(sb, aspectOf(sb.image))
+				if tb.runsInto(sb) {
+					t.Errorf("%s: text %q runs into %q (overlap %.0fx%.0fpx)",
 						name, tb.name, sb.name,
 						min(tb.x2, sb.x2)-max(tb.x1, sb.x1),
 						min(tb.y2, sb.y2)-max(tb.y1, sb.y1))
@@ -85,14 +83,29 @@ func TestNoTextCoversAnImageCentre(t *testing.T) {
 
 type namedBox struct {
 	name           string
+	image          string
 	x1, y1, x2, y2 float64
 }
 
 func (b namedBox) empty() bool { return b.x2 == b.x1 || b.y2 == b.y1 }
 
-func (b namedBox) coversCentreOf(o namedBox) bool {
-	cx, cy := (o.x1+o.x2)/2, (o.y1+o.y2)/2
-	return b.x1 <= cx && cx <= b.x2 && b.y1 <= cy && cy <= b.y2
+func (b namedBox) runsInto(o namedBox) bool {
+	return !(b.x2 <= o.x1 || o.x2 <= b.x1 || b.y2 <= o.y1 || o.y2 <= b.y1)
+}
+
+// ink narrows a picture's box to where its pixels actually land. fit-in centres the
+// picture, so a source whose aspect differs from the box leaves a margin on two sides.
+func inkBox(b namedBox, aspect float64) namedBox {
+	bw, bh := b.x2-b.x1, b.y2-b.y1
+	if aspect <= 0 || bw <= 0 || bh <= 0 {
+		return b
+	}
+	if bw/bh > aspect {
+		iw := bh * aspect
+		return namedBox{b.name, b.image, b.x1 + (bw-iw)/2, b.y1, b.x1 + (bw+iw)/2, b.y2}
+	}
+	ih := bw / aspect
+	return namedBox{b.name, b.image, b.x1, b.y1 + (bh-ih)/2, b.x2, b.y1 + (bh+ih)/2}
 }
 
 // collectSlots flattens a recipe, translating nested canvases. cw and ch are the canvas
@@ -120,16 +133,19 @@ func collectSlots(slots []json.RawMessage, ox, oy float64, cw, ch int,
 		y := resolveDim(s.Y, ch)
 		x2 := x + resolveDim(s.Width, cw)
 		y2 := y + resolveDim(s.Height, ch)
-		b := namedBox{s.Name, x + ox, y + oy, x2 + ox, y2 + oy}
+		b := namedBox{s.Name, s.Image, x + ox, y + oy, x2 + ox, y2 + oy}
 
 		if s.Text != "" {
 			*texts = append(*texts, b)
 		}
-		// A full-canvas image is a background and a rect is a panel; neither is a subject.
-		if s.Image != "" && (s.Kind == "" || s.Kind == "image") {
+		// A full-canvas image is a background and a color: value is a panel; neither is a
+		// picture. What is left is a source a fit will letterbox, which is the only thing
+		// a caption can collide with.
+		if s.Image != "" && (s.Kind == "" || s.Kind == "image") &&
+			!strings.HasPrefix(s.Image, "color:") {
 			full := resolveDim(s.Width, cw) == float64(cw) && resolveDim(s.Height, ch) == float64(ch)
 			if !full {
-				*subjects = append(*subjects, b)
+				*subjects = append(*subjects, namedBox{s.Name, s.Image, b.x1, b.y1, b.x2, b.y2})
 			}
 		}
 		if len(s.Slots) > 0 {
@@ -181,6 +197,29 @@ func resolveDim(v string, total int) float64 {
 	}
 	if f, err := strconv.ParseFloat(v, 64); err == nil {
 		return f
+	}
+	return 0
+}
+
+// aspectOf reads a fixture's aspect from the committed manifest. A source that is not a
+// fixture has no offline aspect, and the check falls back to the whole box - the
+// conservative reading, which reports more rather than fewer collisions.
+func aspectOf(url string) float64 {
+	raw, err := os.ReadFile("../../sources/manifest.json")
+	if err != nil {
+		return 0
+	}
+	var entries []struct {
+		URL    string  `json:"url"`
+		Aspect float64 `json:"aspect"`
+	}
+	if json.Unmarshal(raw, &entries) != nil {
+		return 0
+	}
+	for _, e := range entries {
+		if e.URL == url {
+			return e.Aspect
+		}
 	}
 	return 0
 }
