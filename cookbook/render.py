@@ -147,12 +147,13 @@ def main():
         "- **The template** — what `render_template` takes. **Copy this to iterate.** It",
         "  keeps the slot names and the `values` placeholders, so a card can be re-filled",
         "  for someone else.",
-        "- **The path** — what imagor renders. **Copy this to render**, or to hand",
-        "  straight to a browser as a URL. It is unsigned: prefix `unsafe/` for a",
-        "  development instance, or sign it for your own. **A path is a render, not a",
-        "  template:** `parse_template` reads one back, but the names and the values",
-        "  come back as whatever the path happened to hold, so the result renders once",
-        "  rather than re-filling.",
+        "",
+        "Render one and it comes back as a single imagor URL. Every card here is that and",
+        "nothing else - no design file, no template editor. **The template is the source;",
+        "the URL is what it resolves to:** pass a template to `render_template` and the",
+        "path is returned. A path can be read back with `parse_template`, but what comes",
+        "back renders once rather than re-filling - the names and the `values`",
+        "placeholders are the part a path cannot hold.",
         "",
         "[Back to the README](../README.md) · [All fourteen, one image](contact-sheet.png)",
         "",
@@ -172,15 +173,14 @@ def main():
             "**Template** — copy this to iterate:",
             "",
             "```json",
-            json.dumps(recipe, indent=2),
+            # indent=0 rather than 2: the page is 71% JSON, and two spaces per level of
+            # nesting cost 26% of its length while buying nothing. The longest line is
+            # the same either way - it is a source URL, not a level of nesting - so a
+            # reader can still follow the structure and a caller can still copy it.
+            json.dumps(recipe, indent=0),
             "```",
             "",
-            "**Path** — copy this to render:",
-            "",
-            "```",
-            path,
-            "```",
-            "",
+
         ]
     with open(os.path.join(OUT, "cookbook.md"), "w") as fh:
         fh.write("\n".join(lines))
