@@ -1,26 +1,24 @@
 # imagor-template
 
-**A layout format for [imagor](https://github.com/cshum/imagor), for agents that
-compose and check their own work.**
+**Layouts for [imagor](https://github.com/cshum/imagor), in a format an agent can
+write.**
 
-A layout is a template; a template compiles to one imagor URL. That makes an image
-composition something an agent can **write, render, look at, and correct** — not a
-document it has to hand to someone with a design tool.
+JSON in, one imagor URL out:
 
 ```sh
 $ imagor-template compile cookbook/event.json
-1200x628/filters:image(252x451/color:174c43,64,87):text(14,96,219,Open-Sans-bold-118,fffaf1):...
+1200x628/filters:image(252x451/color:174c43,64,87):text(14,96,219,Open-Sans-bold-118,fffaf1):.../color:f3f0e8
 ```
 
-**Compiling is total and deterministic** — the same layout gives the same path every
-time. That is not a claim about avoiding models; **it is what lets an agent reason**:
-diff two versions, cache a render, tell whether its own edit did what it intended. A
-compiler that varied run to run would break the loop.
+**The URL renders anywhere imagor runs.** Paste it in a browser, store it, put it in a
+page — no library, no template editor, no design file.
 
-Two things in the format exist only because the reader is an agent: **`note`**, which
-says what a card is *for* so a change has something to be judged against, and
-**`verify_imagor_url` returning the image itself** rather than a report. A person
-writing JSON by hand needs neither.
+**The JSON is what you pass around.** It keeps the slot names and the `{{values}}`, so
+one layout re-fills for a different person, product or event — and one layout serves
+1200×630 and 1080×1080, because geometry is relative to the canvas.
+
+**Compiling is deterministic.** The same JSON gives the same URL every time, which is
+what lets an agent diff two versions and tell whether its own edit did what it intended.
 
 ![Fourteen cards, each one a single imagor URL](docs/gallery/contact-sheet.png)
 
@@ -28,63 +26,20 @@ writing JSON by hand needs neither.
 library — composed by an agent through these tools. **[Every template, and the path it
 resolves to, is here »](docs/gallery/cookbook.md)***
 
-**The same engine ships as a CLI**, for the cases with no agent in them — a backend
-resolving a stored layout, a script checking the cookbook.
+## What an agent does with it
 
-## The two directions are not symmetrical
+Ask for a card and it builds one:
 
-| | |
-|---|---|
-| **template → path** | total and deterministic. This is the compiler, and this is the source of truth. |
-| **path → template** | **lossy.** A path holds what a layout *resolved to*, not the decisions that produced it. |
+> *Build a 1200×630 launch card: a deep green ground, a serif headline, a product photo
+> on the right, and the price below it. Show me what it looks like.*
 
-**Which direction is the source matters for an agent more than for a person**, because
-an agent edits the thing it was given: hand it a template and it keeps the names and
-re-fills the `{{values}}`; hand it a path and what comes back renders once and no
-longer adapts. Three delegated runs were given one or the other — **the ones given the
-template kept the design; the ones given only the path rebuilt something that looked
-the same and couldn't be reused.**
+It writes the template, renders it, **looks at the image**, and revises. **Given a brief
+with no layout, no positions and no sizes, an agent designed three distinct banners
+across three runs** — hierarchy, colour, type pairing, invented copy — and zoomed into
+regions to read the small text it had drawn.
 
-Reading a path back gives you the geometry, the colours and the text — but **the slot
-names are gone, `{{values}}` are gone, and a relative form like `38p` or `half` has
-already become the number it resolved to.** So the path is a compiled artifact, not
-the source:
-
-```
-template   names, {{values}}, relative forms, the note
-   |       compile: total, deterministic
-   v
-path       resolved geometry, no names, no values, literal numbers
-   |       decompile: lossy, like running strip on a binary
-   v
-template'  renders the same once, and no longer adapts
-```
-
-**One caveat worth knowing up front:** a text slot with a height is *fitted* by
-measuring, and measuring renders a probe through imagor. So a compile needs a running
-imagor — the pure-function part is everything else.
-
-## What you get
-
-Ask for a card and the agent builds it:
-
-> *Build a 1200×630 launch card: a deep green ground, a serif headline, a product
-> photo on the right, and the price below it. Show me what it looks like.*
-
-It calls `render_template`, gets a signed URL back, calls `verify_imagor_url` to
-fetch the render, **looks at it**, and revises. That loop — write, render, look,
-correct — is the whole point. An agent that can see its own output is an agent you
-can hand a blank brief to.
-
-That is not how image tooling usually works. The products this resembles are
-**editor-first**: someone designs a template in a drag-and-drop canvas and an API
-fills the slots. The canvas is the product. This is **URL-first** — no canvas, no
-template document, no library. A layout *is* a URL, and a URL is something an agent
-can write, check and rewrite.
-
-**Given a brief with no layout, no positions and no sizes, an agent designed three
-distinct banners across three runs** — hierarchy, colour, type pairing, invented
-copy — and zoomed into regions to read the small text it had drawn.
+That is the difference from editor-first image tooling: there is no canvas to design in.
+A layout *is* a URL, and a URL is something an agent can write, check and rewrite.
 
 ## Quick start
 
@@ -171,42 +126,49 @@ invented parameters and no generic "sign this string" tool.
 
 ## Templates
 
-A template carries a layout and no canvas size, so **one layout serves 1200×630 and
-1080×1080**: geometry is relative to the canvas, and text with a height is **fitted**
-to the box its geometry resolves to, which keeps type legible as the frame grows.
-**That is what makes a layout worth an agent's time** — it composes once and renders at
-every format instead of redrawing per size.
+A template has **no canvas size in it**. Geometry is relative, so one layout serves
+1200×630 and 1080×1080, and text with a `height` is **fitted** to its box — it composes
+once and renders at every format.
 
-**A slot carrying its own `slots` is a canvas.** Its width and height become the
-canvas the inner slots are laid out on, and the result draws at the outer slot's
-position. That is how text is centred on something narrower than the frame — a
-label under a product, a caption in a cell.
+Three things worth knowing:
 
-**A slot's `filters` field applies filters to that slot's own source**, written the
-way imagor writes them: `smart/filters:round_corner(230,230,f4f1e8)`.
-
-`parse_template` reads a path back into a layout, so one you already have can be
-edited rather than retyped. The one thing a path cannot carry is a *form* — it holds
-the pixels a box resolved to, not whether it was written `38p` or `half`.
+- **A slot with its own `slots` is a canvas.** Its width and height become the canvas the
+  inner slots lay out on, and the result draws at the outer slot's position. This is how
+  a label sits under a product, or a caption inside a cell.
+- **A slot's `filters` apply to that slot's own source**, written as imagor writes them:
+  `smart/filters:round_corner(230,230,f4f1e8)`.
+- **`parse_template` reads a path back** — useful for a layout you already have. It cannot
+  recover a *form*: `38p` comes back as the number it resolved to.
 
 ## Cookbook and skill
 
-`cookbook/` holds **fourteen ready-made layouts** for the formats that come up most
-— OG cards, a product grid, a profile card, quotes, testimonials, an event, a
-comparison table, a price ladder. Take the closest, change the values, render it.
+`cookbook/` holds **fourteen ready-made layouts** — OG cards, a product grid, a profile
+card, quotes, testimonials, an event, a comparison table, a price ladder. Take the
+closest, change the values, render it.
 
-**Every card, its template, and the path that template resolves to are on the
-[cookbook page](docs/gallery/cookbook.md).** Hand an agent the template — it is the
-source, and it is what an agent can edit and re-render. The path is there to show what
-the template compiles to, and to render without a client.
+**[Every card, its template, and the path it resolves to »](docs/gallery/cookbook.md)**
+Hand an agent the **template**; the path is there to show what it compiles to.
 
-Every recipe is rendered by the test suite **at three canvas sizes on every
-commit**, and the contact sheet above is generated from them by the same code path,
-so it cannot drift from what the recipes produce.
+Every recipe renders **at three canvas sizes on every commit**, and the contact sheet
+above comes from that same code path — so it cannot drift.
 
-The server also carries a **skill**, served as `imagor-mcp://skill`. It covers what
-a tool description cannot: the order a path is written in, where text lands, how a
-label is centred, and a method that builds small pieces before assembling them.
+The server carries a **skill** at `imagor-mcp://skill`: the path grammar, where text
+lands, and a method that builds small pieces before assembling them.
+
+## One direction is the source
+
+| | |
+|---|---|
+| **template → path** | total and deterministic. The compiler. **The source of truth.** |
+| **path → template** | **lossy.** A path holds what a layout *resolved to*, not the decisions behind it. |
+
+Reading a path back gives the geometry, colours and text — but **the slot names and the
+`{{values}}` are gone, and a relative form like `38p` or `half` is already the number it
+resolved to.** So hand an agent the **template**, not the path: a template re-fills for
+the next person, a path renders once.
+
+**A caveat:** a text slot with a height is *fitted* by measuring, and measuring renders a
+probe through imagor — so a compile needs a running imagor. Everything else is pure.
 
 ## Modes
 
@@ -251,21 +213,19 @@ VIPS_CACHE_MAX_HEIGHT=2000
 
 ## Security
 
-**A trusted client of imagor, not a new surface on it.** It holds the signing secret
-for the same reason any backend service does: to mint valid URLs. Trust the
-component; do not trust the agent using it.
+**A trusted client of imagor, not a new surface on it.** It holds the signing secret to
+mint valid URLs, like any backend. **Trust the component; do not trust the agent using
+it.**
 
-- **A mode is required.** It signs or emits `unsafe/`; it never runs unsigned.
-- **Unsafe mode is opt-in and loud** — it warns on stderr, and `describe_imagor`
-  reports it at runtime.
-- **stdio only.** Nothing listens on the network.
-- **No generic signing tool.** It can only emit paths its own typed tools built.
+- **A mode is required** — it signs or emits `unsafe/`, never unsigned.
+- **Unsafe mode is opt-in and loud** — a warning on stderr, reported by `describe_imagor`.
+- **stdio only.** Nothing listens on a port.
+- **No generic signing tool** — it can only emit paths its own typed tools built.
 - **Blast radius stays imagor's to set** — `HTTP_LOADER_ALLOWED_SOURCES`,
-  `VIPS_MAX_RESOLUTION`, `IMAGOR_REQUEST_TIMEOUT` and the rest. A signed URL from an
-  errant agent is still subject to every one of those limits.
+  `VIPS_MAX_RESOLUTION`, `IMAGOR_REQUEST_TIMEOUT`. A URL from an errant agent is still
+  subject to every one.
 
-Do not host this multi-tenant on behalf of users whose keys you would then hold.
-Ship it self-hosted alongside imagor.
+Do not host this multi-tenant for users whose keys you would then hold.
 
 ## Development
 
