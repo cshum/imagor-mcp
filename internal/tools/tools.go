@@ -661,7 +661,14 @@ func (c Config) VerifyURLTool(ctx context.Context, _ *mcp.CallToolRequest, in Ve
 	// The report is part of the metadata response, and a signature covers the
 	// whole path, so the metadata request needs its own signature with meta in
 	// the path. It cannot be derived from the image URL.
-	imageURL := pathgen.BuildURL(p, signer)
+	//
+	// The image URL must be built from params with Meta OFF, whatever the caller
+	// asked for. toParams carries the caller's Meta through, so building the image
+	// URL from p directly produced a URL that asked the server for metadata - and
+	// the preview, which loads that URL as an image, got a JSON document and a 500.
+	imageParams := p
+	imageParams.Meta = false
+	imageURL := pathgen.BuildURL(imageParams, signer)
 	metaParams := p
 	metaParams.Meta = true
 	metaURL := pathgen.BuildURL(metaParams, signer)
@@ -776,6 +783,12 @@ func (c Config) VerifyURLTool(ctx context.Context, _ *mcp.CallToolRequest, in Ve
 	previewParams := p
 	previewParams.Image = out.AbsoluteURL
 	previewParams.Path = ""
+	// The preview asks for the composed image, so it must not carry Meta either.
+	// previewParams starts as a copy of p, and toParams carries the caller's Meta
+	// through - so a caller that asked for metadata got a preview request with
+	// meta in its own path, the server answered with the metadata document, and
+	// the preview reported that the result was not an image.
+	previewParams.Meta = false
 	// The composition is the source of the preview, so the preview's own filter
 	// list must not repeat the composition's. Carrying p.Filters here applied the
 	// overlays and text a second time, on top of the already-composed source, and

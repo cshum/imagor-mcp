@@ -6,6 +6,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 // A signature disagreement has one likely cause, and the settings that disagree
@@ -214,4 +216,64 @@ func TestVerifyRefusesADeclineInsideALoadedPath(t *testing.T) {
 	if !strings.Contains(err.Error(), "blur") {
 		t.Errorf("the error does not name the nested filter:\n%s", err)
 	}
+}
+
+// The image URL must not carry the meta segment, whatever the caller asked for.
+//
+// The preview loads the image URL as an image. When the caller passed meta:true,
+// toParams carried it through, the image URL became the metadata URL, and the
+// preview asked the server to decode a JSON document - a 500 that arrived as a
+// note rather than an error, so the report still came back and the tests passed.
+func TestVerifyKeepsTheMetaSegmentOutOfTheImageURL(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.Contains(r.URL.Path, "/meta/") {
+			_, _ = w.Write([]byte(`{"width":300,"height":300,"filters":[{"name":"blur","processed":true}]}`))
+			return
+		}
+		// anything that is not the metadata request is the preview, and it must
+		// be an image or the preview fails
+		w.Header().Set("Content-Type", "image/png")
+		_, _ = w.Write(onePixelPNG)
+	}))
+	defer srv.Close()
+
+	c := Config{Secret: "a-secret", BaseURL: srv.URL}
+	res, out, err := c.VerifyURLTool(context.Background(), nil, VerifyInput{
+		Image:   "http://x/a.png",
+		Filters: []FilterInput{{Name: "blur", Args: "5"}},
+		Meta:    true,
+	})
+	if err != nil {
+		t.Fatalf("verify: %v", err)
+	}
+	if strings.Contains(out.URL, "/meta/") {
+		t.Errorf("the image URL carries the meta segment: %q", out.URL)
+	}
+	if !strings.Contains(out.MetaURL, "meta") {
+		t.Errorf("the meta URL should carry it: %q", out.MetaURL)
+	}
+	// The preview is attached as content, so its presence is the assertion: an
+	// image came back. A 500 leaves the text report intact, which is why this
+	// has to check the attachment rather than the note.
+	attached := false
+	for _, c := range res.Content {
+		if _, ok := c.(*mcp.ImageContent); ok {
+			attached = true
+		}
+	}
+	if !attached {
+		t.Errorf("no preview image came back; the summary was %q",
+			res.Content[0].(*mcp.TextContent).Text)
+	}
+}
+
+// onePixelPNG is a real 1x1 PNG. The preview path checks that what came back is
+// an image, so a stub returning a PNG signature and nothing else is rejected.
+var onePixelPNG = []byte{
+	0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
+	0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+	0x08, 0x06, 0x00, 0x00, 0x00, 0x1f, 0x15, 0xc4, 0x89, 0x00, 0x00, 0x00,
+	0x0d, 0x49, 0x44, 0x41, 0x54, 0x78, 0xda, 0x63, 0xfc, 0xcf, 0xc0, 0x50,
+	0x0f, 0x00, 0x04, 0x85, 0x01, 0x80, 0x84, 0xa9, 0x8c, 0x21, 0x00, 0x00,
+	0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82,
 }
