@@ -1,7 +1,7 @@
 # imagor-template
 
-**Templates for [imagor](https://github.com/cshum/imagor) — the fast, self-hosted,
-open-source image server — with agent capabilities on top.**
+**Agent template capability for [imagor](https://github.com/cshum/imagor) — the fast,
+self-hosted, open-source image server.**
 
 **An agent writes the layout; you get back one imagor URL.** Paste it in a browser, store
 it, serve it from a CDN, put it in a page — no image library, no template editor, no
