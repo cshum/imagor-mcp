@@ -16,19 +16,15 @@ with the URL each resolves to, and a prompt to ask for it »](docs/gallery/cookb
 **1. Run an imagor.**
 
 ```sh
-docker run -d --rm -p 8000:8000 -e IMAGOR_UNSAFE=1 shumc/imagor
+docker run --rm -p 8000:8000 -e IMAGOR_UNSAFE=1 shumc/imagor
 ```
 
-It runs detached so the rest of this uses the same terminal. Check it came up — this prints
-`200` once imagor is serving:
-
-```sh
-curl -s -o /dev/null -w '%{http_code}\n' localhost:8000/unsafe/1x1/color:red
-```
+Leave it running and use a second terminal for the rest. Its log stays here, so a port already
+in use or a pull that failed is visible now rather than later as an MCP error — and you can
+watch each request as it arrives.
 
 Unsafe is the local mode, and the one to experiment in: an unsigned URL keeps working after
-you change it, so take one the agent built into the browser, edit a coordinate or a word, and
-reload — a signed URL will not. Nothing has to match between the server and imagor either.
+you change it, so you can edit one in the browser and reload. A signed URL will not.
 
 **2. Install the MCP server.**
 
