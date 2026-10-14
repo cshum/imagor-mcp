@@ -26,32 +26,23 @@ regions to read the small text it had drawn.
 That is the difference from editor-first image tooling: there is no canvas to design in.
 A layout *is* a URL, and a URL is something an agent can write, check and rewrite.
 
-## Where this fits
+## What this adds
 
-Three ways to get a dynamic image. Each one costs you something, including this:
+**If imagor is already in your stack, this is a template layer and nothing else.** No new
+service, no per-image fee, no browser — rendering stays in the imagor you run, at the speed
+you already measured.
 
-| | what you get back | what it costs | what you give up |
-|---|---|---|---|
-| **Chromium** (Puppeteer, Satori) | a rendered file | a browser to run | throughput — a page render per image, and a headless browser in your stack |
-| **Hosted template APIs** (Bannerbear, Placid, APITemplate) | a blob, every render | $0.019–0.049 per image, from $49/mo | the per-image fee, and a transfer every time you serve it |
-| **imagor-mcp** | a URL | the imagor you run — one container if you do not already | your layouts live in this format |
+**And a layout compiles to a URL, not a blob.** That is the whole difference from a hosted
+template API: those hand you bytes on every render, a call you pay for and a transfer you
+carry. imagor serves a URL, and **a deterministic URL is a cacheable one** — the browser, the
+proxy and the CDN hold it without asking again. **Transfer is the part that scales with
+traffic, and here it is the only part you have.**
 
-**The difference is not that this is cheaper — it is that the output is a URL.** A hosted
-API hands you bytes, so every render is a call you pay for and a transfer you carry. imagor
-serves a URL instead, and **a deterministic URL is a cacheable one** — the browser, the proxy
-and the CDN hold it without asking again, and transfer is the part that scales with traffic.
-imagor is fast — its benchmark puts it ahead of thumbor — but **the saving here is
-architectural, not a faster loop.**
+**Measured.** A 1200×630 composite from the cookbook renders on a `shumc/imagor` container in
+**119 ms p50** (p95 122 ms, 25 fetches) and comes back as **36 KB** of JPEG; the URL that
+produced it is **865 characters**.
 
-**Measured, so you can check it.** A 1200×630 composite from the cookbook renders on a
-`shumc/imagor` container in **119 ms p50** (p95 122 ms, 25 fetches) and comes back as
-**36 KB** of JPEG. The other two rows hand you those 36 KB on every render, billable and
-carried by you. This hands you an **865-character URL**, and the bytes are served once.
-
-*Rates are the three providers' published pricing, October 2026. The imagor benchmark figure
-is imagor's, not a measurement I ran; the 119 ms and the 36 KB are mine, measured against a
-`shumc/imagor` container. **No latency figure is quoted for the hosted APIs — none is
-published and I have not measured them.***
+*The 119 ms and the 36 KB are mine, measured against a `shumc/imagor` container.*
 
 ## Quick start
 
