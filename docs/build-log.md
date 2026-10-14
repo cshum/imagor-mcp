@@ -330,7 +330,8 @@ words.
 
 ## The urls nobody could open
 
-The quick start ran the server in a container with `IMAGOR_BASE_URL=http://host.docker.internal:8000`.
+The quick start ran the server in a container with
+`IMAGOR_BASE_URL=http://host.docker.internal:8000`.
 That is how a container reaches the host, and it was the only address the server had, so every url
 it returned carried it. A browser cannot resolve it. A user rendered a card, was handed a url,
 clicked it, and got nothing.
