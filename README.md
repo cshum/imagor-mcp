@@ -47,9 +47,7 @@ it is **865 characters**.
 [`shumc/imagor`](https://hub.docker.com/r/shumc/imagor):
 
 ```sh
-docker run -d -p 8000:8000 \
-  -e IMAGOR_SECRET=your-secret-here \
-  shumc/imagor
+docker run -d -p 8000:8000 -e IMAGOR_SECRET=your-secret-here shumc/imagor
 ```
 
 Already running one? Point the config below at it instead. (`imagor-base` is the image
@@ -61,6 +59,31 @@ and open it. It asks for the imagor URL and secret and runs the server for you, 
 Linux and Windows. The same bundle is on
 [Smithery](https://smithery.ai/server/adrian-pzhc/imagor-mcp) and in the
 [MCP Registry](https://registry.modelcontextprotocol.io/) as `io.github.cshum/imagor-mcp`.
+
+**Or run the server as a container**, which carries the skill with it:
+
+```sh
+docker run -i --rm -e IMAGOR_SECRET=your-secret-here ghcr.io/cshum/imagor-mcp
+```
+
+Point a client at the container instead of a binary:
+
+```json
+{
+  "mcpServers": {
+    "imagor": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm",
+        "-e", "IMAGOR_SECRET=your-secret-here",
+        "-e", "IMAGOR_BASE_URL=http://host.docker.internal:8000",
+        "ghcr.io/cshum/imagor-mcp"]
+    }
+  }
+}
+```
+
+Inside a container `localhost` is the container, so a local imagor is reached at
+`host.docker.internal` (`--add-host=host.docker.internal:host-gateway` on Linux).
 
 Anywhere else, the release carries both binaries for six platforms:
 
