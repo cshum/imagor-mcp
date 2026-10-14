@@ -4,8 +4,7 @@
 self-hosted, open-source image server.**
 
 **An agent writes the layout; you get back one imagor URL.** Paste it in a browser, store
-it, serve it from a CDN, put it in a page — no image library, no template editor, no
-design file.
+it, serve it from a CDN, put it in a page.
 
 [![Fourteen cards, each one a single imagor URL](docs/gallery/contact-sheet.png)](docs/gallery/cookbook.md)
 
@@ -37,15 +36,12 @@ Three ways to get a dynamic image:
 | **Hosted template APIs** (Bannerbear, Placid, APITemplate) | send values, **get a blob back** | $0.019–0.049 per image, from $49/mo | the per-image fee, and the transfer every time you serve it |
 | **imagor-mcp** | a layout compiles to an imagor URL | nothing beyond the imagor you already run | nothing per image — **you serve a URL** |
 
-**The difference is not that this is cheaper. It is that the output is a URL.** A hosted
-API hands you bytes, so every render is a call you pay for and a transfer you carry. This
-hands you a URL, and imagor serves it as one — `Cache-Control: max-age=168h` by default,
-so a CDN, a proxy or a browser holds it without asking again. **A deterministic URL is a
-cacheable one, and the transfer is the part that scales with traffic.**
-
-imagor is fast — its own benchmark puts it ahead of thumbor overall and level with
-imgproxy, which is libvips-based too, so the floor is the same. **The saving is
-architectural, not a faster loop.**
+**The difference is not that this is cheaper — it is that the output is a URL.** A hosted
+API hands you bytes, so every render is a call you pay for and a transfer you carry. imagor
+serves a URL instead, `Cache-Control: max-age=168h` by default, so a CDN or a browser holds
+it without asking again. **A deterministic URL is a cacheable one, and transfer is the part
+that scales with traffic.** imagor is fast — its benchmark puts it ahead of thumbor — but
+**the saving here is architectural, not a faster loop.**
 
 *Rates are the three providers' published pricing, October 2026; the benchmark figures are
 imagor's, not measurements I ran.*
@@ -61,39 +57,29 @@ docker run -d -p 8000:8000 \
   shumc/imagor
 ```
 
-`imagor-base` is the image imagor is *built* from — it carries the libvips toolchain
-and no imagor binary, so it is not something to run.
+Already running one? Point the config below at it instead. (`imagor-base` is the image
+imagor is *built* from, not one to run.)
 
-Already running imagor? Skip this and point the config below at it.
-
-**2. Install.** **The server is the one you need** — templates are authored by an agent,
-and a fitted text slot is measured by rendering, so even compiling one wants a live
-imagor. A second binary, `imagor-template`, runs a template you already have; it is
-covered in [Development](#development).
-
-**In a host that takes bundles, that is the whole install.** Download
+**2. Install.** **In a host that takes bundles, this is the whole install** — download
 [`imagor-mcp-v0.5.0.mcpb`](https://github.com/cshum/imagor-mcp/releases/download/v0.5.0/imagor-mcp-v0.5.0.mcpb)
-and open it: it asks for the imagor URL and secret and runs the server for you, on
-macOS, Linux and Windows. The same bundle is listed on
-[Smithery](https://smithery.ai/server/adrian-pzhc/imagor-mcp) and in the official
-[MCP Registry](https://registry.modelcontextprotocol.io/) as
-`io.github.cshum/imagor-mcp`, so a host that reads either can install it from there.
+and open it. It asks for the imagor URL and secret and runs the server for you, on macOS,
+Linux and Windows. The same bundle is on
+[Smithery](https://smithery.ai/server/adrian-pzhc/imagor-mcp) and in the
+[MCP Registry](https://registry.modelcontextprotocol.io/) as `io.github.cshum/imagor-mcp`.
 
-Anywhere else, both binaries ship prebuilt for six platforms, or build from source:
+Anywhere else, the release carries both binaries for six platforms:
 
 ```sh
-# prebuilt for six platforms — pick yours from the releases page
 curl -L -o imagor-mcp \
   https://github.com/cshum/imagor-mcp/releases/download/v0.5.0/imagor-mcp_v0.5.0_darwin_arm64
 chmod +x imagor-mcp
-
-# or, with Go installed — the ./cmd/ path is required: the module root is not a
-# command, and nothing here is importable (the engine is all internal/)
-go install github.com/cshum/imagor-mcp/cmd/imagor-mcp@latest
 ```
 
-Pure Go, with no libvips and no cgo — unlike imagor itself. Every platform, with its
-exact filename, is on the [releases page](https://github.com/cshum/imagor-mcp/releases).
+Pure Go — no libvips, no cgo, unlike imagor itself. Every platform is on the
+[releases page](https://github.com/cshum/imagor-mcp/releases). With Go installed:
+`go install github.com/cshum/imagor-mcp/cmd/imagor-mcp@latest`. **The server is the one
+you need**; `imagor-template` runs a layout you already have, and is covered in
+[Development](#development).
 
 **3. Add it to your MCP client.**
 
@@ -117,11 +103,6 @@ nothing listens on a port.
 
 **4. Ask it for something.** Start from one of the fourteen recipes in `cookbook/`,
 or describe what you want and let it compose.
-
-### Prefer not to hand over the secret?
-
-`build_imagor_path` returns an **unsigned** path and leaves signing to you — for a
-service that constructs compositions but should never hold the key.
 
 ## Tools
 
@@ -193,25 +174,17 @@ the next person, a path renders once.
 **A caveat:** a text slot with a height is *fitted* by measuring, and measuring renders a
 probe through imagor — so a compile needs a running imagor. Everything else is pure.
 
-## Modes
-
-Exactly one applies, selected by the environment. There is no implicit fallback.
-
-| Mode | Selected by | Output |
-|---|---|---|
-| **signed** | `IMAGOR_SECRET` set | `<signature>/<path>` — production |
-| **unsafe** | `IMAGOR_UNSAFE=1` | `unsafe/<path>` — development only |
-
-**Setting both is refused at startup, and so is setting neither** — they state
-opposite intentions, and silently picking one is how an unsigned deployment reaches
-production.
-
 ## Configuration
+
+**A mode is required, and exactly one applies** — selected by the environment, with no
+implicit fallback. Setting both is refused at startup, and so is setting neither: they
+state opposite intentions, and silently picking one is how an unsigned deployment reaches
+production.
 
 | Variable | Meaning |
 |---|---|
-| `IMAGOR_SECRET` | Signing secret. Selects **signed** mode. |
-| `IMAGOR_UNSAFE` | `1`, `true`, `yes` or `on`. Selects **unsafe** mode. Must be explicit. |
+| `IMAGOR_SECRET` | Signing secret. Selects **signed** mode: `<signature>/<path>`. |
+| `IMAGOR_UNSAFE` | `1`, `true`, `yes` or `on`. Selects **unsafe** mode: `unsafe/<path>`, development only. Must be explicit. |
 | `IMAGOR_BASE_URL` | Your imagor origin. Needed for `verify_imagor_url`, and it adds `absolute_url` to output. |
 | `IMAGOR_SIGNER_TYPE` | `sha1` (default), `sha256` or `sha512`. |
 | `IMAGOR_SIGNER_TRUNCATE` | Signature length in characters. `0` means none. |
@@ -240,10 +213,7 @@ VIPS_CACHE_MAX_HEIGHT=2000
 mint valid URLs, like any backend. **Trust the component; do not trust the agent using
 it.**
 
-- **A mode is required** — it signs or emits `unsafe/`, never unsigned.
 - **Unsafe mode is opt-in and loud** — a warning on stderr, reported by `describe_imagor`.
-- **stdio only.** Nothing listens on a port.
-- **No generic signing tool** — it can only emit paths its own typed tools built.
 - **Blast radius stays imagor's to set** — `HTTP_LOADER_ALLOWED_SOURCES`,
   `VIPS_MAX_RESOLUTION`, `IMAGOR_REQUEST_TIMEOUT`. A URL from an errant agent is still
   subject to every one.
