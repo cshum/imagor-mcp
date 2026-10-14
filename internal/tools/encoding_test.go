@@ -1,8 +1,11 @@
 package tools
 
 import (
+	"context"
 	"strings"
 	"testing"
+
+	filtercat "github.com/cshum/imagor-template/internal/filters"
 )
 
 // The two cases use different rules on purpose, and the difference is the point:
@@ -203,16 +206,64 @@ func TestReservedPrefixesCoverImagorsCommands(t *testing.T) {
 	}
 }
 
-// A filter that is listed but has no readable signature invites a guess. label()
-// is undocumented and text() does everything it does, so it is not offered - but
-// it still parses, so a path that already uses it keeps working.
+// A filter that is listed but has no readable signature invites a guess, and one
+// that exists to carry imagor's own state invites a composition built on an
+// internal channel. Neither is offered - but both still parse, so a path that
+// already uses one keeps working.
 func TestSupersededFiltersAreNotOffered(t *testing.T) {
-	if !superseded("label") {
-		t.Error("label should not be offered: text covers it and it has no signature")
+	for name, why := range map[string]string{
+		"label":           "text() covers everything it does and it has no signature",
+		"focal":           "it carries a detection box between processors for the face-detection plugin",
+		"draw_detections": "it draws that box back, which is the plugin's job and not a composition's",
+	} {
+		if !superseded(name) {
+			t.Errorf("%s should not be offered: %s", name, why)
+		}
 	}
-	for _, keep := range []string{"text", "modulate", "trim", "padding", "image"} {
+	for _, keep := range []string{
+		"text", "modulate", "trim", "padding", "image", "crop", "blur",
+	} {
 		if superseded(keep) {
 			t.Errorf("%s should stay offered", keep)
+		}
+	}
+}
+
+// The predicate and the call site are separate, so the listing itself is checked
+// rather than the predicate alone: a filter hidden here but forgotten in
+// list_imagor_filters would still be offered, which is the whole failure mode.
+func TestSupersededFiltersAreAbsentFromTheListing(t *testing.T) {
+	c := Config{}
+	_, out, err := c.ListFiltersTool(context.Background(), nil, ListFiltersInput{})
+	if err != nil {
+		t.Fatalf("listing failed: %v", err)
+	}
+	listed := map[string]bool{}
+	for _, f := range out.Filters {
+		listed[f.Name] = true
+	}
+	if len(listed) == 0 {
+		t.Fatal("nothing was listed, so this proves nothing")
+	}
+	for _, name := range []string{"label", "focal", "draw_detections"} {
+		if listed[name] {
+			t.Errorf("%s is still offered by list_imagor_filters", name)
+		}
+	}
+	for _, name := range []string{"text", "trim", "crop", "blur", "image"} {
+		if !listed[name] {
+			t.Errorf("%s should still be offered", name)
+		}
+	}
+}
+
+// Not offered is not the same as refused. Every superseded filter has to stay in
+// the catalogue, or a path written before it was hidden would stop validating -
+// which is the failure this whole catalogue exists to avoid.
+func TestSupersededFiltersAreStillKnown(t *testing.T) {
+	for _, name := range []string{"label", "focal", "draw_detections"} {
+		if _, ok := filtercat.Lookup(name); !ok {
+			t.Errorf("%s must stay in the catalogue so a path using it still validates", name)
 		}
 	}
 }

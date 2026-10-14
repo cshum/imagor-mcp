@@ -1452,8 +1452,22 @@ func (c Config) ListFiltersTool(_ context.Context, _ *mcp.CallToolRequest, in Li
 // argument positions 1-5, then adds blending, wrapping, alignment, spacing and
 // dpi. Nothing label does is unavailable, and its signature is not in imagor's
 // reference, so a caller that sees it listed can only guess at the arguments.
+//
+// focal() and draw_detections() are imagor's own plumbing rather than anything a
+// caller composes with: focal carries a detection box between processors for the
+// face-detection plugin, and draw_detections draws that box back. Offering them
+// invites a composition built on an internal channel. focal is also left out of
+// the report in /meta, so a path using it could not be verified even if it were
+// offered.
+//
+// Unlike label, these two stay in the catalogue: they parse, so a path that
+// already carries one keeps validating.
 func superseded(name string) bool {
-	return name == "label"
+	switch name {
+	case "label", "focal", "draw_detections":
+		return true
+	}
+	return false
 }
 
 // signatureFor renders a filter's accepted argument count for humans.

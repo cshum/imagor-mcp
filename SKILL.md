@@ -51,8 +51,7 @@ parameters are four flat fields, not a nested object:
   `280x154` comes back at aspect 1.818 against 1.657, nearly 10% wrong. Reshape the
   box instead, or `full-fit-in` if it cannot be reshaped.
 - `crop()` is the only mode that **aims**, which is what removes an unwanted sliver
-  on a known side. `focal` and `smart` also crop: `focal` lands where a centre crop
-  does unless the subject is off-centre, and `smart` frames by content.
+  on a known side. `smart` also crops, framing by content.
 - `trim()` only removes a uniform border, so on a product on a panel it is a no-op
   with byte-identical output.
 
