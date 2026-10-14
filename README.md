@@ -19,6 +19,13 @@ with the URL each resolves to, and a prompt to ask for it »](docs/gallery/cookb
 docker run -d --rm -p 8000:8000 -e IMAGOR_UNSAFE=1 shumc/imagor
 ```
 
+It runs detached so the rest of this uses the same terminal. Check it came up — this prints
+`200` once imagor is serving:
+
+```sh
+curl -s -o /dev/null -w '%{http_code}\n' localhost:8000/unsafe/1x1/color:red
+```
+
 Unsafe is the local mode, and the one to experiment in: an unsigned URL keeps working after
 you change it, so take one the agent built into the browser, edit a coordinate or a word, and
 reload — a signed URL will not. Nothing has to match between the server and imagor either.
