@@ -82,9 +82,6 @@ with no layout, no positions and no sizes, an agent designed three distinct bann
 across three runs** — hierarchy, colour, type pairing, invented copy — and zoomed into
 regions to read the small text it had drawn.
 
-That is the difference from editor-first image tooling: there is no canvas to design in, and
-a URL is something an agent can write, check and rewrite.
-
 ## What this adds
 
 **The template layer runs inside your imagor.** Rendering stays in the instance you run, at
