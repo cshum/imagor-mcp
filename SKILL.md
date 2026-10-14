@@ -76,20 +76,12 @@ fit-in/200x260/filters:fill(white)
   /color:white
 ```
 
-Accepted positions, on both axes:
-
-- A number: from the left or top. **Negative: from the right or bottom**, an inset
-  of that many pixels.
-- `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`, `center`, optionally offset.
-  `right-20` moves **past** the right edge — the opposite of `-20` — so it can clip.
-- `Np`, or a float `0.0`–`1.0`, for a percentage of the canvas, placing the **left**
-  or **top** edge: `0.5` is `50p`, and neither centres. `center` takes no offset —
-  `center-100` does not parse and silently becomes `0`.
-- `repeat` tiles.
-
-A position is the **top-left of the box**, so `full-70` for a caption puts the
-*box* 70px from the bottom and the ink reaches below it. Leave more room than the
-margin you want.
+Accepted positions are imagor's own, and `list_imagor_filters` carries the full set —
+the three filters share them. What it does not say is where they mislead:
+**`center` takes no offset**, and `center-100` becomes a silent `0`; a position is the
+**top-left of the box**, so `full-70` for a caption puts the *box* 70px from the bottom
+and the ink reaches below it, which wants more room than the margin you asked for; and
+`right-20` moves **past** the right edge while `-20` insets from it.
 
 **A marker beside text is sized against the x-height, not the line.** A square dot
 tall enough to span ascender to baseline is centred on the text's ink and still reads
@@ -98,19 +90,21 @@ For 15px type the x-height is about 8px — match that, and check the dot's own 
 against the text's, not its centre against the text's centre.
 
 `full` or `f` in a **nested dimension** inherits the parent: `fullxfull`,
-`fit-in/full-20xfull-20`. A **position** has no such form — `full-N` written as a
-position is read as `0`, lands the element at the origin and returns `200`. The
-build tools warn when they see one. This is the one form that survives a round trip
-and still means something; see *Editing a path you already have*.
+`fit-in/full-20xfull-20`. A **position** has no such form — `full-N` written as one is
+read as `0`, lands the element at the origin and returns `200`. The build tools warn
+when they see one.
 
 ## Nested path order
 
 Inside `image()` the path is a normal path, so crop and dimensions come before
-`filters:`. `watermark()` is the older, narrower form of `image()`, and takes the
-source first, then `x`, then `y`.
+`filters:`. `watermark()` is the older, narrower form of `image()`: the source, then
+`x`, `y` and `alpha`, with optional width and height ratios in place of a nested path.
 
-Sources inside `image()` need a full URL; a bare filename is a `404`, even when
-the same name works as the top-level image.
+A source inside `image()` needs a full URL; a bare filename is a `404`, even when the
+same name works as the top-level image. **`path:<imagor path>` is the other kind of
+source** — an imagor path rather than a URL, resolved by the server already serving the
+request, so a nested image nothing outside it can reach still loads. It needs imagor
+1.9.10 — see *Which imagor the server needs* for what an older server does with one.
 
 ## Colors and awkward URLs
 
@@ -146,6 +140,11 @@ parsed for syntax:
 {"name":"image","source":"https://cdn.example.com/a,b.png?v=2","args":"600x600,60,60"}
 ```
 
+**What cannot be left alone is written `b64:`** — base64url, unpadded — which carries
+arbitrary Unicode and multi-word strings past the rules above. It is imagor's syntax as
+well as this server's, so a path read back may carry one, and the tools emit it where a
+value would otherwise be mangled.
+
 These rules match the converter in imagor-studio
 (`server/internal/imagortemplate`), so a path either project builds means the
 same thing.
@@ -153,27 +152,20 @@ same thing.
 ## Templates
 
 `render_template` renders a layout at a canvas size, so a layout is written once and
-served at any size. A text slot given a height is **fitted against the box its geometry
-resolves to** — see *Placing text* for what that costs and how to cap it.
+served at any size. A text slot's font resolves the way `text()` resolves it, and a text
+slot given a height is **fitted against the box its geometry resolves to** — see *Placing
+text* for both, and for what fitting costs and how to cap it.
 
-**A generic font is resolved to a narrower face and the note says so** — `sans` to
-`Open-Sans`, `serif` to `Liberation-Serif`. See *Placing text*.
+A canvas, its slots, and the values that fill them:
 
 ```json
-{
-  "canvas_width": 1200, "canvas_height": 630, "background": "color:1a1a2e",
-  "slots": [
-    {"name":"bar","kind":"rect","image":"color:3b82f6","x":"0","y":"0",
-     "width":"12","height":"full"},
-    {"name":"eyebrow","kind":"text","text":"{{eyebrow}}","x":"40","y":"40",
-     "font":"Open-Sans-bold-22","color":"3b82f6"},
-    {"name":"title","kind":"text","text":"{{title}}","x":"40","y":"140",
-     "width":"full-80","height":"220","font":"Liberation-Serif","color":"ffffff",
-     "align":"low","max_size":84,"min_size":24}
-  ],
-  "values": {"eyebrow":"ENGINEERING","title":"…"}
-}
+{"canvas_width": 1200, "canvas_height": 630, "background": "color:1a1a2e",
+ "slots": [{"name":"bar","kind":"rect","image":"color:3b82f6","x":"0","y":"0",
+            "width":"12","height":"full"}],
+ "values": {"eyebrow":"ENGINEERING"}}
 ```
+
+The cookbook holds fourteen of these, so reach for one before writing the JSON out.
 
 **A slot's `filters` field applies filters to that slot's own source**, because the
 image field is data rather than syntax — a path written there is encoded as a source.
@@ -205,10 +197,8 @@ transparent: it adds only what it draws.
 | `38p` | 38% of the canvas dimension |
 | `6p+34p` | a percentage, plus a percentage of the same dimension |
 
-imagor has no fraction or percentage form for a dimension, so those are the template
-layer's own and resolve to pixels. `full` and `full-N` imagor does have, so they reach
-the path. Positions resolve to pixels too; everything else imagor accepts for one
-(`center`, `top`, `bottom`, `left`, `right` and their offsets) passes through.
+Only `full` and `full-N` exist in imagor as dimensions; the fraction and percentage
+forms are the template layer's own, resolved to pixels before a path exists.
 
 ## Editing a path you already have
 
@@ -235,64 +225,46 @@ path and a URL both work, signed or not.
 
 ## Cookbook
 
-There are fourteen ready-made layouts. **Call `get_cookbook_recipe` with no name** and it
-returns the list: what each layout is for, its size, and which values it takes. Then call
-it again with the name you want.
+Fourteen ready-made layouts, fetched by name with `get_cookbook_recipe`.
 
-```
-get_cookbook_recipe                      ->  the list, to choose from
-get_cookbook_recipe  name: "event"       ->  the template, ready for render_template
-```
+**Match on what a layout is for, not on its name**, which will not resemble the
+request. Take the closest and change the values rather than composing from nothing:
+the recipes carry spacing and type sizes that took iteration to get right, and the test
+suite renders them at three canvas sizes, so one that no longer works cannot reach the
+index.
 
-**Start with the no-name call rather than guessing a name**, and rather than reading the
-`imagor-mcp://cookbook` resource: the resource carries the same list, but a client that
-surfaces only tools never shows it, and a run that tried reported exactly that. Match on
-what a layout *is for* — the note — not on its name, which will not resemble the request.
-
-Take the closest and change the values. They carry spacing and type sizes that took
-iteration to get right, and they are rendered by the test suite at three canvas sizes,
-so a recipe that no longer works cannot reach the list.
-
-The recipes reference their images from **`s.imagor.net`**, so they render as they are.
-For the full set with dimensions and what each is for, read the `imagor-mcp://sources`
-resource.
+They reference their images from **`s.imagor.net`**, so they render as they are.
 
 ## Placing text is a search, not a calculation
 
 Text lands wherever the font's own metrics put it, and nothing reports those.
 
-- **A generic is resolved to a narrower face and the note says so.** `sans`, `serif`
-  and `monospace` become `Open-Sans`, `Liberation-Serif` and `Liberation-Mono`. The
-  generics are DejaVu, the widest face imagor carries, so type sized for one overflows
-  a box drawn for anything narrower. Name `DejaVu-Sans` to keep it.
-- **An uninstalled name falls back to DejaVu, silently and with a `200`**, so which
-  faces exist belongs to the imagor you point at — check before relying on one.
+- **A font name is a lookup that cannot fail loudly.** A generic resolves to a narrower
+  face: `sans`, `serif` and `monospace` become `Open-Sans`, `Liberation-Serif` and
+  `Liberation-Mono`, and the generics are DejaVu, the widest face imagor carries, so
+  type sized for one overflows a box drawn for anything narrower. Name `DejaVu-Sans` to
+  keep it. An uninstalled family and an absent weight fall back exactly as silently,
+  both with a `200`: the official image's Open Sans carries Light, Regular, Semibold,
+  Bold and ExtraBold, its Liberation only Regular and Bold, so `Open-Sans-Medium`
+  renders as Regular and `Open-Sans-Black` as ExtraBold. Check by rendering a weight
+  and comparing against Regular.
 - **The font is a Pango description with hyphens for spaces.** `sans-bold-40` is
   `sans bold 40`: **family first, size last**. A number anywhere else is ignored —
   `sans-40-bold` renders at the default 20 — and a word before the family becomes it,
   so `bold-sans-40` renders as `sans-40`. A literal space is a **malformed URL**: use
   a hyphen or `b64:`.
-- **Only the weights a face carries exist, and an absent one falls back silently.** On
-  the official image Open Sans has Light, Regular, Semibold, Bold and ExtraBold;
-  Liberation has Regular and Bold. `Open-Sans-Medium` renders as Regular and
-  `Open-Sans-Black` as ExtraBold, both with a `200` — the same silent substitution as
-  an unknown family. Check by rendering the weight and comparing against Regular.
 - **A fitted text slot takes the largest size that fits its box.** That is what a
   headline wants and what a supporting line does not — a short line balloons to fill
   the box it was given. Cap it with `max_size`, or give the slot no height and a
   `size` instead.
 - **To centre text on something narrower than the frame, give it a canvas of its
   own: a slot carrying its own `slots`.** `x=center` resolves against the canvas it
-  is on, and a numeric `x` leaves text hanging left whatever `align` says. The outer
-  slot's width and height become that canvas; the result draws where it is placed.
-  A label measured this way landed at centre 921 against a product centre of 922.
+  is on, and a numeric `x` leaves text hanging left whatever `align` says. A label
+  measured this way landed at centre 921 against a product centre of 922.
 - **A wordmark is one `text()` call, even though that loses the tracking.** `text()`
   has no letter-spacing, and its `spacing` argument is *line* spacing. One glyph per
   call reaches the reference's spacing but hard-codes the string, so a different
   value breaks the layout. Prefer one call; the rest of the layout stays exact.
-- **Measure the region you changed, not the whole image.** A whole-image number
-  hides a label that is 40px out, because most of the canvas did not move.
-
 ## Grids of images
 
 Sizing each panel to its own source gives panels of different shapes, which reads as
@@ -312,7 +284,9 @@ lands on.
 
 **Sizes adapt; type does not.** A font size is in pixels, so the same composition
 renders relatively smaller type on a larger canvas, and there is no percentage font
-size. Size the text per canvas with `fit_text`, or accept that it will not scale.
+size. Size the text per canvas by calling **`fit_text`** — it finds the largest size at
+which a string still fits a box and returns the font argument for `text()` — or accept
+that it will not scale.
 
 ## When imagor refuses to serve
 
@@ -349,30 +323,31 @@ in a startup log and on no endpoint, so there is nothing to ask.
 
 ## Working method
 
-1. `describe_imagor` once, for the grammar this server targets.
-2. `list_imagor_filters` before using a filter you have not used here: it carries
-   imagor's own signature, description and accepted forms.
-3. `build_imagor_url` refuses invalid compositions, so a refusal is a mistake worth
-   fixing rather than working around.
-4. `verify_imagor_url` the result, passing the same typed parameters you built from —
-   it takes parameters, not a URL. `applied` means it ran; `declined` means it was
-   recognised and did nothing; `not_reported` means this processor does not handle it.
-   Absence is not failure.
-5. **Look at what came back.** A composition can report `applied` and still be wrong,
-   and placement, cropping and proportions are visible at preview size. Where the
-   preview is too small to read a label, call again with `preview_region` as `x,y,w,h`
-   in **result** pixels — full resolution for a fraction of the cost. Iterate until it
-   matches.
-6. To composite, build small pieces first: one tile, then the grid, then the banner. A
+1. `describe_imagor` once, for the grammar this server targets, and
+   `list_imagor_filters` before using a filter you have not used here — imagor ignores
+   an unrecognised one silently, and the request comes back `200` with the image
+   unchanged.
+2. Build with `build_imagor_url`, which refuses an invalid composition rather than
+   emitting it, so a refusal is a mistake worth fixing rather than working around.
+   `build_imagor_path` returns the same composition unsigned, for when the server
+   should not hold the signing secret, and `validate_imagor_path` reads a path back to
+   report whether it round-trips.
+3. `verify_imagor_url` the result, passing the same typed parameters you built from —
+   it takes parameters, not a URL. An outcome is `applied`, `declined` (recognised,
+   did nothing), `not_reported` (this processor does not handle it) or `unknown` (the
+   server reports no outcomes at all, so nothing can be concluded; neither is a
+   failure). **A `declined` filter is an error unless it is deliberately conditional**,
+   which is what `allow_declined` says.
+4. **Look at what came back** — `applied` does not mean correct. Where the preview is
+   too small to read a label, call again with `preview_region` as `x,y,w,h` in
+   **result** pixels: full resolution for a fraction of the cost. `preview: false` for
+   the report alone. Iterate until it matches.
+5. To composite, build small pieces first — one tile, then the grid, then the banner. A
    wrong number in a nested path is much harder to see in the finished image.
-7. Measure only what looking cannot settle, and measure the **rows**, not the centres.
-   Compare the thing's own ink rows against the rows it is meant to match — a dot's
-   rows against its text's, a panel's against its neighbour's. Two centres can agree
-   to the pixel while the shapes read as misaligned, and a whole-image average hides
-   a 40px error. Crop to the region you changed and check the pairing before you
-   believe the number.
+6. Measure only what looking cannot settle, and measure the **rows**, not the centres:
+   a dot's rows against its text's, a panel's against its neighbour's. Two centres can
+   agree to the pixel while the shapes read as misaligned. Crop to the region you
+   changed before you believe the number.
 
 **These rules are procedures and facts on purpose.** A procedure says what to type and
-is followed; a preference asks the reader to want the right thing and is not, so where
-one would be needed the server enforces it instead — a generic font resolves to a
-narrower face, `fit` centres in its box.
+is followed; a preference asks the reader to want the right thing and is not.
