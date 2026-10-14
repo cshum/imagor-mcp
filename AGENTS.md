@@ -49,6 +49,27 @@ accepts filters imagor ignores, or rejects ones that exist.
 and looking at it is the only test that has ever caught a layout fault, a substituted
 font, or a caption sitting on a picture.
 
+## A filter that should not be offered
+
+`superseded` in `internal/tools/tools.go` hides a filter from `list_imagor_filters`
+while leaving it in the catalogue. **Hiding is not deleting.** `filtercat.Check` is
+what `build_imagor_url` refuses on and what `validate_imagor_path` reports, so a
+filter removed from the catalogue would stop a path that already carries it from
+building or validating. Regenerating the catalogue is safe — `superseded` is not
+generated.
+
+Two things justify hiding one:
+
+- **Its signature is not readable**, so a caller that sees it listed can only guess at
+  the arguments. `label()` is undocumented and `text()` covers everything it does.
+- **It exists for imagor's own machinery rather than for composing.** `focal` carries
+  a detection box between processors for the face-detection plugin, and
+  `draw_detections` draws it back. `focal` is also left out of the report in `/meta`,
+  so a path using it could not be verified even if it were offered.
+
+`TestSupersededFiltersAreAbsentFromTheListing` asserts on the listing itself rather
+than on the predicate, because a filter hidden in one and not the other is the failure.
+
 ## Changing the template schema
 
 A field belongs on **both** `TemplateSlot` and `InnerSlot`. They are separate types
