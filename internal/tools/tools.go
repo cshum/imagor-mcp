@@ -201,7 +201,9 @@ type FilterInput struct {
 // TransformInput describes an image transformation. Every field maps onto a
 // concept in the imagor path grammar; there are no invented parameters.
 type TransformInput struct {
-	Image string `json:"image" jsonschema:"source image: a URL or path such as \"example.com/a.jpg\", or a synthetic source such as \"color:red\" or \"color:none\""`
+	// Says what it is not, because the tool name invites the opposite reading: an agent
+	// that has just built a URL will try to verify that URL, and this field is not it.
+	Image string `json:"image" jsonschema:"the source to transform, not a composed result: a URL or path such as \"example.com/a.jpg\", or a synthetic source such as \"color:red\" or \"color:none\""`
 
 	Width  int `json:"width,omitempty" jsonschema:"target width in pixels; 0 means automatic"`
 	Height int `json:"height,omitempty" jsonschema:"target height in pixels; 0 means automatic"`
@@ -1513,8 +1515,8 @@ func Register(s *mcp.Server, cfg Config) {
 			"Read get_imagor_skill before composing anything, and call list_imagor_filters for each " +
 			"filter's signature, description and accepted argument forms, which are generated " +
 			"from imagor's own filter reference. Build and verify in a loop: a request returns " +
-			"200 whether or not a filter did anything, so call verify_imagor_url on the result " +
-			"rather than assuming it worked.",
+			"200 whether or not a filter did anything, so pass the same parameters to " +
+			"verify_imagor_url rather than assuming it worked.",
 	}, cfg.BuildURLTool)
 
 	mcp.AddTool(s, &mcp.Tool{
