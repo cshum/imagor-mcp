@@ -19,12 +19,10 @@ with the URL each resolves to, and a prompt to ask for it »](docs/gallery/cookb
 docker run --rm -p 8000:8000 -e IMAGOR_UNSAFE=1 shumc/imagor
 ```
 
-Leave it running and use a second terminal for the rest. Its log stays here, so a port already
-in use or a pull that failed is visible now rather than later as an MCP error — and you can
-watch each request as it arrives.
+Leave it running, and use a second terminal for the rest.
 
-Unsafe is the local mode, and the one to experiment in: an unsigned URL keeps working after
-you change it, so you can edit one in the browser and reload. A signed URL will not.
+Unsafe mode is for trying things out. Production runs on `IMAGOR_SECRET` — see
+[imagor's security docs](https://docs.imagor.net/security).
 
 **2. Install the MCP server.**
 
@@ -65,8 +63,8 @@ it by name, and as `ghcr.io/cshum/imagor-mcp` in a container — which needs a d
 URL, in [Configuration](#configuration). Windows binaries are on the
 [releases page](https://github.com/cshum/imagor-mcp/releases).
 
-**Before anything is public, set `IMAGOR_SECRET` on the server and on imagor** — see
-[Security](docs/security.md).
+**Before anything is public**, read [Security](docs/security.md) — what this server is
+trusted with, and what it refuses.
 
 ## What an agent does with it
 
