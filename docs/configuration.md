@@ -26,21 +26,13 @@ That is the one real cost of running the server in a container. There, the host 
 `host.docker.internal` and `localhost` is the container, so the server needs
 `-e IMAGOR_BASE_URL=http://host.docker.internal:8000` to work at all — and every URL it hands
 you then carries a name your browser cannot resolve. On the host, one address does both
-jobs.
+jobs. Anything else that puts a proxy or a different hostname in front of imagor does the
+same thing.
 
-## Making previews faster
+## Previews
 
-`verify_imagor_url` fetches through imagor's `preview()` filter, which skips result
-storage and opts into the in-memory cache. **Turn the cache on** and repeated looks
-at the same composition get much cheaper — measured on a 1600×600 composition,
-**386 ms** for the first preview and **25 ms** for a repeat:
-
-```bash
-VIPS_CACHE_SIZE=52428800      # byte budget; 0 disables the cache (default)
-VIPS_CACHE_MAX_WIDTH=2400     # images larger than this are not cached
-VIPS_CACHE_MAX_HEIGHT=2000
-```
-
-
-Running the server in a container changes `IMAGOR_BASE_URL` — see the paragraph above — and so
-does anything that puts a proxy or a different hostname in front of imagor.
+`verify_imagor_url` fetches through imagor's `preview()` filter, which opts the request into
+imagor's in-memory cache. That cache is **imagor's setting, not this server's**, and it is
+keyed by source image rather than by composition — see
+[imagor's in-memory cache](https://docs.imagor.net/in-memory-cache) for the variables and what
+they do.
