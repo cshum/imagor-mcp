@@ -102,6 +102,11 @@ an imagor path rather than a URL, resolved by the server already serving the req
 nested image nothing outside it can reach still loads. It needs imagor 1.9.10 — see *Which
 imagor the server needs* for what an older server does with one.
 
+Nested under nothing, `path:` only re-encodes: the server resolves the inner path to pixels and
+encodes the result again, so the inner `quality()` and `format()` are not applied. Put the
+transformation outside the wrapper, or leave the path bare. An image argument that is itself a
+path is nested for you, and a wrapper with nothing outside it is collapsed for you.
+
 ## Colors
 
 `color:white` is a canvas with no source: `image(311x35/color:f1f2ee,1096,600)` is a

@@ -294,7 +294,11 @@ func (in TransformInput) toParams() (imagorpath.Params, error) {
 		filters = append(filters, imagorpath.Filter{Name: "expire", Args: strconv.FormatInt(in.ExpireUnixMillis, 10)})
 	}
 
-	return imagorpath.Params{
+	if inner, ok := nestedSource(in.Image); ok {
+		in.Image = "path:" + inner
+	}
+
+	return collapseNested(imagorpath.Params{
 		Image:         in.Image,
 		Width:         in.Width,
 		Height:        in.Height,
@@ -316,7 +320,41 @@ func (in TransformInput) toParams() (imagorpath.Params, error) {
 		VFlip:         in.VFlip,
 		Meta:          in.Meta,
 		Filters:       filters,
-	}, nil
+	}), nil
+}
+
+// nestedSource reports whether an image argument is itself an imagor path and
+// returns it. A path carrying parameters of its own cannot be written as the
+// image of another path: parameters come before filters, so imagor reads the
+// whole token as one source and tries to load it as a URL. Nested under path:
+// it resolves in-process instead.
+//
+// The test is whether parsing moved anything out of the image. A plain source -
+// a url, photos/a.jpg, color:red - parses to itself and is left alone.
+func nestedSource(image string) (string, bool) {
+	if image == "" || strings.HasPrefix(image, "path:") {
+		return "", false
+	}
+	if p := imagorpath.Parse(image); p.Image == "" || p.Image == image {
+		return "", false
+	}
+	return image, true
+}
+
+// collapseNested unwraps a path that is nothing but a nested source. path:X
+// with no transformation of its own asks imagor to resolve X and encode the
+// result again, which costs a generation and discards X's own output settings;
+// X is the request instead.
+func collapseNested(p imagorpath.Params) imagorpath.Params {
+	inner, ok := strings.CutPrefix(p.Image, "path:")
+	if !ok || inner == "" || imagorpath.HasTransformations(p) {
+		return p
+	}
+	np := imagorpath.Parse(inner)
+	if np.Image == "" || imagorpath.GeneratePath(np) != inner {
+		return p
+	}
+	return np
 }
 
 // filterWarnings reports filters that are known to imagor but carry more
