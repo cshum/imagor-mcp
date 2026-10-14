@@ -1022,19 +1022,6 @@ const (
 	maxMetaBytes  = 4 << 20
 )
 
-// BuildPathTool returns the bare imagor path, with no signature or prefix.
-func (c Config) BuildPathTool(_ context.Context, _ *mcp.CallToolRequest, in TransformInput) (*mcp.CallToolResult, BuildOutput, error) {
-	out, err := c.build(in)
-	if err != nil {
-		return nil, BuildOutput{}, err
-	}
-	out.URL = ""
-	out.AbsoluteURL = ""
-	out.Signed = false
-	out.Note = "bare path, with no signature and no unsafe prefix"
-	return nil, out, nil
-}
-
 // ValidateInput is a path to check.
 type ValidateInput struct {
 	Path string `json:"path" jsonschema:"an imagor path to validate, without a leading slash and without any signature prefix"`
@@ -1537,14 +1524,44 @@ func Register(s *mcp.Server, cfg Config) {
 			"the report alone when you do not need to look.",
 	}, cfg.VerifyURLTool)
 
-	mcp.AddTool(s, &mcp.Tool{
-		Name: "build_imagor_path",
-		Description: "Build an unsigned imagor path from typed transformation parameters, for the " +
-			"caller to sign with its own secret. Use this when the MCP server should not hold " +
-			"the signing secret. Read get_imagor_skill before composing anything, and call " +
-			"list_imagor_filters for each filter's signature, description and accepted " +
-			"argument forms.",
-	}, cfg.BuildPathTool)
+	// Three primitives are separated by who decides to use them: a tool is called
+	// by the model, a resource is read by the application, and a prompt is chosen
+	// by the user. The skill was reachable by the first two only, so a user who
+	// already knew they wanted a composition had no way to say so - and every
+	// session that never needs the skill pays nothing for a prompt, where a tool
+	// costs the model a decision it can get wrong.
+	s.AddPrompt(&mcp.Prompt{
+		Name:  "compose-imagor-image",
+		Title: "Compose an imagor image",
+		Description: "Load the composition skill and work through a layout with these tools. " +
+			"Anything you give as the brief is carried into the instructions.",
+		Arguments: []*mcp.PromptArgument{{
+			Name:        "brief",
+			Description: "What the image is for and what it has to say, in your own words.",
+			Required:    false,
+		}},
+	}, func(_ context.Context, req *mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
+		brief := ""
+		if req.Params != nil {
+			brief = strings.TrimSpace(req.Params.Arguments["brief"])
+		}
+		var b strings.Builder
+		b.WriteString(imagormcp.Skill)
+		b.WriteString("\n\n---\n\n")
+		if brief == "" {
+			b.WriteString("The user has not said what the image is for. Ask before composing.")
+		} else {
+			b.WriteString("The user asks for:\n\n")
+			b.WriteString(brief)
+		}
+		return &mcp.GetPromptResult{
+			Description: "The imagor composition skill, with the user's brief attached.",
+			Messages: []*mcp.PromptMessage{{
+				Role:    "user",
+				Content: &mcp.TextContent{Text: b.String()},
+			}},
+		}, nil
+	})
 
 	mcp.AddTool(s, &mcp.Tool{
 		Name: "validate_imagor_path",

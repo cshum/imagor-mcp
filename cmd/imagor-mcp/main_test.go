@@ -109,7 +109,7 @@ func TestToolsAreRegisteredWithSchemas(t *testing.T) {
 			t.Errorf("tool %s has no description", tool.Name)
 		}
 	}
-	for _, want := range []string{"build_imagor_url", "build_imagor_path", "validate_imagor_path", "list_imagor_filters", "describe_imagor"} {
+	for _, want := range []string{"build_imagor_url", "validate_imagor_path", "list_imagor_filters", "describe_imagor"} {
 		if !got[want] {
 			t.Errorf("tool %s not registered", want)
 		}
@@ -154,28 +154,32 @@ func TestBuildURLMatchesVerifiedValue(t *testing.T) {
 	}
 }
 
-func TestPathOutModeWithoutSecret(t *testing.T) {
+// The bare path a caller signs itself is the path field of the ordinary build
+// result, so it needs no tool of its own: url and absolute_url carry the prefix
+// and path does not.
+func TestPathFieldCarriesTheBarePath(t *testing.T) {
 	s := connect(t, unsafeEnv)
 
 	var out struct {
-		URL    string `json:"url"`
-		Signed bool   `json:"signed"`
-		Note   string `json:"note"`
+		Path string `json:"path"`
+		URL  string `json:"url"`
 	}
-	err := callTool(t, s, "build_imagor_path", map[string]any{
+	if err := callTool(t, s, "build_imagor_url", map[string]any{
 		"image":  "example.com/a.jpg",
 		"width":  320,
 		"height": 240,
 		"smart":  true,
-	}, &out)
-	if err != nil {
-		t.Fatalf("build_imagor_path: %v", err)
+	}, &out); err != nil {
+		t.Fatalf("build_imagor_url: %v", err)
 	}
-	if out.Signed || out.URL != "" {
-		t.Errorf("build_imagor_path must not sign or return a request URL: %+v", out)
+	if out.Path == "" {
+		t.Fatal("path must not be empty")
 	}
-	if out.Note == "" {
-		t.Error("expected a note explaining the unsigned result")
+	if strings.HasPrefix(out.Path, "unsafe/") {
+		t.Errorf("path must be the bare path, got %q", out.Path)
+	}
+	if !strings.HasPrefix(out.URL, "unsafe/") {
+		t.Errorf("url should carry the unsafe prefix, got %q", out.URL)
 	}
 }
 
@@ -684,9 +688,10 @@ func TestUnsafeMode(t *testing.T) {
 	}
 }
 
-// build_imagor_path must stay usable in every mode, since it is the fallback
-// for callers that sign themselves.
-func TestPathToolWorksInUnsafeAndSignedModes(t *testing.T) {
+// The bare path must be the same in both modes: only the request URL carries a
+// prefix or a signature, which is why one tool can serve callers that sign
+// themselves and callers that do not.
+func TestPathIsBareInBothModes(t *testing.T) {
 	for name, env := range map[string]map[string]string{
 		"unsafe": {"IMAGOR_UNSAFE": "1"},
 		"signed": {"IMAGOR_SECRET": "s", "IMAGOR_SIGNER_TYPE": "sha256"},
@@ -699,17 +704,25 @@ func TestPathToolWorksInUnsafeAndSignedModes(t *testing.T) {
 				AbsoluteURL string `json:"absolute_url"`
 				Signed      bool   `json:"signed"`
 			}
-			if err := callTool(t, s, "build_imagor_path", map[string]any{
+			if err := callTool(t, s, "build_imagor_url", map[string]any{
 				"image": "example.com/a.jpg",
 				"width": 100,
 			}, &out); err != nil {
-				t.Fatalf("build_imagor_path: %v", err)
+				t.Fatalf("build_imagor_url: %v", err)
 			}
 			if out.Path == "" {
 				t.Error("path must not be empty")
 			}
-			if out.URL != "" || out.AbsoluteURL != "" || out.Signed {
-				t.Errorf("path tool must return an unprefixed path: %+v", out)
+			if strings.HasPrefix(out.Path, "unsafe/") {
+				t.Errorf("path must be bare in %s mode, got %q", name, out.Path)
+			}
+			if out.URL == "" {
+				t.Errorf("url must be populated in %s mode: %+v", name, out)
+			}
+			// absolute_url needs IMAGOR_BASE_URL, which neither mode sets here;
+			// that it is empty is the environment, not the tool.
+			if out.AbsoluteURL != "" {
+				t.Errorf("absolute_url should be empty without IMAGOR_BASE_URL: %+v", out)
 			}
 		})
 	}

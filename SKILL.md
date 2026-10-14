@@ -328,9 +328,10 @@ in a startup log and on no endpoint, so there is nothing to ask.
    unchanged.
 2. Build with `build_imagor_url`, which refuses an invalid composition rather than
    emitting it, so a refusal is a mistake worth fixing rather than working around.
-   `build_imagor_path` returns the same composition unsigned, for when the server
-   should not hold the signing secret, and `validate_imagor_path` reads a path back to
-   report whether it round-trips.
+   Its `path` field is the bare path with no prefix and no signature, for a caller
+   that signs itself; `url` and `absolute_url` carry the prefix and signature the
+   server is configured for. `validate_imagor_path` reads a path back to report
+   whether it round-trips.
 3. `verify_imagor_url` the result, passing the same typed parameters you built from —
    it takes parameters, not a URL. An outcome is `applied`, `declined` (the server
    recognised the filter and left the image unchanged) or one of the two that mean
