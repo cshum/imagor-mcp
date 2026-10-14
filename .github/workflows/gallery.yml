@@ -41,7 +41,7 @@ jobs:
       - name: Start imagor
         run: |
           docker run -d --name imagor -p 8197:8000 \
-            -e IMAGOR_UNSAFE=1 ghcr.io/cshum/imagor:1.9.9
+            -e IMAGOR_UNSAFE=1 ghcr.io/cshum/imagor:1.9.10
 
       - name: Wait for it
         run: |

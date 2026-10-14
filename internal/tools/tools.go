@@ -564,15 +564,23 @@ type FilterOutcome struct {
 	Filters any `json:"filters,omitempty" jsonschema:"outcomes for the filters inside a path this filter loaded, nested as the server reports them"`
 }
 
-// RequiresImagor is the oldest imagor release whose metadata reports what it did
-// with each filter, which is what verify_imagor_url reads. A server that does not
-// report it cannot be verified against, and saying which release introduced it is
-// more useful than reporting an absent field: a caller can act on a version.
+// RequiresImagor is the oldest imagor release this server works against end to
+// end. Saying which release is needed is more useful than reporting an absent
+// field or a puzzling 400: a caller can act on a version.
 //
-// This is a contract, not a derived value, so it moves by hand when the fields
-// move. It is not the catalogue version, which describes the path grammar and is
+//	1.9.8   metadata reports what it did with each filter, which verify_imagor_url
+//	        reads. A server that does not report it cannot be verified against.
+//	1.9.10  a nested path source (path:<imagor path>) is resolved in-process. On
+//	        an older server "path:" is not syntax, so the whole token is read as
+//	        the image name and the request fails with 400 invalid.
+//
+// 1.9.10 is the base because it is the release that made a composition safe to
+// preview without the server being able to reach itself.
+//
+// This is a contract, not a derived value, so it moves by hand when the behaviour
+// moves. It is not the catalogue version, which describes the path grammar and is
 // generated from a released imagor.
-const RequiresImagor = "1.9.8"
+const RequiresImagor = "1.9.10"
 
 // VerifyOutput is what the running imagor did with each filter, alongside both
 // URLs for the composition: the image itself, and the metadata that was read.
@@ -613,9 +621,16 @@ type ServerInfo struct {
 	// CatalogueVersion is the release this server's filter reference describes,
 	// so a caller can see the two side by side.
 	CatalogueVersion string `json:"catalogue_version" jsonschema:"the imagor release this server's filter reference was generated from"`
-	// RequiresImagor is the oldest release whose metadata reports filter
-	// outcomes. A server older than this cannot be verified against.
-	RequiresImagor string `json:"requires_imagor" jsonschema:"the oldest imagor release whose metadata reports filter outcomes, which is what this tool needs"`
+	// RequiresImagor is the oldest release this server works against end to end.
+	// A server older than this is refused rather than half-supported.
+	RequiresImagor string `json:"requires_imagor" jsonschema:"the oldest imagor release this server works against end to end"`
+	// NestedPath is whether the server understands a nested path source, which
+	// needs imagor 1.9.10. False means it predates the syntax: a path using one
+	// is rejected while parsing, so this is reported rather than inferred.
+	NestedPath bool `json:"nested_path" jsonschema:"whether the server understands a nested path source (path:<imagor path>), which needs imagor 1.9.10 or later"`
+	// ProbeNote is why NestedPath is false when the probe could not reach a
+	// verdict. Absent when the probe answered, including when it answered no.
+	ProbeNote string `json:"probe_note,omitempty" jsonschema:"why the nested path probe was inconclusive, when it was; absent when the probe answered"`
 	// Compatible is whether the server reported what this tool needs. False
 	// means nothing could be verified, which is not the same as a failure.
 	Compatible bool `json:"compatible" jsonschema:"whether the server reported the fields this tool needs"`
@@ -640,6 +655,17 @@ func (c Config) VerifyURLTool(ctx context.Context, _ *mcp.CallToolRequest, in Ve
 	if c.BaseURL == "" {
 		return nil, VerifyOutput{}, fmt.Errorf(
 			"verification fetches the result from a running imagor, so IMAGOR_BASE_URL must be set to its origin")
+	}
+	// Probe once for the nested path source, and use the one answer twice:
+	// refuse an older server before the composition is built, and report what
+	// the probe found. Every path this server emits may carry a nested source,
+	// and a server that predates the syntax rejects one while parsing, as 400
+	// invalid naming no part of the path — which reads as a bad composition
+	// rather than an old server. Only a definite no refuses; see
+	// RequireNestedPath for why an inconclusive probe does not.
+	support, probeErr := c.probeNestedPath(ctx)
+	if support == nestedNo {
+		return nil, VerifyOutput{}, c.nestedPathRefusal()
 	}
 	mode, err := c.Mode()
 	if err != nil {
@@ -685,7 +711,17 @@ func (c Config) VerifyURLTool(ctx context.Context, _ *mcp.CallToolRequest, in Ve
 	checked := c.BaseURL + "/" + metaURL
 	out.AbsoluteURL = c.BaseURL + "/" + imageURL
 	out.MetaAbsoluteURL = checked
-	out.Server = ServerInfo{CatalogueVersion: filtercat.ImagorVersion, RequiresImagor: RequiresImagor}
+	// NestedPath reports what the probe actually found. It is false both for a
+	// server that answered no and for one the probe could not reach a verdict
+	// on, which is why the note below carries the reason when there is one.
+	out.Server = ServerInfo{
+		CatalogueVersion: filtercat.ImagorVersion,
+		RequiresImagor:   RequiresImagor,
+		NestedPath:       support == nestedYes,
+	}
+	if support != nestedYes && probeErr != nil {
+		out.Server.ProbeNote = probeErr.Error()
+	}
 
 	reqCtx, cancel := context.WithTimeout(ctx, verifyTimeout)
 	defer cancel()

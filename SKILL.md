@@ -329,6 +329,24 @@ A signature covers the whole path, so any difference in those three produces the
 same refusal and neither side can read the other's secret back. `describe_imagor`
 reports what this server is using — compare before debugging anything else.
 
+## Which imagor the server needs
+
+**imagor 1.9.10 or later.** Two features this tooling leans on arrived in
+specific releases:
+
+- **1.9.8** — `/meta` reports what each filter did. Before it there is nothing to
+  verify against, and every outcome comes back `unknown`.
+- **1.9.10** — a nested path source, `path:<imagor path>`, resolves in-process.
+
+On an older server `path:` is not syntax, so the token is read as part of the
+image name and the **whole request is refused with `400 invalid`**, naming no
+part of the path. That is indistinguishable from a genuinely bad composition, so
+`verify_imagor_url` probes for the syntax first and refuses with the release
+named rather than letting you debug the composition.
+
+The probe answers on behaviour, not a version string: imagor reports its version
+in a startup log and on no endpoint, so there is nothing to ask.
+
 ## Working method
 
 1. `describe_imagor` once, for the grammar this server targets.

@@ -241,7 +241,7 @@ Do not host this multi-tenant for users whose keys you would then hold.
 ## Development
 
 ```sh
-docker run -d -p 8197:8000 -e IMAGOR_UNSAFE=1 ghcr.io/cshum/imagor:1.9.9
+docker run -d -p 8197:8000 -e IMAGOR_UNSAFE=1 ghcr.io/cshum/imagor:1.9.10
 IMAGOR_BASE_URL=http://localhost:8197 IMAGOR_UNSAFE=1 go test ./...
 python3 cookbook/render.py /tmp/gallery   # render every recipe, build the sheet
 python3 cookbook/index.py                 # regenerate the embedded recipe index
