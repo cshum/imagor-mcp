@@ -1306,7 +1306,7 @@ type SkillOutput struct {
 // resource, but a host that reads only tools/list never sees a resource, and
 // that host is the one that most needs this.
 func (c Config) SkillTool(_ context.Context, _ *mcp.CallToolRequest, _ any) (*mcp.CallToolResult, SkillOutput, error) {
-	return nil, SkillOutput{Skill: imagormcp.Skill}, nil
+	return skillResult(SkillOutput{Skill: imagormcp.Skill}), SkillOutput{Skill: imagormcp.Skill}, nil
 }
 
 // DescribeTool reports the supported grammar and the server's signing mode.
@@ -1353,7 +1353,7 @@ func (c Config) DescribeTool(_ context.Context, _ *mcp.CallToolRequest, _ any) (
 		out.Limitations = append(out.Limitations,
 			"UNSAFE MODE: this server emits unsigned URLs and only works against an imagor instance running with IMAGOR_UNSAFE=1. Never use it in production.")
 	}
-	return nil, out, nil
+	return textResult(describeText(out)), out, nil
 }
 
 // ListFiltersInput selects which filters to return.
@@ -1445,7 +1445,7 @@ func (c Config) ListFiltersTool(_ context.Context, _ *mcp.CallToolRequest, in Li
 	if out.Count == 0 {
 		out.Note = fmt.Sprintf("no filter name contains %q", in.NameContains)
 	}
-	return nil, out, nil
+	return textResult(filtersText(out)), out, nil
 }
 
 // superseded reports filters that work but should not be offered.
