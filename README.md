@@ -52,14 +52,17 @@ imagor's, not measurements I ran.*
 
 ## Quick start
 
-**1. You need an imagor to render with.** The official image is the one the
-cookbook targets:
+**1. You need an imagor to render with.** Any imagor will do; the published image is
+[`shumc/imagor`](https://hub.docker.com/r/shumc/imagor):
 
 ```sh
 docker run -d -p 8000:8000 \
   -e IMAGOR_SECRET=your-secret-here \
-  cshum/imagor-base
+  shumc/imagor
 ```
+
+`imagor-base` is the image imagor is *built* from — it carries the libvips toolchain
+and no imagor binary, so it is not something to run.
 
 Already running imagor? Skip this and point the config below at it.
 
