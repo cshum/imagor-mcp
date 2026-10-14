@@ -88,11 +88,9 @@ want and let it compose.
 
 Published as `io.github.cshum/imagor-mcp` in the
 [official MCP Registry](https://registry.modelcontextprotocol.io/), where a client can install
-it by name, and on [Smithery](https://smithery.ai/server/adrian-pzhc/imagor-mcp). Hosts that
-take a bundle can open
-[`imagor-mcp.mcpb`](https://github.com/cshum/imagor-mcp/releases/latest/download/imagor-mcp.mcpb)
-instead — it runs outside a container, so its base URL is plain `localhost:8000`. Every
-platform's binary is on the [releases page](https://github.com/cshum/imagor-mcp/releases).
+it by name, and on [Smithery](https://smithery.ai/server/adrian-pzhc/imagor-mcp). The tap
+carries macOS and Linux; Windows and anything else are on the
+[releases page](https://github.com/cshum/imagor-mcp/releases).
 
 **Before anything is public, move both sides to `IMAGOR_SECRET`** — see
 [Configuration](#configuration).
