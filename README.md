@@ -74,7 +74,10 @@ covered in [Development](#development).
 **In a host that takes bundles, that is the whole install.** Download
 [`imagor-mcp-v0.5.0.mcpb`](https://github.com/cshum/imagor-mcp/releases/download/v0.5.0/imagor-mcp-v0.5.0.mcpb)
 and open it: it asks for the imagor URL and secret and runs the server for you, on
-macOS, Linux and Windows.
+macOS, Linux and Windows. The same bundle is listed on
+[Smithery](https://smithery.ai/server/adrian-pzhc/imagor-mcp) and in the official
+[MCP Registry](https://registry.modelcontextprotocol.io/) as
+`io.github.cshum/imagor-mcp`, so a host that reads either can install it from there.
 
 Anywhere else, both binaries ship prebuilt for six platforms, or build from source:
 
