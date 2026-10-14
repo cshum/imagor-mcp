@@ -1,0 +1,47 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.cshum/imagor-mcp",
+  "title": "imagor-mcp",
+  "description": "Build and verify imagor image URLs, and render layouts at any canvas size, from an MCP client.",
+  "repository": {
+    "url": "https://github.com/cshum/imagor-mcp",
+    "source": "github"
+  },
+  "version": "0.5.0",
+  "packages": [
+    {
+      "registryType": "mcpb",
+      "identifier": "https://github.com/cshum/imagor-mcp/releases/download/v0.5.0/imagor-mcp-v0.5.0.mcpb",
+      "fileSha256": "73a0394f0f598813d7ae6ba63de5bfe0c06e11b2fd1df24daa2e390139b23aa6",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "IMAGOR_BASE_URL",
+          "description": "The imagor server these tools build URLs for, for example http://localhost:8000",
+          "isRequired": true,
+          "isSecret": false
+        },
+        {
+          "name": "IMAGOR_UNSAFE",
+          "description": "Set to 1 when the imagor server runs in unsafe mode. Leave unset when it is signed.",
+          "isRequired": false,
+          "isSecret": false
+        },
+        {
+          "name": "IMAGOR_SECRET",
+          "description": "The signing secret, when the imagor server is signed. Must match the server's own secret and signer settings.",
+          "isRequired": false,
+          "isSecret": true
+        },
+        {
+          "name": "IMAGOR_SIGNER_TYPE",
+          "description": "sha1, sha256 or sha512. Must match the imagor server, and defaults to sha1 as the server does.",
+          "isRequired": false,
+          "isSecret": false
+        }
+      ]
+    }
+  ]
+}

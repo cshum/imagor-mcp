@@ -71,7 +71,12 @@ and a fitted text slot is measured by rendering, so even compiling one wants a l
 imagor. A second binary, `imagor-template`, runs a template you already have; it is
 covered in [Development](#development).
 
-Both ship prebuilt for six platforms, or build from source:
+**In a host that takes bundles, that is the whole install.** Download
+[`imagor-mcp-v0.5.0.mcpb`](https://github.com/cshum/imagor-mcp/releases/download/v0.5.0/imagor-mcp-v0.5.0.mcpb)
+and open it: it asks for the imagor URL and secret and runs the server for you, on
+macOS, Linux and Windows.
+
+Anywhere else, both binaries ship prebuilt for six platforms, or build from source:
 
 ```sh
 # prebuilt for six platforms — pick yours from the releases page

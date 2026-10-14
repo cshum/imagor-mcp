@@ -1,0 +1,82 @@
+name: publish-mcp
+
+# Lists the server on the official MCP Registry (registry.modelcontextprotocol.io).
+# The entry points at a release asset, so it can only be published for a tag that
+# already exists.
+#
+# Dispatch-only on purpose. A listing is public and client-discoverable the moment
+# it lands, which is a decision to make rather than a side effect of tagging.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Released tag whose .mcpb to list, e.g. v0.5.0
+        required: true
+        type: string
+
+permissions:
+  id-token: write   # mcp-publisher trades this for a short-lived registry credential
+  contents: read
+
+jobs:
+  publish:
+    name: Publish to the MCP Registry
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v7
+
+      # The version, the asset URL and the hash all come from the release rather
+      # than from server.json, so the listing cannot drift from what shipped. The
+      # namespace is proved by the OIDC token instead of by the file, which is why
+      # a stale file here is harmless.
+      - name: Stamp server.json from the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="${{ inputs.tag }}"
+          gh release download "$tag" -p checksums.txt --output /tmp/checksums.txt
+          asset="imagor-mcp-${tag}.mcpb"
+          hash="$(awk -v a="$asset" '$2 == a {print $1}' /tmp/checksums.txt)"
+          if [ -z "$hash" ]; then
+            echo "::error::checksums.txt for ${tag} has no entry for ${asset}"
+            exit 1
+          fi
+          python3 - "$tag" "$hash" <<'PY'
+          import json, os, sys
+          tag, digest = sys.argv[1], sys.argv[2]
+          repo = os.environ["GITHUB_REPOSITORY"]
+          d = json.load(open("server.json"))
+          d["version"] = tag.lstrip("v")
+          p = d["packages"][0]
+          p["identifier"] = f"https://github.com/{repo}/releases/download/{tag}/imagor-mcp-{tag}.mcpb"
+          p["fileSha256"] = digest
+          json.dump(d, open("server.json", "w"), indent=2)
+          open("server.json", "a").write("\n")
+          PY
+          cat server.json
+
+      # Pinned, verified against the upstream checksums file. The publisher is the
+      # only thing here that talks to the registry, so it is worth pinning tightly.
+      - name: Install mcp-publisher
+        run: |
+          set -euo pipefail
+          version="1.8.1"
+          archive="mcp-publisher_linux_amd64.tar.gz"
+          expected="a06c9096dcb9727c13555b6be26c7effa707b01f06a4c561ba7a3635443cf2cc"
+          curl --fail --location --proto '=https' --tlsv1.2 \
+            "https://github.com/modelcontextprotocol/registry/releases/download/v${version}/${archive}" \
+            --output "${archive}"
+          printf '%s  %s\n' "$expected" "$archive" | sha256sum --check --strict
+          tar --extract --gzip --file "${archive}" mcp-publisher
+          chmod 0755 mcp-publisher
+          ./mcp-publisher --version
+
+      - name: Authenticate with GitHub OIDC
+        run: ./mcp-publisher login github-oidc
+
+      - name: Validate and publish
+        run: |
+          ./mcp-publisher validate server.json
+          ./mcp-publisher publish
