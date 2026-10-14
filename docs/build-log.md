@@ -438,7 +438,8 @@ The later entries move the fault from the tool to the words about it, or to a ch
 compared against its consequence: a description that contradicted the tool it named, a document
 delivered as one line of JSON, a count written into three documents, a claim with no evidence in
 it, a base url chosen for the server's convenience rather than the reader's, a check wired to the
-caller that could not act on it, a config blamed for a process. They fail the same way. Nothing checks a claim, so a wrong one looks the same as a
-right one. The fix is the rest of this document's: compare the claim against the thing.
+caller that could not act on it, a config blamed for a process. They fail the same way. Nothing
+checks a claim, so a wrong one looks the same as a right one. The fix is the rest of this
+document's: compare the claim against the thing.
 
 That is what the tool is for, and it is why this document sits next to it.
