@@ -15,7 +15,7 @@ signing happens only as the by-product of a typed tool.
 | `list_imagor_filters` | Accepted filters with signature, description and argument forms. |
 | `describe_imagor` | The supported path grammar and the current signing mode. |
 | `get_cookbook_recipe` | Fetch a ready-made layout by name. **Call it with no name first** to get the list. |
-| `get_imagor_skill` | The skill, for a client that reads it as a tool rather than a resource. |
+| `get_imagor_skill` | The skill, for a client that reads it as a tool rather than a resource. **Called with no section it returns the outline**; name one to read just that part. |
 
 The server also serves one **prompt**, `compose-imagor-image`, which loads the skill with a
 brief attached. Prompts are chosen by the user from the client's menu rather than called by the

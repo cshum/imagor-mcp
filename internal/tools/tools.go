@@ -1284,16 +1284,59 @@ type DescribeOutput struct {
 	Limitations   []string   `json:"limitations"`
 }
 
-// SkillOutput carries the composition skill.
+// SkillOutput carries the composition skill, or the section of it that was asked
+// for.
 type SkillOutput struct {
-	Skill string `json:"skill"`
+	Skill    string   `json:"skill" jsonschema:"the skill text returned: the outline when no section was named, or that section"`
+	Sections []string `json:"sections" jsonschema:"every section name, so a caller can ask for a different one without another call"`
+	Section  string   `json:"section,omitempty" jsonschema:"the section that was returned, when one was named"`
+	Note     string   `json:"note,omitempty"`
 }
 
 // SkillTool returns the composition skill. The server also serves it as a
 // resource, but a host that reads only tools/list never sees a resource, and
 // that host is the one that most needs this.
-func (c Config) SkillTool(_ context.Context, _ *mcp.CallToolRequest, _ any) (*mcp.CallToolResult, SkillOutput, error) {
-	return skillResult(SkillOutput{Skill: imagormcp.Skill}), SkillOutput{Skill: imagormcp.Skill}, nil
+//
+// Naming no section returns the outline; naming one returns that section. The
+// whole document is 18 KB and most of it is irrelevant to any one composition,
+// so the caller decides what to spend on. SkillOutput.Sections always carries
+// every name, so a caller that asked for the wrong one does not need a second
+// call to find the right one.
+func (c Config) SkillTool(_ context.Context, _ *mcp.CallToolRequest, in SkillInput) (*mcp.CallToolResult, SkillOutput, error) {
+	head, secs := skillParts()
+	names := skillNames(secs)
+	want := strings.ToLower(strings.TrimSpace(in.Section))
+
+	if want == "" {
+		out := SkillOutput{
+			Skill:    skillOutline(head, secs),
+			Sections: names,
+			Note: "no section named, so this is the outline. " +
+				"Call again with a section name to read one.",
+		}
+		return skillResult(out), out, nil
+	}
+	for _, s := range secs {
+		if s.Slug != want && !strings.EqualFold(s.Title, strings.TrimSpace(in.Section)) {
+			continue
+		}
+		out := SkillOutput{
+			Skill:    s.Body,
+			Section:  s.Slug,
+			Sections: names,
+			Note:     "one section of the skill. Call again with no section for the outline.",
+		}
+		return skillResult(out), out, nil
+	}
+	// An unknown name is answered with the outline rather than an error: the
+	// caller learns the valid names either way, and a retry costs one call.
+	out := SkillOutput{
+		Skill:    skillOutline(head, secs),
+		Sections: names,
+		Note: fmt.Sprintf("no section named %q, so this is the outline. "+
+			"Call again with one of the section names.", strings.TrimSpace(in.Section)),
+	}
+	return skillResult(out), out, nil
 }
 
 // DescribeTool reports the supported grammar and the server's signing mode.
@@ -1616,7 +1659,8 @@ func Register(s *mcp.Server, cfg Config) {
 		Name: "get_imagor_skill",
 		Description: "Read this before composing anything. The order a path is written in, how " +
 			"overlays and text are placed, what the resize modes actually do, and the things a " +
-			"200 response will not tell you.",
+			"200 response will not tell you. Called with no section it returns the outline; " +
+			"call again with a section name to read the part you need.",
 	}, cfg.SkillTool)
 
 	// A recipe is the agent's intermediate channel: it is what gets handed to
