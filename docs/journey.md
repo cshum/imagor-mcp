@@ -280,41 +280,37 @@ So that is now an error. A composition where any filter did nothing fails, names
 
 Two things came out of writing that, both worth more than the change. The first is that the note was counting declines rather than naming them — a test I wrote failed on it, and the right fix was the message, not the test, because identifying *which* filter did nothing is the entire point. The second is that the existing suite caught me: one test's fixture had `rotate()` declining, which it does by design since it needs an angle, so the new default failed it. That is the behaviour working. A test that breaks when you make the tool stricter was asserting the old silence.
 
-## 14 October — It looked at its own output and handed back the wrong thing
+## 14 October — It gave back the picture and not the url
 
 The first sessions in someone else's client, rather than in mine.
 
 One of them ran the whole loop. It read the skill, composed a card, rendered it, looked at the
 image, and reported that the result was right. And it did not give back the url.
 
-No tool failed. The url was in the report the whole time, on its own line, and the agent had
-read it. It reported what it could see. The picture is the artifact the agent looked at; the url
-is the artifact the user serves, and nothing had said which one the answer was for.
+No tool failed. The url was in the report, on its own line, and the agent had read it. It
+reported the picture, because the picture is what it had looked at. The url is what the user
+serves, and nothing said so.
 
-The fix is a sentence in the report and a step in the skill — the url is the output, the
-attachment is scaled and is there to check with. Not a feature. A sentence I had not written,
-which meant the tool had been handing back the wrong half of its own result for as long as it
-had returned both.
+The fix is a sentence in the report and a step in the skill: the url is the output, the
+attachment is a scaled copy for checking. It was not a missing feature. It was a missing
+sentence, and the tool had been returning both halves of its own result without saying which one
+the answer was for.
 
 The other session found something one level down. It followed a tool description that said to
 call another tool "on the result" — and the result of building a url is a url — so it passed one,
 and imagor answered `404`. The tool that pointed at its neighbour was contradicting it; the
 neighbour's own description said, in as many words, that it does not take a url.
 
-Both are the same discovery, and it is the one this document has been walking toward from the
-other side. Last week the agent learned to look at what it built. It could look, and it could
-check every filter, and it still reported the wrong artifact and followed the wrong instruction,
-because **nothing had checked that what the tool says about itself is true.** Every test in the
-suite asserted what the tools do. Not one asserted what they say.
+Both are the same discovery. Last week the agent learned to look at what it built. It could
+look, and it could check every filter, and it still reported the wrong thing and followed the
+wrong instruction, because **nothing had checked that what the tool says about itself is true.**
+Every test in the suite asserted what the tools do. None asserted what they say.
 
-Then there is the part I would rather not write. Reading the code to plan this work, I found that
-the server did not return an image, and said so twice, to the person who wrote it. It does. It
-had for weeks: a capped, scaled base64 jpeg, mime type sniffed rather than trusted, with the
-scale stated in words so a caller knows which coordinate system it is looking at. I had probed
-one tool, seen one text block, and generalised — the same shape as the six failures in the
-experiment harness, and the cache hypothesis before them. One observation is not a property. I
-wrote earlier in this piece that it is a habit I now notice faster, which is a lesser thing than
-having learned it. This is the receipt.
+I also made that mistake myself while planning this work. I read one tool, saw one text block,
+and concluded the server did not return an image. It does, and had for weeks. I said so twice, to
+the person who wrote it. One observation is not a property — the same shape as the six failures
+in the experiment harness and the cache hypothesis before them. I wrote earlier in this piece
+that it is a habit I now notice faster. That is a lesser thing than having learned it.
 
 ## After — What I keep coming back to
 
@@ -355,5 +351,5 @@ about moving the boundary between those two rather than pretending it is not the
 
 I have been building a server that says yes, and teaching an agent to notice when yes is not
 an answer — which it now does, reliably, for every question it can be asked in the language
-of the URL. What I have not built is a way to tell it what it should have seen — or a way to be
-sure that what I have written about the tool is true, which is the same problem pointed at me.
+of the URL. What I have not built is a way to tell it what it should have seen, or a way to check
+that what I have written about the tool is true. That is the same problem, pointed back at me.

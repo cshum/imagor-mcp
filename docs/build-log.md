@@ -233,8 +233,8 @@ built `unsafe/<that path>/<the rendered url>`, and imagor answered `404`. The ag
 could not confirm the preview, which was true.
 
 **What it cost:** a round trip, and a wrong conclusion in a session that was otherwise working.
-**What fixed it:** "pass the same parameters to `verify_imagor_url`". **Why it took so long:**
-every test asserted what the tools *do*. Not one asserted what they *say*.
+**What fixed it:** "pass the same parameters to `verify_imagor_url`". **Why it was not caught:**
+every test asserted what the tools do. None asserted what they say.
 
 ## The document that arrived as one line
 
@@ -257,9 +257,9 @@ secret. Its input schema was byte-identical to `build_imagor_url`'s. It called t
 and then blanked two fields. And its `path` field held the same value, because `build_imagor_url`
 already returns the bare path — the prefix lives in `url`, not in `path`, in both modes.
 
-A subset, offered as a capability, costing 4,225 characters of schema that every session pays
-whether or not it composes anything. Fixed cost went from 24,710 characters to 20,161 when it
-was removed, and nothing was lost.
+It was a subset of what the neighbouring tool already returned, and it cost 4,225 characters of
+schema that every session pays whether or not it composes anything. Fixed cost went from 24,710
+characters to 20,161 when it was removed, and nothing was lost.
 
 **How it was found:** by measuring the schemas rather than by reading the tools. It had been
 there from the beginning, and nothing about it looked wrong.
@@ -275,10 +275,9 @@ I had probed `render_template`, got one text block, and generalised. `render_tem
 only a URL **by design** — compiling is local and instant, fetching is `verify_imagor_url`'s job.
 I checked the compile tool and reported on the fetch tool.
 
-**What it cost:** a wrong claim, made twice, and part of a session spent planning a feature that
-already existed. **The shape is the one from the experiment that lied:** one observation is not a
-property. That mistake has now been made in the code, in the test harness, and in my own
-description of the tool.
+**What it cost:** a wrong claim made twice, and part of a session spent planning a feature that
+already existed. **The shape:** one observation is not a property. This is the third place I have
+made that mistake — in the code, in the test harness, and now in a description of the tool.
 
 ## The measurement nobody made
 
@@ -307,9 +306,9 @@ in its environment, being talked to by a client that does not re-read its config
 that is already running.
 
 **What it cost:** a confident wrong diagnosis. **What fixed it:** killing the process I had
-started. The lesson is narrower than it looks — **editing a config does not reach a process that
-is already running**, and the debris of a test is not litter. It is a running service with an old
-environment, and someone else is talking to it.
+started. **The lesson:** editing a config does not reach a process that is already running. A test
+binary left running is a service holding an old environment, and a client can still be talking to
+it.
 
 ## And more of the small ones
 
@@ -322,12 +321,12 @@ text means rendering a probe. The third attempt was the first to say anything tr
 **A download instruction that did not work.** Fetch the binary with `curl`, `chmod +x imagor-mcp`,
 then point a client at `"command": "imagor-mcp"`. `chmod` marks a file executable where it sits;
 it does not put it on `PATH`. The next two steps fail with `spawn ENOENT`, which a client reports
-as a server that would not start. An instruction that reads as sufficient and is not costs more
-than no instruction.
+as a server that would not start. A step that looks complete and is not is worse than no step,
+because the reader stops looking.
 
 **A heading over the wrong sentence.** `docs/tools.md` had a `## The cookbook` heading above a
 line about the tool list, and stated the same fact twice fifty lines apart in two different
-words. Nobody reads a document looking for that.
+words.
 
 ## What the pattern is
 
@@ -339,8 +338,7 @@ than at what something said about it.
 The later entries move the fault from the tool to the words about it: a description that
 contradicted the tool it named, a document delivered as one line of JSON, a heading over the
 wrong sentence, a measurement nobody took, a config blamed for a process. They fail the same
-way. Nothing checks a claim, so a wrong one reads exactly like a right one, and the fix is
-the same as everywhere else in this document — compare the claim against the thing, not
-against itself.
+way. Nothing checks a claim, so a wrong one looks the same as a right one. The fix is the rest
+of this document's: compare the claim against the thing.
 
 That is why the tool exists, and it is why this document exists next to it.
