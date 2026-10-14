@@ -7,10 +7,18 @@ name: publish-mcp
 # Dispatch-only on purpose. A listing is public and client-discoverable the moment
 # it lands, which is a decision to make rather than a side effect of tagging.
 on:
+  # Called by the release workflow, so a release lists itself. Dispatch stays for backfilling
+  # a release that predates this, or republishing after a registry-side change.
+  workflow_call:
+    inputs:
+      tag:
+        description: Released tag whose .mcpb to list, e.g. v0.6.1
+        required: true
+        type: string
   workflow_dispatch:
     inputs:
       tag:
-        description: Released tag whose .mcpb to list, e.g. v0.5.0
+        description: Released tag whose .mcpb to list, e.g. v0.6.1
         required: true
         type: string
 

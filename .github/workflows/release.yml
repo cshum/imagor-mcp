@@ -77,6 +77,23 @@ jobs:
       - name: Build the MCP bundle
         run: ./mcpb/build.sh "${GITHUB_REF_NAME}" dist
 
+      # Stable names as well as versioned ones, so the README and any pinned config can use
+      # releases/latest/download/<name> and never need editing again. The version stays in the
+      # versioned copy for anyone who wants to pin.
+      - name: Add version-free aliases
+        run: |
+          set -euo pipefail
+          cd dist
+          cp "imagor-mcp-${GITHUB_REF_NAME}.mcpb" imagor-mcp.mcpb
+          for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64 windows/arm64; do
+            os="${target%/*}"
+            arch="${target#*/}"
+            ext=""
+            [ "$os" = "windows" ] && ext=".exe"
+            cp "imagor-mcp_${GITHUB_REF_NAME}_${os}_${arch}${ext}" "imagor-mcp_${os}_${arch}${ext}"
+          done
+          ls -1 | sort
+
       - name: Checksums
         run: |
           cd dist
@@ -87,6 +104,19 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release create "${GITHUB_REF_NAME}" dist/* --generate-notes --title "${GITHUB_REF_NAME}"
+
+  # Called rather than dispatched: GITHUB_TOKEN cannot trigger a workflow run, so a release
+  # that wants the registry updated has to run those steps inline. The workflow stamps the
+  # version and hash from this release, so nothing has to be bumped by hand first.
+  registry:
+    name: Update the MCP Registry
+    needs: release
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/publish-mcp.yml
+    with:
+      tag: ${{ github.ref_name }}
 
   # The server is a static binary, so the image is the binary plus certificates. It exists
   # for the one-line install: a client config can name a container where it would otherwise
