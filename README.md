@@ -59,6 +59,12 @@ docker run -i --rm -e IMAGOR_UNSAFE=1 -e IMAGOR_BASE_URL=http://host.docker.inte
   ghcr.io/cshum/imagor-mcp
 ```
 
+**In VS Code and Copilot**, this link adds the container straight to your MCP servers:
+
+```
+vscode:mcp/install?%7B%22name%22%3A%22imagor%22%2C%22command%22%3A%22docker%22%2C%22args%22%3A%5B%22run%22%2C%22-i%22%2C%22--rm%22%2C%22-e%22%2C%22IMAGOR_UNSAFE%3D1%22%2C%22-e%22%2C%22IMAGOR_BASE_URL%3Dhttp%3A%2F%2Fhost.docker.internal%3A8000%22%2C%22ghcr.io%2Fcshum%2Fimagor-mcp%22%5D%7D
+```
+
 **Binary** — every platform is on the [releases page](https://github.com/cshum/imagor-mcp/releases):
 
 ```sh
