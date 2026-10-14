@@ -47,11 +47,13 @@ it is **865 characters**.
 [`shumc/imagor`](https://hub.docker.com/r/shumc/imagor):
 
 ```sh
-docker run -d -p 8000:8000 -e IMAGOR_SECRET=your-secret-here shumc/imagor
+docker run -d --rm -p 8000:8000 -e IMAGOR_UNSAFE=1 shumc/imagor
 ```
 
-Already running one? Point the config below at it instead. (`imagor-base` is the image
-imagor is *built* from, not one to run.)
+`IMAGOR_UNSAFE=1` is a local server: URLs carry no signature, so one you edit by hand still
+renders. Both sides use it below, which is why nothing has to match. Already running an
+imagor? Point the config at it instead. (`imagor-base` is the image imagor is *built* from,
+not one to run.)
 
 **2. Install.** **In a host that takes bundles, this is the whole install** — download
 [`imagor-mcp-v0.5.0.mcpb`](https://github.com/cshum/imagor-mcp/releases/download/v0.5.0/imagor-mcp-v0.5.0.mcpb)
@@ -74,7 +76,7 @@ Point a client at the container instead of a binary:
     "imagor": {
       "command": "docker",
       "args": ["run", "-i", "--rm",
-        "-e", "IMAGOR_SECRET=your-secret-here",
+        "-e", "IMAGOR_UNSAFE=1",
         "-e", "IMAGOR_BASE_URL=http://host.docker.internal:8000",
         "ghcr.io/cshum/imagor-mcp"]
     }
@@ -105,7 +107,7 @@ covered in [docs/development.md](docs/development.md).
     "imagor": {
       "command": "imagor-mcp",
       "env": {
-        "IMAGOR_SECRET": "your-secret-here",
+        "IMAGOR_UNSAFE": "1",
         "IMAGOR_BASE_URL": "http://localhost:8000"
       }
     }
@@ -113,9 +115,10 @@ covered in [docs/development.md](docs/development.md).
 }
 ```
 
-That is the whole setup. **`IMAGOR_SECRET` must match the imagor you point at**, or
-its signature check rejects what this mints. The server speaks MCP over stdio, so
-nothing listens on a port.
+That is the whole setup. The server speaks MCP over stdio, so nothing listens on a port.
+
+**Before anything is public, move both sides to `IMAGOR_SECRET`** — the same value in the
+server and in the client — and leave unsafe behind. See [Configuration](#configuration).
 
 **4. Ask it for something.** Start from one of the fourteen recipes in `cookbook/`,
 or describe what you want and let it compose.
