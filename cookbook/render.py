@@ -22,7 +22,7 @@ from PIL import Image, ImageDraw
 # Point this at the image, run with IMAGOR_UNSAFE=1 (the published image is configured
 # that way), and use the tag the recipes target:
 #
-#   docker run -d -p 8197:8000 -e IMAGOR_UNSAFE=1 ghcr.io/cshum/imagor:1.9.9
+#   docker run -d -p 8197:8000 ghcr.io/cshum/imagor:1.9.10 -imagor-unsafe
 MCP = os.environ.get("IMAGOR_MCP_BIN", "imagor-mcp")
 BASE = os.environ.get("IMAGOR_BASE_URL", "http://localhost:8197")
 # The recipes live beside this script. An absolute path here works on one machine

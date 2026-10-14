@@ -16,7 +16,7 @@ with the URL each resolves to, and a prompt to ask for it »](docs/gallery/cookb
 **1. Run an imagor.**
 
 ```sh
-docker run --rm -p 8000:8000 -e IMAGOR_UNSAFE=1 shumc/imagor
+docker run --rm -p 8000:8000 shumc/imagor -imagor-unsafe
 ```
 
 Leave it running, and use a second terminal for the rest.
