@@ -312,6 +312,13 @@ where the server fetches a render back to check it and what the returned urls ar
 on the host those are the same address — so the bug cannot happen there and did happen here. The
 fix was a documentation change: install the binary, not the container.
 
+One of the tools had the answer the whole time. It inspects a path, finds an image written where
+a parameter belongs, and says so in a sentence naming the cause and the consequence. That sentence
+reached one tool and not the one that builds the url, so the failure arrived as a 404 from a server
+that could not resolve a host called `fit-in`. The agent on the other end read the skill,
+wrapped the argument by hand, and got a working url. Nobody had written anything wrong. The
+sentence was simply addressed to somebody who was not there.
+
 I also made that mistake myself while planning this work. I read one tool, saw one text block,
 and concluded the server did not return an image. It does, and had for weeks. I said so twice, to
 the person who wrote it. One observation is not a property — the same shape as the six failures

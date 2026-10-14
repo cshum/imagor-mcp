@@ -394,6 +394,39 @@ spans and twenty-seven numbers in this log, twenty-two and twenty-three in the e
 identical. **What it would have cost to skip that:** a prose pass that read well and had quietly
 dropped a measurement.
 
+## The fix that was already written
+
+An image argument that is itself an imagor path built a url that could not load, because the path
+was escaped and written where the image belongs. imagor read the whole token as one source:
+
+    515x438/fit-in%2F491x414%2Ffilters:fill%28none%29%2Fhttps:%2F%2Fs.imagor.net%2Fphotos%2F...
+    -> 404 dial tcp: lookup fit-in on 192.168.65.7:53: no such host
+
+`checkPath` had described this exactly, in as many words: "parameters come before filters, so
+imagor would try to load this as a URL and fail". That message reached the tool that inspects a
+path and not the tool that builds one. The check was written, was correct, and was wired to a
+caller that could not act on it.
+
+An agent met the 404, read `path:<imagor path>` in the skill, wrapped the argument by hand, and got
+a url that worked. From the outside that reads as an agent working around a limitation. It was
+working around our message not arriving.
+
+The hand-wrap has a cost, and it is not the extra characters. `path:X` resolves X to pixels and the
+outer request encodes the result, so X's own `quality()` and `format()` are not applied:
+
+    X = 600x300/filters:quality(30)/a.jpg
+      path:X  -> 17,318 bytes    the quality filter is gone; encoded at the default
+      X       -> 12,373 bytes
+
+It usually looks free. A png round-trips to identical bytes, and so does a composition whose output
+settings are already the default, which is why the 60 bytes between the wrapped and bare forms of a
+real url read as noise instead of as the thing they were.
+
+**What fixed it:** the builder nests a path handed in as an image, and collapses a wrapper with
+nothing outside it. **What it cost:** a url that fails to load, and a quality decision silently
+overridden for as long as anyone wrapped by hand. **The shape:** the diagnosis existed and was
+correct. Nothing was missing from it except the route to the caller who needed it.
+
 ## What the pattern is
 
 Every entry above is a wrong answer that looked right. Not one of them errored. The
@@ -404,8 +437,8 @@ than at what something said about it.
 The later entries move the fault from the tool to the words about it, or to a choice nobody
 compared against its consequence: a description that contradicted the tool it named, a document
 delivered as one line of JSON, a count written into three documents, a claim with no evidence in
-it, a base url chosen for the server's convenience rather than the reader's, a config blamed for
-a process. They fail the same way. Nothing checks a claim, so a wrong one looks the same as a
+it, a base url chosen for the server's convenience rather than the reader's, a check wired to the
+caller that could not act on it, a config blamed for a process. They fail the same way. Nothing checks a claim, so a wrong one looks the same as a
 right one. The fix is the rest of this document's: compare the claim against the thing.
 
 That is what the tool is for, and it is why this document sits next to it.
