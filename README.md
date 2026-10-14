@@ -48,7 +48,7 @@ docker run -d --rm -p 8000:8000 -e IMAGOR_UNSAFE=1 shumc/imagor
 [MCP Registry](https://registry.modelcontextprotocol.io/) as `io.github.cshum/imagor-mcp`,
 which resolves to the bundle below. Any one of these:
 
-**Bundle:** [`imagor-mcp-v0.6.0.mcpb`](https://github.com/cshum/imagor-mcp/releases/download/v0.6.0/imagor-mcp-v0.6.0.mcpb)
+**Bundle:** [`imagor-mcp-v0.6.1.mcpb`](https://github.com/cshum/imagor-mcp/releases/download/v0.6.1/imagor-mcp-v0.6.1.mcpb)
 — open it in a host that takes bundles, on macOS, Linux and Windows. Also on
 [Smithery](https://smithery.ai/server/adrian-pzhc/imagor-mcp).
 
@@ -69,7 +69,7 @@ vscode:mcp/install?%7B%22name%22%3A%22imagor%22%2C%22command%22%3A%22docker%22%2
 
 ```sh
 curl -L -o imagor-mcp \
-  https://github.com/cshum/imagor-mcp/releases/download/v0.6.0/imagor-mcp_v0.6.0_darwin_arm64
+  https://github.com/cshum/imagor-mcp/releases/download/v0.6.1/imagor-mcp_v0.6.1_darwin_arm64
 chmod +x imagor-mcp
 ```
 
