@@ -128,7 +128,7 @@ or describe what you want and let it compose.
 Eleven tools, each mapping onto a concept in the imagor path grammar. The list, and what each
 is for, is in **[docs/tools.md](docs/tools.md)**.
 
-
+## The cookbook
 
 `cookbook/` holds **fourteen ready-made layouts** — OG cards, a product grid, a profile
 card, quotes, testimonials, an event, a comparison table, a price ladder. Take the
