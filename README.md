@@ -37,66 +37,63 @@ CDN can cache — so the bytes are transferred once.
 
 ## Quick start
 
-**1. Run an imagor.** Unsafe is the local mode — URLs carry no signature, so one you edit by
-hand still renders, and nothing has to match between the two sides below.
+**1. Run an imagor.**
 
 ```sh
 docker run -d --rm -p 8000:8000 -e IMAGOR_UNSAFE=1 shumc/imagor
 ```
 
-**2. Get the server** — published in the official
-[MCP Registry](https://registry.modelcontextprotocol.io/) as `io.github.cshum/imagor-mcp`,
-which resolves to the bundle below. Any one of these:
+Unsafe is the local mode — URLs carry no signature, so one you edit by hand still renders, and
+nothing has to match between the two sides.
 
-**Bundle:** [`imagor-mcp.mcpb`](https://github.com/cshum/imagor-mcp/releases/latest/download/imagor-mcp.mcpb)
-— open it in a host that takes bundles, on macOS, Linux and Windows. Also on
-[Smithery](https://smithery.ai/server/adrian-pzhc/imagor-mcp).
-
-**Container** — carries the skill with it:
+**2. Run the server.**
 
 ```sh
 docker run -i --rm -e IMAGOR_UNSAFE=1 -e IMAGOR_BASE_URL=http://host.docker.internal:8000 \
   ghcr.io/cshum/imagor-mcp
 ```
 
-Binaries for every platform are on the [releases page](https://github.com/cshum/imagor-mcp/releases);
-put one on `PATH` yourself, or use the container above.
+The container carries the skill with it and needs nothing installed. `host.docker.internal` is
+how a container reaches the imagor on the host. On Linux, add
+`--add-host=host.docker.internal:host-gateway`.
 
-**In VS Code and Copilot**, this link adds the server to your MCP servers — the binary on
-`PATH` first, because the base URL is then plain `localhost`:
-
-```
-vscode:mcp/install?%7B%22name%22%3A%22imagor%22%2C%22command%22%3A%22imagor-mcp%22%2C%22env%22%3A%7B%22IMAGOR_UNSAFE%22%3A%221%22%2C%22IMAGOR_BASE_URL%22%3A%22http%3A%2F%2Flocalhost%3A8000%22%7D%7D
-```
-
-Without the binary, the container works too, but inside a container `localhost` is the
-container, so the URL has to name the host — and on Linux Docker needs
-`--add-host=host.docker.internal:host-gateway`:
-
-```
-vscode:mcp/install?%7B%22name%22%3A%22imagor%22%2C%22command%22%3A%22docker%22%2C%22args%22%3A%5B%22run%22%2C%22-i%22%2C%22--rm%22%2C%22-e%22%2C%22IMAGOR_UNSAFE%3D1%22%2C%22-e%22%2C%22IMAGOR_BASE_URL%3Dhttp%3A%2F%2Fhost.docker.internal%3A8000%22%2C%22ghcr.io%2Fcshum%2Fimagor-mcp%22%5D%7D
-```
-
-**3. Point a client at it.** With the binary on `PATH`:
+**3. Point a client at it.**
 
 ```json
 {
   "mcpServers": {
     "imagor": {
-      "command": "imagor-mcp",
-      "env": { "IMAGOR_UNSAFE": "1", "IMAGOR_BASE_URL": "http://localhost:8000" }
+      "command": "docker",
+      "args": ["run", "-i", "--rm",
+               "-e", "IMAGOR_UNSAFE=1",
+               "-e", "IMAGOR_BASE_URL=http://host.docker.internal:8000",
+               "ghcr.io/cshum/imagor-mcp"]
     }
   }
 }
 ```
 
-For the container, the same block with `"command": "docker"` and the arguments above.
+In VS Code and Copilot, this writes that entry for you:
+
+```
+vscode:mcp/install?%7B%22name%22%3A%22imagor%22%2C%22command%22%3A%22docker%22%2C%22args%22%3A%5B%22run%22%2C%22-i%22%2C%22--rm%22%2C%22-e%22%2C%22IMAGOR_UNSAFE%3D1%22%2C%22-e%22%2C%22IMAGOR_BASE_URL%3Dhttp%3A%2F%2Fhost.docker.internal%3A8000%22%2C%22ghcr.io%2Fcshum%2Fimagor-mcp%22%5D%7D
+```
+
+The server speaks MCP over stdio, so nothing listens on a port.
 
 **4. Ask it for something.** One of the fourteen recipes in `cookbook/`, or describe what you
 want and let it compose.
 
-The server speaks MCP over stdio, so nothing listens on a port. **Before anything is public,
-move both sides to `IMAGOR_SECRET`** — see [Configuration](#configuration).
+Published as `io.github.cshum/imagor-mcp` in the
+[official MCP Registry](https://registry.modelcontextprotocol.io/), where a client can install
+it by name, and on [Smithery](https://smithery.ai/server/adrian-pzhc/imagor-mcp). Hosts that
+take a bundle can open
+[`imagor-mcp.mcpb`](https://github.com/cshum/imagor-mcp/releases/latest/download/imagor-mcp.mcpb)
+instead — it runs outside a container, so its base URL is plain `localhost:8000`. Every
+platform's binary is on the [releases page](https://github.com/cshum/imagor-mcp/releases).
+
+**Before anything is public, move both sides to `IMAGOR_SECRET`** — see
+[Configuration](#configuration).
 
 ## Tools
 
