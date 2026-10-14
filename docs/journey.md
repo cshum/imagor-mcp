@@ -3,8 +3,7 @@
 *2 May to 14 October 2026. An issue filed in May, six days of building in October, and one bug
 that took both to close.*
 
-What I want is to hand an agent a blank canvas and a brief, and get back a layout I would
-publish.
+I want to hand an agent a blank canvas and a brief, and get back a layout I would publish.
 
 imagor is an image-processing server I maintain. You give it a URL and it gives you an
 image back. A URL like
@@ -13,8 +12,8 @@ image back. A URL like
 /300x200/filters:quality(80)/photo.jpg
 ```
 
-says *resize, and compress on the way out*. That is the smallest thing it does. A real one
-looks more like this:
+means: resize the image, and compress it on the way out. That is the smallest thing it does.
+A real one looks more like this:
 
 ```
 /1600x600/filters:image(580x600/photo.jpg,1020,0)
@@ -28,12 +27,12 @@ masks, colour profiles, PDF pages, region detection and redaction — and the wh
 is a path. Written out, it is a small program, and like most small programs it has a habit
 of doing something reasonable-looking when you get it wrong.
 
-What that adds up to is a claim I have not seen made in this space, and it is worth stating
-before the failures, because the failures are in service of it.
+The claim is worth stating before the failures, because the failures that follow are in
+service of it.
 
 The products this resembles are **editor-first**. A human designs a template in a
 drag-and-drop canvas, and an API fills slots in that design. The canvas is the product.
-This is **URL-first**: there is no canvas, no template document, no library. A layout *is*
+This is **URL-first**: there is no canvas, no template document, no library. A layout is
 a URL, and a URL is something an agent can write, check and rewrite. Given a brief with no
 layout, no positions and no sizes, the agent designed three distinct banners across three
 runs — hierarchy, colour, type pairing, invented copy — and zoomed into regions to read the
@@ -41,8 +40,8 @@ small text it had drawn.
 
 **An agent can author a layout, not just fill one in.** That is the claim.
 
-And the thing I keep coming back to is not a feature. It is a number: `200 OK`. What follows
-is what it cost to be able to make that claim.
+What the work comes down to is a number: `200 OK`. What follows is what it cost to be able
+to make that claim.
 
 ## 2 May — Someone else found it first
 
@@ -111,7 +110,7 @@ Six runs of the same task, same reference, same model, only the document differi
 original averaged 9.42 with a range of 4.19. The shorter one averaged 9.06 with a range of
 **0.38**.
 
-That looked like a result. The shorter version was not just equal, it was *tighter* — it
+That looked like a result. The shorter version was not just equal, it was tighter — it
 raised the floor. I wrote it up that way, merged it, and moved on.
 
 Then, later, I ran the shorter version three more times to check something else. The range
@@ -154,8 +153,8 @@ when it should have been green, decided the server was serving a cached copy, an
 looking into cache headers. Two lines I had already printed said the truth: the value I had
 changed was an orphan, and the slot held a different URL directly. I had not read them.
 Twice more in one evening I formed a hypothesis from a glance and started acting on it
-before checking. It is not a lesson I have finished learning; it is a habit I now notice
-faster, which is a different and lesser thing.
+before checking. I have not finished learning this; I notice the habit faster now, and that
+is a lesser thing than having learned it.
 
 ## 12 October — Teaching it to look
 
@@ -192,10 +191,9 @@ I had expected to write a section on design principles afterwards. I did not, be
 design sense was not coming from the document. The document only had to supply the
 mechanics and a way to see.
 
-That is the whole thing working. Not an agent filling in a template somebody else designed,
-but an agent given a blank canvas and a brief, producing work I would not have been
-embarrassed to publish, and checking it as it went. Everything in this essay that reads
-like a confession is the price of getting to that paragraph.
+That is the whole thing working — an agent given a blank canvas and a brief, producing work
+I would not have been embarrassed to publish, and checking it as it went, rather than an
+agent filling in a template somebody else designed.
 
 It is public and tagged. Ten tools, a skill served byte-identically from the binary, and
 fourteen recipes in an example cookbook that CI renders at three canvas sizes on every
@@ -255,8 +253,9 @@ live. Every card changed. Judgements I had made about the composition of that se
 headline was too heavy, which ground was too dark — had been made against the wrong
 picture, and some of them were simply wrong.
 
-That is the same failure as the filter that did nothing, one level up. Not a mistake in
-what I asked for. A whole dimension of the work, quietly not applied, reported as success.
+That is the same failure as the filter that did nothing, one level up. It was not a mistake
+in what I asked for. A whole dimension of the work had been quietly not applied, and it was
+reported as success.
 
 ## 13 October — The filter that did nothing
 
@@ -274,11 +273,11 @@ and the metadata endpoint reports it per filter, one entry per occurrence in URL
 
 That is the answer to the question at the top of this. The server that says yes now says what it did.
 
-But a report is still something a caller has to read, and the tools I had built were reading it and returning success. A filter the server recognised and left the image unchanged came back in a note — *"1 recognised but left the image unchanged"* — which a caller checking for an error would never see. The tool had the information and handed it over as prose.
+But a report is still something a caller has to read, and the tools I had built were reading it and returning success. A filter the server recognised and left the image unchanged came back in a note — "1 recognised but left the image unchanged" — which a caller checking for an error would never see. The tool had the information and handed it over as prose.
 
 So that is now an error. A composition where any filter did nothing fails, names the filter, and says what imagor did instead. There is an opt-out for a filter that is deliberately conditional, and the walk descends into loaded paths, because a filter inside `image()` that did nothing is the same fault and harder to spot.
 
-Two things came out of writing that, both worth more than the change. The first is that the note was counting declines rather than naming them — a test I wrote failed on it, and the right fix was the message, not the test, because identifying *which* filter did nothing is the entire point. The second is that the existing suite caught me: one test's fixture had `rotate()` declining, which it does by design since it needs an angle, so the new default failed it. That is the behaviour working. A test that breaks when you make the tool stricter was asserting the old silence.
+Two things came out of writing that, both worth more than the change. The first is that the note was counting declines rather than naming them — a test I wrote failed on it, and the right fix was the message, not the test, because identifying which filter did nothing is the entire point. The second is that the existing suite caught me: one test's fixture had `rotate()` declining, which it does by design since it needs an angle, so the new default failed it. That is the behaviour working. A test that breaks when you make the tool stricter was asserting the old silence.
 
 ## 14 October — It gave back the picture and not the url
 

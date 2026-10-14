@@ -14,7 +14,7 @@ the one that was asked for.
 
 Everything below is a variation on that, including the mistakes that were mine rather than
 the server's. **A wrong answer that looks right is the whole problem this tool exists to
-address, and it turned out to be the whole problem in building it too.**
+address, and it was the whole problem in building it too.**
 
 ---
 
@@ -32,7 +32,7 @@ slot  texture  -> texture-navy.svg       a literal URL, which wins
 ```
 
 The slot held the URL directly instead of a `{{texture}}` placeholder, so `values.texture`
-was an orphan key nobody read. **The value looked live and was dead.**
+was an orphan key nobody read. **The value looked live, but nothing read it.**
 
 **What it cost:** a detour into cache behaviour, and a fixture added for a problem that did
 not exist. **What fixed it:** reading the two lines. **What I should have done first:**
@@ -50,8 +50,8 @@ output** — the earlier command printed `FIXTURES` and I read it as `FIXTURES`.
 
 **What it cost:** nothing, because the script read the real name from the generator instead
 of trusting a literal. **What it would have cost:** a commit whose message described a typo
-that never existed. **The lesson is not "check twice"** — it is that the verification step
-is what caught it, not the care taken in the fix.
+that never existed. **What caught it was the verification step, not the care I took over the
+fix** — checking twice was not what did the work here.
 
 ## The check that passed and proved nothing
 
@@ -66,13 +66,14 @@ the check ran, found nothing, and reported success.
 
 **Second**, even with values substituted it was comparing each caption against the cell's
 own white background rectangle rather than against the photograph inside it. A cell in this
-cookbook is a `color:ffffff` rect carrying a nested photo. **The rect is not ink.**
+cookbook is a `color:ffffff` rect carrying a nested photo. **The rect is a background, not
+ink.**
 
 **Both faults were invisible.** The check printed `85 text slots checked, 0 overlaps` and
 that number was true and meaningless.
 
-**What it took to find:** making the check fail on purpose. **A test that has never failed
-is a test you have not tested.**
+**What it took to find:** making the check fail on purpose. **A check that has never failed
+has not been tested.**
 
 ## I measured the box and called it the picture
 
@@ -81,11 +82,10 @@ seven overlaps, all in a card whose render is correct.
 
 The reasoning was that a fitted image centres in its box and leaves margins, so a caption
 can overlap the box harmlessly. That is true — **and then I over-applied it.** To catch the
-portrait case I added "a portrait *box* means a portrait *source*, so any overlap is a
-fault."
+portrait case I added "a portrait box means a portrait source, so any overlap is a fault."
 
-**A box's shape says nothing about the source's.** A 700×700 photograph in a 342×396 box
-letterboxes vertically and leaves the caption 54 pixels of margin. My rule flagged that
+**A box's shape does not tell you the source's shape.** A 700×700 photograph in a 342×396
+box letterboxes vertically and leaves the caption 54 pixels of margin. My rule flagged that
 card ten times.
 
 **What fixed it:** reading the source's aspect, which the URL carries when the width is set
@@ -114,13 +114,13 @@ the code, because the substitution is invisible.
 The green ground needed a fixture, so I added `texture-forest` — a gradient SVG, deployed,
 verified.
 
-Then the actual fix turned out to be `color:142e2b` on the canvas. **A background is a
+Then the actual fix turned out to be `color:142e2b` on the canvas. **The background is a
 colour, not an asset.** Every other card in the set already worked that way; this one had
 been fetching an image to paint its own background, which is what put a network fetch
 between the card and its colour in the first place.
 
-The fixture was removed. **An unused fixture justified by a hypothetical future request is
-the same dead weight as the orphaned value that started this.**
+The fixture was removed. **It was dead weight in the same way as the orphaned value that
+started this: unused, and justified only by a hypothetical future request.**
 
 ## What a machine found that I did not
 
@@ -192,21 +192,21 @@ segment of `176x176/smart` as a height. It also broke three existing tests.
 knows every form a path takes. That fixed the URL and the `smart`, and `comparison` became
 stable. But three recipes still moved, and the same three tests still failed. `Parse` is right
 for imagor's own vocabulary and this is not imagor's vocabulary: the dimension segment here is
-`full` and `full-144`, forms the template layer resolves *before* a path is written, and
+`full` and `full-144`, forms the template layer resolves before a path is written, and
 imagor has never heard of them.
 
 **The third started from the instrument instead of the parser.** A test that walks
-render → parse and checks **every field by name**, so a failure says *which* one rather than
+render → parse and checks **every field by name**, so a failure says which one rather than
 "the path changed". It named five failures in one run, and four were the same one: the
 boundary between a slot's own filters and its source was being guessed. It is now found by
 walking the path once at parenthesis depth zero — a source begins at a scheme, or failing
 that at the last slash that is not inside a filter.
 
-**The lesson is the one this document keeps arriving at, and I had to be shown it twice.** I
-was comparing *paths* — a plausible artifact that looked right — instead of the *fields*,
-which are the thing the tool exists to produce. The tests were asserting the fields all
-along, and I was not reading them. Two attempts "made progress" and failed the same three
-tests because I had no instrument that could tell me which field broke.
+I had to be shown this twice. **I was comparing paths — a plausible artifact that looked
+right — instead of the fields**, which are the thing the tool exists to produce. The tests
+were asserting the fields all along, and I was not reading them. Two attempts "made
+progress" and failed the same three tests because I had no instrument that could tell me
+which field broke.
 
 **Two other bugs fell out of the third attempt.** A text slot's box width is written as a
 form, `full-144`, and the parser read it with `strconv.Atoi`, which failed silently and
@@ -306,9 +306,9 @@ in its environment, being talked to by a client that does not re-read its config
 that is already running.
 
 **What it cost:** a confident wrong diagnosis. **What fixed it:** killing the process I had
-started. **The lesson:** editing a config does not reach a process that is already running. A test
-binary left running is a service holding an old environment, and a client can still be talking to
-it.
+started. **The lesson:** editing a config does not reach a process that is already running. A
+test binary left running is a service holding an old environment, and a client can still be
+talking to it.
 
 ## And more of the small ones
 
@@ -341,4 +341,4 @@ wrong sentence, a measurement nobody took, a config blamed for a process. They f
 way. Nothing checks a claim, so a wrong one looks the same as a right one. The fix is the rest
 of this document's: compare the claim against the thing.
 
-That is why the tool exists, and it is why this document exists next to it.
+That is what the tool is for, and it is why this document sits next to it.
