@@ -54,6 +54,13 @@ brew trust cshum/tap && brew install imagor-mcp
 
 **3. Point a client at it.**
 
+| your client | what to do |
+|---|---|
+| **VS Code** | **[add it from here](https://vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522imagor%2522%252C%2522command%2522%253A%2522imagor-mcp%2522%252C%2522env%2522%253A%257B%2522IMAGOR_UNSAFE%2522%253A%25221%2522%252C%2522IMAGOR_BASE_URL%2522%253A%2522http%253A%252F%252Flocalhost%253A8000%2522%257D%257D)** — one click |
+| **Claude Desktop** | open [`imagor-mcp.mcpb`](https://github.com/cshum/imagor-mcp/releases/latest/download/imagor-mcp.mcpb) — one click |
+| **Cursor, Claude Code, Windsurf** | add the block below to its config file |
+| **Codex** | the same values in TOML, at `~/.codex/config.toml` |
+
 ```json
 {
   "mcpServers": {
@@ -65,17 +72,9 @@ brew trust cshum/tap && brew install imagor-mcp
 }
 ```
 
-That is the shape most clients read — Claude Desktop, Claude Code, Cursor, Windsurf. **VS
-Code keys its servers under `servers`, not `mcpServers`, and Codex reads TOML**: either one
-with the block above parses fine and does nothing. The file each client reads is in
+VS Code keys its servers under `servers` and Codex reads TOML, so the block above fits
+neither. Every client's file path, and the shape each one wants, is in
 **[docs/clients.md](docs/clients.md)**.
-
-In VS Code, **[add it from here](https://vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522imagor%2522%252C%2522command%2522%253A%2522imagor-mcp%2522%252C%2522env%2522%253A%257B%2522IMAGOR_UNSAFE%2522%253A%25221%2522%252C%2522IMAGOR_BASE_URL%2522%253A%2522http%253A%252F%252Flocalhost%253A8000%2522%257D%257D)** — or copy this into your
-address bar:
-
-```
-vscode:mcp/install?%7B%22name%22%3A%22imagor%22%2C%22command%22%3A%22imagor-mcp%22%2C%22env%22%3A%7B%22IMAGOR_UNSAFE%22%3A%221%22%2C%22IMAGOR_BASE_URL%22%3A%22http%3A%2F%2Flocalhost%3A8000%22%7D%7D
-```
 
 **4. Ask it for something.** Open the **[cookbook](docs/gallery/cookbook.md)** and name a
 recipe, or describe the image you want and let it compose.

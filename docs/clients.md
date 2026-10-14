@@ -35,7 +35,15 @@ Windows is `%APPDATA%` where macOS is `~/Library/Application Support`, and
 
 Keyed under `servers`, not `mcpServers` — a block copied from anywhere else parses fine and
 does nothing, which is the single most common way this goes wrong. This is the same file
-the [install link](../README.md#quick-start) writes to:
+the install link writes to.
+
+If the link does not open, paste this into your browser's address bar:
+
+```
+vscode:mcp/install?%7B%22name%22%3A%22imagor%22%2C%22command%22%3A%22imagor-mcp%22%2C%22env%22%3A%7B%22IMAGOR_UNSAFE%22%3A%221%22%2C%22IMAGOR_BASE_URL%22%3A%22http%3A%2F%2Flocalhost%3A8000%22%7D%7D
+```
+
+The file itself:
 
 ```jsonc
 {
