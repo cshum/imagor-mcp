@@ -229,7 +229,7 @@ They reference their images from **`s.imagor.net`**, so they render as they are.
 
 ## Placing text is a search, not a calculation
 
-Text lands wherever the font's own metrics put it, and nothing reports those.
+Text lands where the font's metrics put it, and imagor does not report those.
 
 - **A font name is a lookup that cannot fail loudly.** A generic resolves to a narrower
   face: `sans`, `serif` and `monospace` become `Open-Sans`, `Liberation-Serif` and
@@ -259,7 +259,7 @@ Text lands wherever the font's own metrics put it, and nothing reports those.
 ## Grids of images
 
 Sizing each panel to its own source gives panels of different shapes, which reads as
-unrelated pictures rather than a grid — and no amount of position tuning fixes it.
+unrelated pictures rather than a grid, and tuning positions does not fix it.
 
 - **Give every cell one identical size, on even rows and columns, and fit the image inside
   its cell** (`fit`). The cells align; the images inside them do not fill them, so nothing
@@ -337,10 +337,9 @@ startup log and on no endpoint, so there is nothing to ask.
    dot's rows against its text's, a panel's against its neighbour's. Two centres can agree
    to the pixel while the shapes read as misaligned. Crop to the region you changed before
    you believe the number.
-7. **Hand back the url, in full, alongside the picture.** The url is what the user serves;
-   the image you checked is a scaled preview of it. An answer that shows the result and
-   drops the url leaves them with something they cannot use, which is the whole product
-   missing.
+7. **Give the url to the user, in full, alongside the picture.** The url is the output;
+   the image you checked is a scaled preview of it. Showing the result and dropping the
+   url leaves them with nothing they can serve.
 
 **These rules are procedures and facts on purpose.** A procedure says what to type and is
 followed; a preference asks the reader to want the right thing and is not.

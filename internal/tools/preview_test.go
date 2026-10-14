@@ -151,8 +151,8 @@ func TestAttachedPreviewNamesTheURLAsTheDeliverable(t *testing.T) {
 	txt := verifySummary(out, "", true, 64)
 	for _, want := range []string{
 		out.AbsoluteURL,
-		"what the user serves",
-		"hand it back in full",
+		"Give the user the url",
+		"it is the output",
 		"scaled preview",
 	} {
 		if !strings.Contains(txt, want) {
@@ -163,7 +163,7 @@ func TestAttachedPreviewNamesTheURLAsTheDeliverable(t *testing.T) {
 	// With nothing attached there is no preview to distinguish from the file, so the
 	// instruction would be noise.
 	bare := verifySummary(out, "", false, 0)
-	if strings.Contains(bare, "what the user serves") {
+	if strings.Contains(bare, "Give the user the url") {
 		t.Errorf("the instruction belongs only where a preview was attached:\n%s", bare)
 	}
 	if !strings.Contains(bare, out.AbsoluteURL) {

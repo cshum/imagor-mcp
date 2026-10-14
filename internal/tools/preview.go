@@ -156,8 +156,8 @@ func verifySummary(out VerifyOutput, note string, attached bool, scale int) stri
 		// The url is what the caller serves and the attachment is not it. A caller
 		// that reports only what it can see leaves the reader with a picture they
 		// cannot serve, which is what happened before this line existed.
-		b.WriteString(" The url is what the user serves: hand it back in full, because " +
-			"the attachment is a scaled preview rather than the file.")
+		b.WriteString(" Give the user the url in full: it is the output, and the " +
+			"attachment is only a scaled preview.")
 	}
 	return b.String()
 }

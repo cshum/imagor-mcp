@@ -5,9 +5,8 @@ mint valid URLs, like any backend. **Trust the component; do not trust the agent
 it.**
 
 - **The secret is environment-only.** It is read from `IMAGOR_SECRET` and never crosses
-  the tool surface: no tool takes a secret, and none returns one. An agent cannot leak
-  what it was never given, and a prompt-injected one cannot be talked into signing with a
-  key it does not hold.
+  the tool surface: no tool takes a secret, and none returns one. An agent has no access
+  to the key, so it cannot leak it or be prompted into using it.
 - **Unsafe mode is opt-in and loud** — a warning on stderr, reported by `describe_imagor`.
 - **Blast radius stays imagor's to set.** A URL from an errant agent is still subject to
   every limit on the instance it lands on: `HTTP_LOADER_ALLOWED_SOURCES`,

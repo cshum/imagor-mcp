@@ -19,8 +19,8 @@ with the URL each resolves to, and a prompt to ask for it »](docs/gallery/cookb
 docker run -d --rm -p 8000:8000 -e IMAGOR_UNSAFE=1 shumc/imagor
 ```
 
-Unsafe is the local mode: URLs carry no signature, so one you edit by hand still renders and
-the two sides cannot disagree about a secret.
+Unsafe is the local mode: URLs carry no signature, so one you edit by hand still renders. You
+do not have to set a matching secret on the server and on imagor.
 
 **2. Install the MCP server.**
 
@@ -133,8 +133,8 @@ can open, which is why it names `localhost` above and not a container-internal h
 That is the one real cost of running the server in a container. There, the host is
 `host.docker.internal` and `localhost` is the container, so the server needs
 `-e IMAGOR_BASE_URL=http://host.docker.internal:8000` to work at all — and every URL it hands
-you then carries a name your browser cannot resolve. On the host the two jobs coincide and
-neither problem exists.
+you then carries a name your browser cannot resolve. On the host, one address does both
+jobs.
 
 ### Making previews faster
 
