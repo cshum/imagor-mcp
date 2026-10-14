@@ -1,6 +1,6 @@
 # Tools
 
-The same ten the server answers `tools/list` with. Every parameter maps onto a
+Every tool the server answers `tools/list` with. Every parameter maps onto a
 concept in the [imagor path grammar](format.md) — there are no invented parameters, and
 signing happens only as the by-product of a typed tool.
 

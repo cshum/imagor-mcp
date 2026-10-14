@@ -97,7 +97,7 @@ carries macOS and Linux; Windows and anything else are on the
 
 ## Tools
 
-Ten tools, each mapping onto a concept in the imagor path grammar. The list, and what each
+Each tool maps onto a concept in the imagor path grammar. The list, and what each
 is for, is in **[docs/tools.md](docs/tools.md)**.
 
 ## The cookbook
@@ -152,7 +152,7 @@ The format, and the conventions an agent needs to compose well:
 
 - **[docs/format.md](docs/format.md)** — a template carries no canvas size, and why a path
   cannot be read back into a template.
-- **[docs/tools.md](docs/tools.md)** — the ten tools the server serves, and the prompt.
+- **[docs/tools.md](docs/tools.md)** — every tool the server serves, and the prompt.
 - **[docs/skill.md](docs/skill.md)** — the skill the server carries, and what it covers.
 - **[docs/security.md](docs/security.md)** — what it is trusted with, and what it refuses.
 - **[docs/development.md](docs/development.md)** — building, testing, and the CLI.
