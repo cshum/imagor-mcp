@@ -73,7 +73,7 @@ Both ship prebuilt for six platforms, or build from source:
 ```sh
 # prebuilt for six platforms — pick yours from the releases page
 curl -L -o imagor-mcp \
-  https://github.com/cshum/imagor-template/releases/latest/download/imagor-mcp_v<VERSION>_darwin_arm64
+  https://github.com/cshum/imagor-template/releases/download/v0.5.0/imagor-mcp_v0.5.0_darwin_arm64
 chmod +x imagor-mcp
 
 # or, with Go installed — note the ./cmd/ path: the module root is a library
