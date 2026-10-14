@@ -148,6 +148,24 @@ reader knows how to ask their agent for something; they do not know what an MCP 
 `cmd/imagor-template` and `cmd/imagor-mcp` are bindings on the same code in
 `internal/tools`.
 
+**The repo is named for the server; the second command keeps its own name.** A user
+installs `imagor-mcp`, and the bundle, the server name in the manifest and the
+`go install` path all say so. `imagor-template` runs a template you already have, and
+renaming it to match the repo would be a lie about what it does.
+
+Renaming the repo moved the **module path** with it, and a module path is verified
+rather than redirected: Go reads the `module` line and refuses a fetch whose path does
+not match. So `go install github.com/cshum/imagor-mcp/...` resolves only from the first
+tag cut after the rename — every earlier tag declares the old path and answers with
+`module declares its path as ... but was required as ...`. Old release URLs and the old
+`go install` path keep working, because GitHub redirects a renamed repo and the old tags
+are unchanged. **Cut a tag after any future rename**, or the install line is dead until
+you do.
+
+Nothing here is importable from outside the module, so a rename can only strand the
+`go install` line: the engine is all `internal/`, and the root package carries four
+embedded strings.
+
 **The CLI is a runner, not an authoring path.** A template has to be written, and writing
 one is what the agent does — so the CLI cannot stand in for the server. It compiles a
 template you already have, in a place with no agent in it: a stored layout, a build step,
