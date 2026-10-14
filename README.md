@@ -50,6 +50,10 @@ brew trust cshum/tap && brew install imagor-mcp
 }
 ```
 
+Those two settings have to match what you started in step 1: `IMAGOR_UNSAFE` puts this server
+in the same mode, and `IMAGOR_BASE_URL` is where imagor is. Everything else it takes is in
+[Configuration](#configuration).
+
 VS Code keys its servers under `servers` and Codex reads TOML, so the block above fits
 neither. Every client's file path, and the shape each one wants, is in
 **[docs/clients.md](docs/clients.md)**.
