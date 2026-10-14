@@ -34,7 +34,7 @@ Three ways to get a dynamic image. Each one costs you something, including this:
 |---|---|---|---|
 | **Chromium** (Puppeteer, Satori) | a rendered file | a browser to run | throughput — a page render per image, and a headless browser in your stack |
 | **Hosted template APIs** (Bannerbear, Placid, APITemplate) | a blob, every render | $0.019–0.049 per image, from $49/mo | the per-image fee, and a transfer every time you serve it |
-| **imagor-mcp** | a URL | the imagor you already run | you run imagor — one container if you do not already |
+| **imagor-mcp** | a URL | the imagor you run — one container if you do not already | your layouts live in this format |
 
 **The difference is not that this is cheaper — it is that the output is a URL.** A hosted
 API hands you bytes, so every render is a call you pay for and a transfer you carry. imagor
