@@ -35,9 +35,6 @@ run, at the throughput it already has.
 transfer the bytes on every render. imagor serves a URL instead, which any browser, proxy or
 CDN can cache — so the bytes are transferred once.
 
-**Fast.** A 1200×630 composite renders on `shumc/imagor` in **119 ms p50** and returns **36 KB**
-of JPEG.
-
 ## Quick start
 
 **1. Run an imagor.** Unsafe is the local mode — URLs carry no signature, so one you edit by
