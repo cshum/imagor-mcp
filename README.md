@@ -44,17 +44,24 @@ hand still renders, and nothing has to match between the two sides below.
 docker run -d --rm -p 8000:8000 -e IMAGOR_UNSAFE=1 shumc/imagor
 ```
 
-**2. Get the server** — any one of these. In a host that opens bundles:
-[`imagor-mcp-v0.6.0.mcpb`](https://github.com/cshum/imagor-mcp/releases/download/v0.6.0/imagor-mcp-v0.6.0.mcpb),
-also on [Smithery](https://smithery.ai/server/adrian-pzhc/imagor-mcp) and in the
-[MCP Registry](https://registry.modelcontextprotocol.io/) as `io.github.cshum/imagor-mcp`.
+**2. Get the server** — published in the official
+[MCP Registry](https://registry.modelcontextprotocol.io/) as `io.github.cshum/imagor-mcp`,
+which resolves to the bundle below. Any one of these:
+
+**Bundle:** [`imagor-mcp-v0.6.0.mcpb`](https://github.com/cshum/imagor-mcp/releases/download/v0.6.0/imagor-mcp-v0.6.0.mcpb)
+— open it in a host that takes bundles, on macOS, Linux and Windows. Also on
+[Smithery](https://smithery.ai/server/adrian-pzhc/imagor-mcp).
+
+**Container** — carries the skill with it:
 
 ```sh
-# a container, which carries the skill with it
 docker run -i --rm -e IMAGOR_UNSAFE=1 -e IMAGOR_BASE_URL=http://host.docker.internal:8000 \
   ghcr.io/cshum/imagor-mcp
+```
 
-# or a binary — every platform is on the releases page
+**Binary** — every platform is on the [releases page](https://github.com/cshum/imagor-mcp/releases):
+
+```sh
 curl -L -o imagor-mcp \
   https://github.com/cshum/imagor-mcp/releases/download/v0.6.0/imagor-mcp_v0.6.0_darwin_arm64
 chmod +x imagor-mcp
