@@ -59,13 +59,8 @@ docker run -i --rm -e IMAGOR_UNSAFE=1 -e IMAGOR_BASE_URL=http://host.docker.inte
   ghcr.io/cshum/imagor-mcp
 ```
 
-**Binary** — every platform is on the [releases page](https://github.com/cshum/imagor-mcp/releases):
-
-```sh
-curl -L -o imagor-mcp \
-  https://github.com/cshum/imagor-mcp/releases/latest/download/imagor-mcp_darwin_arm64
-chmod +x imagor-mcp
-```
+Binaries for every platform are on the [releases page](https://github.com/cshum/imagor-mcp/releases);
+put one on `PATH` yourself, or use the container above.
 
 **In VS Code and Copilot**, this link adds the server to your MCP servers — the binary on
 `PATH` first, because the base URL is then plain `localhost`:
