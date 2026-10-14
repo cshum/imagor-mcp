@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/cshum/imagor-template/internal/pathgen"
+	"github.com/cshum/imagor-mcp/internal/pathgen"
 	"github.com/cshum/imagor/imagorpath"
 )
 

@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cshum/imagor-template/internal/pathgen"
+	"github.com/cshum/imagor-mcp/internal/pathgen"
 	"github.com/cshum/imagor/imagorpath"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )

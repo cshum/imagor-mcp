@@ -8,7 +8,7 @@ import (
 	"sort"
 	"strings"
 
-	imagormcp "github.com/cshum/imagor-template"
+	imagormcp "github.com/cshum/imagor-mcp"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 

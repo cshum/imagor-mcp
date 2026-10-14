@@ -1,4 +1,4 @@
-module github.com/cshum/imagor-template
+module github.com/cshum/imagor-mcp
 
 go 1.27.1
 

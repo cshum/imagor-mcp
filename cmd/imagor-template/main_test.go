@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/cshum/imagor-template/internal/tools"
+	"github.com/cshum/imagor-mcp/internal/tools"
 )
 
 // configForTests returns the config the CLI would use, and reports whether a live

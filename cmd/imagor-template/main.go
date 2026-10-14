@@ -20,7 +20,7 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"github.com/cshum/imagor-template/internal/tools"
+	"github.com/cshum/imagor-mcp/internal/tools"
 )
 
 const usage = `imagor-template - a layout format for imagor

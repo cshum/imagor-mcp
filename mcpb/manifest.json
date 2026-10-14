@@ -7,10 +7,10 @@
   "author": {
     "name": "Adrian Shum"
   },
-  "homepage": "https://github.com/cshum/imagor-template",
+  "homepage": "https://github.com/cshum/imagor-mcp",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cshum/imagor-template"
+    "url": "https://github.com/cshum/imagor-mcp"
   },
   "license": "Apache-2.0",
   "server": {

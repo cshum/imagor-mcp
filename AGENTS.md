@@ -1,4 +1,4 @@
-# Working on imagor-template
+# Working on imagor-mcp
 
 Conventions for changing this repo. Only what cannot be worked out from the code
 belongs here — if it is inferable, it is not written down.

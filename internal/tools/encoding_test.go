@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	filtercat "github.com/cshum/imagor-template/internal/filters"
+	filtercat "github.com/cshum/imagor-mcp/internal/filters"
 )
 
 // The two cases use different rules on purpose, and the difference is the point:

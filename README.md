@@ -1,4 +1,4 @@
-# imagor-template
+# imagor-mcp
 
 **Agent template capability for [imagor](https://github.com/cshum/imagor) — the fast,
 self-hosted, open-source image server.**
@@ -35,7 +35,7 @@ Three ways to get a dynamic image:
 |---|---|---|---|
 | **Chromium** (Puppeteer, Satori) | screenshot an HTML page per image | nothing, but a browser to run | **slow** — [they say so themselves](https://www.bannerbear.com/blog/how-to-make-a-custom-open-graph-image-using-puppeteer/) |
 | **Hosted template APIs** (Bannerbear, Placid, APITemplate) | send values, **get a blob back** | $0.019–0.049 per image, from $49/mo | the per-image fee, and the transfer every time you serve it |
-| **imagor-template** | a layout compiles to an imagor URL | nothing beyond the imagor you already run | nothing per image — **you serve a URL** |
+| **imagor-mcp** | a layout compiles to an imagor URL | nothing beyond the imagor you already run | nothing per image — **you serve a URL** |
 
 **The difference is not that this is cheaper. It is that the output is a URL.** A hosted
 API hands you bytes, so every render is a call you pay for and a transfer you carry. This
@@ -73,15 +73,16 @@ Both ship prebuilt for six platforms, or build from source:
 ```sh
 # prebuilt for six platforms — pick yours from the releases page
 curl -L -o imagor-mcp \
-  https://github.com/cshum/imagor-template/releases/download/v0.5.0/imagor-mcp_v0.5.0_darwin_arm64
+  https://github.com/cshum/imagor-mcp/releases/download/v0.5.0/imagor-mcp_v0.5.0_darwin_arm64
 chmod +x imagor-mcp
 
-# or, with Go installed — note the ./cmd/ path: the module root is a library
-go install github.com/cshum/imagor-template/cmd/imagor-mcp@latest
+# or, with Go installed — the ./cmd/ path is required: the module root is not a
+# command, and nothing here is importable (the engine is all internal/)
+go install github.com/cshum/imagor-mcp/cmd/imagor-mcp@latest
 ```
 
 Pure Go, with no libvips and no cgo — unlike imagor itself. Every platform, with its
-exact filename, is on the [releases page](https://github.com/cshum/imagor-template/releases).
+exact filename, is on the [releases page](https://github.com/cshum/imagor-mcp/releases).
 
 **3. Add it to your MCP client.**
 
