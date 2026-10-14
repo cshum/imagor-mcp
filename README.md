@@ -75,8 +75,8 @@ vscode:mcp/install?%7B%22name%22%3A%22imagor%22%2C%22command%22%3A%22imagor-mcp%
 recipe, or describe the image you want and let it compose.
 
 That is the whole install. It is also on the
-[official MCP Registry](https://registry.modelcontextprotocol.io/) and
-[Smithery](https://smithery.ai/server/adrian-pzhc/imagor-mcp), as
+[official MCP Registry](https://registry.modelcontextprotocol.io/), where a client can install
+it by name, as
 [`imagor-mcp.mcpb`](https://github.com/cshum/imagor-mcp/releases/latest/download/imagor-mcp.mcpb)
 for hosts that take bundles, and as `ghcr.io/cshum/imagor-mcp` in a container — which changes
 the base URL, so read [Configuration](#configuration) first. Windows binaries are on the
