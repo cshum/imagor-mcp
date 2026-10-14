@@ -11,30 +11,6 @@ stored, served from a CDN, put in a page.
 *Every card above is one imagor URL, composed by an agent from a brief. **[All fourteen,
 with the URL each resolves to, and a prompt to ask for it »](docs/gallery/cookbook.md)***
 
-## What an agent does with it
-
-Ask for a card and it builds one:
-
-> *Build a 1200×630 launch card: a deep green ground, a serif headline, a product photo
-> on the right, and the price below it. Show me what it looks like.*
-
-It writes the template, renders it, **looks at the image**, and revises. **Given a brief
-with no layout, no positions and no sizes, an agent designed three distinct banners
-across three runs** — hierarchy, colour, type pairing, invented copy — and zoomed into
-regions to read the small text it had drawn.
-
-That is the difference from editor-first image tooling: there is no canvas to design in.
-A layout *is* a URL, and a URL is something an agent can write, check and rewrite.
-
-## What this adds
-
-**imagor-mcp adds a template layer to imagor.** Rendering stays in the imagor instance you
-run, at the throughput it already has.
-
-**A layout compiles to a URL; a hosted template API returns an image.** Those bill and
-transfer the bytes on every render. imagor serves a URL instead, which any browser, proxy or
-CDN can cache — so the bytes are transferred once.
-
 ## Quick start
 
 **1. Run an imagor.**
@@ -89,6 +65,30 @@ the base URL, so read [Configuration](#configuration) first. Windows binaries ar
 
 **Before anything is public, move both sides to `IMAGOR_SECRET`** — see
 [Security](docs/security.md).
+
+## What an agent does with it
+
+Ask for a card and it builds one:
+
+> *Build a 1200×630 launch card: a deep green ground, a serif headline, a product photo
+> on the right, and the price below it. Show me what it looks like.*
+
+It writes the template, renders it, **looks at the image**, and revises. **Given a brief
+with no layout, no positions and no sizes, an agent designed three distinct banners
+across three runs** — hierarchy, colour, type pairing, invented copy — and zoomed into
+regions to read the small text it had drawn.
+
+That is the difference from editor-first image tooling: there is no canvas to design in.
+A layout *is* a URL, and a URL is something an agent can write, check and rewrite.
+
+## What this adds
+
+**The template layer runs inside your imagor.** Rendering stays in the instance you run, at
+the throughput it already has.
+
+**A layout compiles to a URL; a hosted template API returns an image.** Those bill and
+transfer the bytes on every render. imagor serves a URL instead, which any browser, proxy or
+CDN can cache — so the bytes are transferred once.
 
 ## Tools
 
