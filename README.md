@@ -45,9 +45,8 @@ that scales with traffic.** imagor is fast — its benchmark puts it ahead of th
 
 **Measured, so you can check it.** A 1200×630 composite from the cookbook renders on a
 `shumc/imagor` container in **119 ms p50** (p95 122 ms, 25 fetches) and comes back as
-**36 KB** of JPEG behind `Cache-Control: max-age=604800` — seven days, read off the
-response. The other two rows hand you those 36 KB on every render, billable and carried by
-you. This hands you an **865-character URL**, and the bytes are served once.
+**36 KB** of JPEG. The other two rows hand you those 36 KB on every render, billable and
+carried by you. This hands you an **865-character URL**, and the bytes are served once.
 
 *Rates are the three providers' published pricing, October 2026. The imagor benchmark figure
 is imagor's, not a measurement I ran; the 119 ms and the 36 KB are mine, measured against a
