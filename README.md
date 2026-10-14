@@ -38,10 +38,10 @@ Three ways to get a dynamic image:
 
 **The difference is not that this is cheaper — it is that the output is a URL.** A hosted
 API hands you bytes, so every render is a call you pay for and a transfer you carry. imagor
-serves a URL instead, `Cache-Control: max-age=168h` by default, so a CDN or a browser holds
-it without asking again. **A deterministic URL is a cacheable one, and transfer is the part
-that scales with traffic.** imagor is fast — its benchmark puts it ahead of thumbor — but
-**the saving here is architectural, not a faster loop.**
+serves a URL instead, and **a deterministic URL is a cacheable one** — the browser, the proxy
+and the CDN hold it without asking again, and transfer is the part that scales with traffic.
+imagor is fast — its benchmark puts it ahead of thumbor — but **the saving here is
+architectural, not a faster loop.**
 
 **Measured, so you can check it.** A 1200×630 composite from the cookbook renders on a
 `shumc/imagor` container in **119 ms p50** (p95 122 ms, 25 fetches) and comes back as
