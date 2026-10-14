@@ -305,6 +305,13 @@ look, and it could check every filter, and it still reported the wrong thing and
 wrong instruction, because **nothing had checked that what the tool says about itself is true.**
 Every test in the suite asserted what the tools do. None asserted what they say.
 
+The same day, a user clicked a url the tool had returned and got nothing. The server was running
+in a container, where the address that reaches the host is `host.docker.internal`, and that is
+what the returned urls were built from. A browser cannot resolve it. The setting has to be both
+where the server fetches a render back to check it and what the returned urls are built from, and
+on the host those are the same address — so the bug cannot happen there and did happen here. The
+fix was a documentation change: install the binary, not the container.
+
 I also made that mistake myself while planning this work. I read one tool, saw one text block,
 and concluded the server did not return an image. It does, and had for weeks. I said so twice, to
 the person who wrote it. One observation is not a property — the same shape as the six failures

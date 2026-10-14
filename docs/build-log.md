@@ -328,6 +328,72 @@ because the reader stops looking.
 line about the tool list, and stated the same fact twice fifty lines apart in two different
 words.
 
+## The urls nobody could open
+
+The quick start ran the server in a container with `IMAGOR_BASE_URL=http://host.docker.internal:8000`.
+That is how a container reaches the host, and it was the only address the server had, so every url
+it returned carried it. A browser cannot resolve it. A user rendered a card, was handed a url,
+clicked it, and got nothing.
+
+The setting has to do two jobs. It is where the server fetches a render back to check it, and it
+is what the returned urls are built from. On the host those are the same address, so the problem
+cannot arise. In a container they are different addresses and one variable cannot hold both, so
+the tool worked and its output did not.
+
+**What fixed it:** documenting the binary as the install rather than the container, because on the
+host one address covers both jobs. The container is still there with its cost stated. **What it
+cost:** the quick start recommended the one variant whose urls do not open, for as long as that
+section existed.
+
+## The block a client would ignore
+
+The quick start showed a config block keyed `mcpServers` and then offered a one-click link that
+writes a VS Code config. VS Code keys its servers under `servers`. A block under the wrong key
+parses and does nothing, with no error.
+
+Nothing compared the two. **What fixed it:** the block is described as what most clients read, the
+two that differ are named, and the file each client reads is on its own page. **What it cost:**
+anyone who pasted our block into VS Code got a config that looked right and had no effect.
+
+## The number written into three documents
+
+A count of the tools appeared twice in the README and once in `docs/tools.md`. Removing one tool
+made all three wrong and nothing noticed. A test listed four tool names by hand and would have
+passed either way.
+
+**What fixed it:** checking what the number stood for instead of the number. Every tool the server
+answers `tools/list` with must be documented, and every tool documented must be served. Nothing
+needs maintaining, and it catches a renamed tool as well as a missing one. **Verified by breaking
+it:** renaming a documented tool reports "served but not documented" and "documented but not
+served", and inventing a row reports the second. The count is gone from the prose, because it was
+the part that drifted.
+
+## The claim with no evidence in it
+
+The entry "The typo that wasn't" quotes the two spellings the story turns on. They are identical —
+`FIXTURES` against `FIXTURES` — and have been since the commit that added the entry, so the
+anecdote has no mismatch in it to read.
+
+**How it was found:** rewriting the document for register, and diffing every inline code span
+against the previous version to prove none had been dropped. They all matched, including the two
+that should not match each other. **What it has cost:** the entry has been unreadable since it was
+written. **What it will cost:** the two values cannot be recovered from the file, and
+reconstructing them would mean inventing the evidence for a story about misreading a name.
+
+## The rewrite that had to be checked
+
+Two agents rewrote this log and the essay for register. Both reported that no fact had been
+preserved wrong. Both were right, and two of their sentences were still wrong: one turned "a test
+that has never failed is a test you have not tested" into "has not been shown to work", which is
+the same idea with the instruction removed, and the other pre-announced a claim that is bolded two
+paragraphs later. Both agents flagged those two sentences themselves, unprompted.
+
+**What made the report worth trusting:** extracting every heading, code fence, inline span and
+number from both versions and diffing them, rather than reading the new one. Sixty-one inline
+spans and twenty-seven numbers in this log, twenty-two and twenty-three in the essay, all
+identical. **What it would have cost to skip that:** a prose pass that read well and had quietly
+dropped a measurement.
+
 ## What the pattern is
 
 Every entry above is a wrong answer that looked right. Not one of them errored. The
@@ -335,10 +401,11 @@ server, the test, the check, the brief and the README each reported success whil
 wrong, and in every case **the only way to tell was to look at the thing itself** rather
 than at what something said about it.
 
-The later entries move the fault from the tool to the words about it: a description that
-contradicted the tool it named, a document delivered as one line of JSON, a heading over the
-wrong sentence, a measurement nobody took, a config blamed for a process. They fail the same
-way. Nothing checks a claim, so a wrong one looks the same as a right one. The fix is the rest
-of this document's: compare the claim against the thing.
+The later entries move the fault from the tool to the words about it, or to a choice nobody
+compared against its consequence: a description that contradicted the tool it named, a document
+delivered as one line of JSON, a count written into three documents, a claim with no evidence in
+it, a base url chosen for the server's convenience rather than the reader's, a config blamed for
+a process. They fail the same way. Nothing checks a claim, so a wrong one looks the same as a
+right one. The fix is the rest of this document's: compare the claim against the thing.
 
 That is what the tool is for, and it is why this document sits next to it.
