@@ -65,7 +65,8 @@ brew trust cshum/tap && brew install imagor-mcp
 }
 ```
 
-In VS Code and Copilot, this writes that entry for you:
+In VS Code and Copilot, **[add it from here](https://vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522imagor%2522%252C%2522command%2522%253A%2522imagor-mcp%2522%252C%2522env%2522%253A%257B%2522IMAGOR_UNSAFE%2522%253A%25221%2522%252C%2522IMAGOR_BASE_URL%2522%253A%2522http%253A%252F%252Flocalhost%253A8000%2522%257D%257D)** — or copy this into your
+address bar:
 
 ```
 vscode:mcp/install?%7B%22name%22%3A%22imagor%22%2C%22command%22%3A%22imagor-mcp%22%2C%22env%22%3A%7B%22IMAGOR_UNSAFE%22%3A%221%22%2C%22IMAGOR_BASE_URL%22%3A%22http%3A%2F%2Flocalhost%3A8000%22%7D%7D
