@@ -1,5 +1,16 @@
 # Development
 
+Building from source, with Go 1.27 or later:
+
+```sh
+go install github.com/cshum/imagor-mcp/cmd/imagor-mcp@latest
+```
+
+The `./cmd/` path is required: the module root is not a command, and nothing here is
+importable — the engine is all `internal/`.
+
+Tests need an imagor to measure against:
+
 ```sh
 docker run -d -p 8197:8000 -e IMAGOR_UNSAFE=1 ghcr.io/cshum/imagor:1.9.10
 IMAGOR_BASE_URL=http://localhost:8197 IMAGOR_UNSAFE=1 go test ./...

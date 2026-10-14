@@ -94,9 +94,8 @@ chmod +x imagor-mcp
 ```
 
 Every platform is on the [releases page](https://github.com/cshum/imagor-mcp/releases).
-With Go installed: `go install github.com/cshum/imagor-mcp/cmd/imagor-mcp@latest`. **The
-server is the one you need**; `imagor-template` runs a layout you already have, covered in
-[docs/development.md](docs/development.md).
+**The server is the one you need**; `imagor-template` runs a layout you already have,
+covered in [docs/development.md](docs/development.md).
 
 **3. Add it to your MCP client.**
 
