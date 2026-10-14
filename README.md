@@ -19,8 +19,9 @@ with the URL each resolves to, and a prompt to ask for it »](docs/gallery/cookb
 docker run -d --rm -p 8000:8000 -e IMAGOR_UNSAFE=1 shumc/imagor
 ```
 
-Unsafe is the local mode: URLs carry no signature, so one you edit by hand still renders. You
-do not have to set a matching secret on the server and on imagor.
+Unsafe is the local mode, and the one to experiment in: an unsigned URL keeps working after
+you change it, so take one the agent built into the browser, edit a coordinate or a word, and
+reload — a signed URL will not. Nothing has to match between the server and imagor either.
 
 **2. Install the MCP server.**
 
@@ -125,6 +126,10 @@ production.
 | `IMAGOR_MCP_EXTRA_FILTERS` | Extra filter names for forks that register their own. |
 
 The signer settings must match your imagor exactly, or it rejects the URLs.
+
+**Compose in `IMAGOR_UNSAFE`; serve in `IMAGOR_SECRET`.** A signature covers the whole path,
+so editing any part of a signed URL invalidates it. Switch when the URL is finished and
+something else is going to serve it.
 
 **`IMAGOR_BASE_URL` does two jobs.** It is where the server fetches a render back to verify
 it, and it is what the URLs it returns are prefixed with. Both have to be an address *you*
