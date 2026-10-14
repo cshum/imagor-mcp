@@ -59,18 +59,27 @@ docker run -i --rm -e IMAGOR_UNSAFE=1 -e IMAGOR_BASE_URL=http://host.docker.inte
   ghcr.io/cshum/imagor-mcp
 ```
 
-**In VS Code and Copilot**, this link adds the container straight to your MCP servers:
-
-```
-vscode:mcp/install?%7B%22name%22%3A%22imagor%22%2C%22command%22%3A%22docker%22%2C%22args%22%3A%5B%22run%22%2C%22-i%22%2C%22--rm%22%2C%22-e%22%2C%22IMAGOR_UNSAFE%3D1%22%2C%22-e%22%2C%22IMAGOR_BASE_URL%3Dhttp%3A%2F%2Fhost.docker.internal%3A8000%22%2C%22ghcr.io%2Fcshum%2Fimagor-mcp%22%5D%7D
-```
-
 **Binary** — every platform is on the [releases page](https://github.com/cshum/imagor-mcp/releases):
 
 ```sh
 curl -L -o imagor-mcp \
   https://github.com/cshum/imagor-mcp/releases/latest/download/imagor-mcp_darwin_arm64
 chmod +x imagor-mcp
+```
+
+**In VS Code and Copilot**, this link adds the server to your MCP servers — the binary on
+`PATH` first, because the base URL is then plain `localhost`:
+
+```
+vscode:mcp/install?%7B%22name%22%3A%22imagor%22%2C%22command%22%3A%22imagor-mcp%22%2C%22env%22%3A%7B%22IMAGOR_UNSAFE%22%3A%221%22%2C%22IMAGOR_BASE_URL%22%3A%22http%3A%2F%2Flocalhost%3A8000%22%7D%7D
+```
+
+Without the binary, the container works too, but inside a container `localhost` is the
+container, so the URL has to name the host — and on Linux Docker needs
+`--add-host=host.docker.internal:host-gateway`:
+
+```
+vscode:mcp/install?%7B%22name%22%3A%22imagor%22%2C%22command%22%3A%22docker%22%2C%22args%22%3A%5B%22run%22%2C%22-i%22%2C%22--rm%22%2C%22-e%22%2C%22IMAGOR_UNSAFE%3D1%22%2C%22-e%22%2C%22IMAGOR_BASE_URL%3Dhttp%3A%2F%2Fhost.docker.internal%3A8000%22%2C%22ghcr.io%2Fcshum%2Fimagor-mcp%22%5D%7D
 ```
 
 **3. Point a client at it.** With the binary on `PATH`:
