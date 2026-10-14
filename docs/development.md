@@ -18,7 +18,7 @@ imagor-template decompile '<path>'            # a path back to a layout
 ```
 
 Compiling is total and deterministic, so the same layout gives the same path every time.
-**Decompiling is lossy** — see [One direction is the source](../README.md#one-direction-is-the-source)
+**Decompiling is lossy** — see [One direction is the source](format.md#one-direction-is-the-source)
 for what a path cannot carry. Both call the same engine the server does, and
 `cmd/imagor-template/main_test.go` compiles every recipe through both front ends and
 fails if they ever disagree.

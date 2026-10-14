@@ -1,10 +1,10 @@
 # imagor-mcp
 
-**Agent template capability for [imagor](https://github.com/cshum/imagor) — the fast,
-self-hosted, open-source image server.**
+**An MCP server and a skill that add template capability to
+[imagor](https://github.com/cshum/imagor).**
 
-**An agent writes the layout; you get back one imagor URL.** Paste it in a browser, store
-it, serve it from a CDN, put it in a page.
+An agent writes a layout; the layout compiles to one imagor URL — pasted in a browser,
+stored, served from a CDN, put in a page.
 
 [![Fourteen cards, each one a single imagor URL](docs/gallery/contact-sheet.png)](docs/gallery/cookbook.md)
 
@@ -28,19 +28,16 @@ A layout *is* a URL, and a URL is something an agent can write, check and rewrit
 
 ## What this adds
 
-**If imagor is already in your stack, you already own the expensive part** — the rendering
-stays in the imagor you run, at the speed you already have. A template layer is all this
-adds.
+**imagor-mcp adds a template layer to imagor.** Rendering stays in the imagor instance you
+run, at the throughput it already has.
 
-**And a layout compiles to a URL, not a blob.** That is the whole difference from a hosted
-template API: those hand you bytes on every render, a call you pay for and a transfer you
-carry. imagor serves a URL, and **a deterministic URL is a cacheable one** — the browser, the
-proxy and the CDN hold it without asking again. **Transfer is the part that scales with
-traffic, and here it is the only part you have.**
+**A layout compiles to a URL; a hosted template API returns an image.** Those bill and
+transfer the bytes on every render. imagor serves a URL instead, which any browser, proxy or
+CDN can cache — so the bytes are transferred once.
 
 **Measured.** A 1200×630 composite from the cookbook renders on a `shumc/imagor` container in
-**119 ms p50** (p95 122 ms, 25 fetches) and comes back as **36 KB** of JPEG; the URL that
-produced it is **865 characters**.
+**119 ms p50** (p95 122 ms, 25 fetches) and returns **36 KB** of JPEG; the URL that produced
+it is **865 characters**.
 
 *The 119 ms and the 36 KB are mine, measured against a `shumc/imagor` container.*
 
@@ -120,29 +117,6 @@ or describe what you want and let it compose.
 Every parameter maps onto a concept in the imagor path grammar, and signing happens only
 as the by-product of a typed tool.
 
-## One layout, every format
-
-A template carries **no canvas size**. Geometry is relative and text with a `height` is
-**fitted** to its box, so the same layout serves 1200×630 and 1080×1080 — write it once,
-render it anywhere. That is what makes a layout worth keeping.
-
-The rest of the format — nested canvases, filters on a slot's own source, what a path can
-and cannot carry — is in the skill, where the reader is an agent that has to write one.
-
-## The skill
-
-The server carries a skill, served at `imagor-mcp://skill`. It is the part of using
-this that does not fit in a tool description, and an agent that skips it composes badly:
-
-- **The path grammar** — the order a path is written in, and the two crops whose orders
-  are opposite.
-- **Where text lands** — placement is a *search*, not a calculation, and the skill says so.
-- **Awkward values** — colours, and what has to be encoded.
-- **A working method** — build small pieces, check each, then assemble.
-
-It travels with the server, so a client that reads only the tool list never sees it.
-`get_imagor_skill` returns it for a client that reads tools rather than resources.
-
 ## The cookbook
 
 `cookbook/` holds **fourteen ready-made layouts** — OG cards, a product grid, a profile
@@ -155,21 +129,6 @@ travels in the server and arrives by name.
 
 Every recipe renders **at three canvas sizes on every commit**, and the contact sheet
 above comes from that same code path — so it cannot drift.
-
-## One direction is the source
-
-| | |
-|---|---|
-| **template → path** | total and deterministic. The compiler. **The source of truth.** |
-| **path → template** | **lossy.** A path holds what a layout *resolved to*, not the decisions behind it. |
-
-Reading a path back gives the geometry, colours and text — but **the slot names and the
-`{{values}}` are gone, and a relative form like `38p` or `half` is already the number it
-resolved to.** So hand an agent the **template**, not the path: a template re-fills for
-the next person, a path renders once.
-
-**A caveat:** a text slot with a height is *fitted* by measuring, and measuring renders a
-probe through imagor — so a compile needs a running imagor. Everything else is pure.
 
 ## Configuration
 
@@ -204,22 +163,15 @@ VIPS_CACHE_MAX_WIDTH=2400     # images larger than this are not cached
 VIPS_CACHE_MAX_HEIGHT=2000
 ```
 
-## Security
+## Going deeper
 
-**A trusted client of imagor, not a new surface on it.** It holds the signing secret to
-mint valid URLs, like any backend. **Trust the component; do not trust the agent using
-it.**
+The format, and the conventions an agent needs to compose well:
 
-- **Unsafe mode is opt-in and loud** — a warning on stderr, reported by `describe_imagor`.
-- **Blast radius stays imagor's to set** — `HTTP_LOADER_ALLOWED_SOURCES`,
-  `VIPS_MAX_RESOLUTION`, `IMAGOR_REQUEST_TIMEOUT`. A URL from an errant agent is still
-  subject to every one.
-
-Do not host this multi-tenant for users whose keys you would then hold.
-
-## Development
-
-Building, testing, and the `imagor-template` CLI: **[docs/development.md](docs/development.md)**.
+- **[docs/format.md](docs/format.md)** — a template carries no canvas size, and why a path
+  cannot be read back into a template.
+- **[docs/skill.md](docs/skill.md)** — the skill the server carries, and what it covers.
+- **[docs/security.md](docs/security.md)** — what it is trusted with, and what it refuses.
+- **[docs/development.md](docs/development.md)** — building, testing, and the CLI.
 
 ## Licence
 
