@@ -46,7 +46,7 @@ docker run -d --rm -p 8000:8000 -e IMAGOR_UNSAFE=1 shumc/imagor
 Unsafe is the local mode: URLs carry no signature, so one you edit by hand still renders and
 the two sides cannot disagree about a secret.
 
-**2. Install the server.**
+**2. Install the MCP server.**
 
 ```sh
 brew trust cshum/tap && brew install imagor-mcp
@@ -65,7 +65,12 @@ brew trust cshum/tap && brew install imagor-mcp
 }
 ```
 
-In VS Code and Copilot, **[add it from here](https://vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522imagor%2522%252C%2522command%2522%253A%2522imagor-mcp%2522%252C%2522env%2522%253A%257B%2522IMAGOR_UNSAFE%2522%253A%25221%2522%252C%2522IMAGOR_BASE_URL%2522%253A%2522http%253A%252F%252Flocalhost%253A8000%2522%257D%257D)** — or copy this into your
+That is the shape most clients read — Claude Desktop, Claude Code, Cursor, Windsurf. **VS
+Code keys its servers under `servers`, not `mcpServers`, and Codex reads TOML**: either one
+with the block above parses fine and does nothing. The file each client reads is in
+**[docs/clients.md](docs/clients.md)**.
+
+In VS Code, **[add it from here](https://vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522imagor%2522%252C%2522command%2522%253A%2522imagor-mcp%2522%252C%2522env%2522%253A%257B%2522IMAGOR_UNSAFE%2522%253A%25221%2522%252C%2522IMAGOR_BASE_URL%2522%253A%2522http%253A%252F%252Flocalhost%253A8000%2522%257D%257D)** — or copy this into your
 address bar:
 
 ```
@@ -154,6 +159,8 @@ The format, and the conventions an agent needs to compose well:
 - **[docs/tools.md](docs/tools.md)** — every tool the server serves, and the prompt.
 - **[docs/skill.md](docs/skill.md)** — the skill the server carries, and what it covers.
 - **[docs/security.md](docs/security.md)** — what it is trusted with, and what it refuses.
+- **[docs/clients.md](docs/clients.md)** — the config file each client reads, and the two that
+  key their servers differently.
 - **[docs/development.md](docs/development.md)** — building, testing, and the CLI.
 
 ## Licence
