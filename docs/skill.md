@@ -1,7 +1,6 @@
 # The skill
 
-The server carries a skill, served at `imagor-mcp://skill`. It is the part of using
-this that does not fit in a tool description, and an agent that skips it composes badly:
+The server carries a skill, served at `imagor-mcp://skill`. It carries what a tool description cannot, and an agent that skips it writes worse layouts:
 
 - **The path grammar** — the order a path is written in, and the two crops whose orders
   are opposite.
@@ -21,10 +20,10 @@ a section name it returns that section. Every response carries the full name lis
 caller that guessed wrong does not need an extra call to find the right one, and an
 unknown name is answered with the outline rather than an error.
 
-It is a tool parameter rather than one resource per section because a resource is read
-when the *application* decides to read it, and a host that surfaces only tools would
-lose the skill entirely — that being the host that most needs it.
+It is a tool parameter rather than one resource per section because a resource is read when
+the application decides to read it, and a client that surfaces only tools would not see the
+skill at all.
 
-The prompt `compose-imagor-image` is the deliberate path and still carries the whole
-document: a user who picks it from a menu has asked for exactly that.
+The prompt `compose-imagor-image` still carries the whole document — a user who picks it
+from a menu has asked for it.
 

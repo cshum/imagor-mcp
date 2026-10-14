@@ -3,7 +3,7 @@
 
 A template carries **no canvas size**. Geometry is relative and text with a `height` is
 **fitted** to its box, so the same layout serves 1200×630 and 1080×1080 — write it once,
-render it anywhere. That is what makes a layout worth keeping.
+render it anywhere.
 
 The rest of the format — nested canvases, filters on a slot's own source, what a path can
 and cannot carry — is in [the skill](skill.md), where the reader is an agent that has to write one.

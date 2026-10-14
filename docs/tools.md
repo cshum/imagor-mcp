@@ -1,8 +1,8 @@
 # Tools
 
-Every tool the server answers `tools/list` with. Every parameter maps onto a
-concept in the [imagor path grammar](format.md) — there are no invented parameters, and
-signing happens only as the by-product of a typed tool.
+Every tool the server answers `tools/list` with. Every parameter maps onto a concept in the
+[imagor path grammar](format.md) — there are no invented parameters, and nothing is signed
+except by a tool that builds a path.
 
 | Tool | Purpose |
 |---|---|
@@ -20,10 +20,3 @@ signing happens only as the by-product of a typed tool.
 The server also serves one **prompt**, `compose-imagor-image`, which loads the skill with a
 brief attached. Prompts are chosen by the user from the client's menu rather than called by the
 model, so it costs a session nothing until someone picks it.
-
-Every parameter maps onto a concept in the imagor path grammar, and signing happens only
-as the by-product of a typed tool.
-
-## The cookbook
-
-A client discovers these at runtime; this page is the same list written down.

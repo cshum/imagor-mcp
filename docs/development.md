@@ -31,16 +31,14 @@ imagor-template decompile '<path>'            # a path back to a layout
 Compiling is total and deterministic, so the same layout gives the same path every time.
 **Decompiling is lossy** — see [One direction is the source](format.md#one-direction-is-the-source)
 for what a path cannot carry. Both call the same engine the server does, and
-`cmd/imagor-template/main_test.go` compiles every recipe through both front ends and
-fails if they ever disagree.
+`cmd/imagor-template/main_test.go` compiles every recipe through both front ends and fails if
+they diverge.
 
 Use the published image rather than one built for your machine: it is the only place
 the declared font families exist, and a host binary substitutes a system face
 silently while the tests pass. See [AGENTS.md](../AGENTS.md) for the conventions and
-[build-log.md](build-log.md) for the faults that shaped them.
+[build-log.md](build-log.md) for the bugs behind them.
 
 CI runs `gofmt -l`, `go vet`, `go test -race`, a drift guard on the generated filter
 catalogue, and a job that re-renders the gallery.
 
-The CLI and the server are the same engine: `cmd/imagor-template/main_test.go` compiles every
-recipe through both front ends and fails if they diverge.

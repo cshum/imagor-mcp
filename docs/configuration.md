@@ -26,8 +26,7 @@ That is the one real cost of running the server in a container. There, the host 
 `host.docker.internal` and `localhost` is the container, so the server needs
 `-e IMAGOR_BASE_URL=http://host.docker.internal:8000` to work at all — and every URL it hands
 you then carries a name your browser cannot resolve. On the host, one address does both
-jobs. Anything else that puts a proxy or a different hostname in front of imagor does the
-same thing.
+jobs. Anything that puts a proxy or a different hostname in front of imagor does the same.
 
 ## Previews
 
