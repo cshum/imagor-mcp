@@ -28,9 +28,9 @@ A layout *is* a URL, and a URL is something an agent can write, check and rewrit
 
 ## What this adds
 
-**If imagor is already in your stack, this is a template layer and nothing else.** No new
-service, no per-image fee, no browser — rendering stays in the imagor you run, at the speed
-you already measured.
+**If imagor is already in your stack, you already own the expensive part** — the rendering
+stays in the imagor you run, at the speed you already have. A template layer is all this
+adds.
 
 **And a layout compiles to a URL, not a blob.** That is the whole difference from a hosted
 template API: those hand you bytes on every render, a call you pay for and a transfer you
@@ -118,8 +118,8 @@ or describe what you want and let it compose.
 | `get_cookbook_recipe` | Fetch a ready-made layout by name. **Call it with no name first** to get the list. |
 | `get_imagor_skill` | The skill, for a client that reads it as a tool rather than a resource. |
 
-Every parameter maps onto a concept in the imagor path grammar. There are no
-invented parameters and no generic "sign this string" tool.
+Every parameter maps onto a concept in the imagor path grammar, and signing happens only
+as the by-product of a typed tool.
 
 ## One layout, every format
 
