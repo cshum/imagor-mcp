@@ -28,13 +28,13 @@ A layout *is* a URL, and a URL is something an agent can write, check and rewrit
 
 ## Where this fits
 
-Three ways to get a dynamic image:
+Three ways to get a dynamic image. Each one costs you something, including this:
 
-| | how | what it costs you | what limits you |
+| | what you get back | what it costs | what you give up |
 |---|---|---|---|
-| **Chromium** (Puppeteer, Satori) | screenshot an HTML page per image | nothing, but a browser to run | **slow** — [they say so themselves](https://www.bannerbear.com/blog/how-to-make-a-custom-open-graph-image-using-puppeteer/) |
-| **Hosted template APIs** (Bannerbear, Placid, APITemplate) | send values, **get a blob back** | $0.019–0.049 per image, from $49/mo | the per-image fee, and the transfer every time you serve it |
-| **imagor-mcp** | a layout compiles to an imagor URL | nothing beyond the imagor you already run | nothing per image — **you serve a URL** |
+| **Chromium** (Puppeteer, Satori) | a rendered file | a browser to run | throughput — a page render per image, and a headless browser in your stack |
+| **Hosted template APIs** (Bannerbear, Placid, APITemplate) | a blob, every render | $0.019–0.049 per image, from $49/mo | the per-image fee, and a transfer every time you serve it |
+| **imagor-mcp** | a URL | the imagor you already run | you run imagor — and there is no editor to design in |
 
 **The difference is not that this is cheaper — it is that the output is a URL.** A hosted
 API hands you bytes, so every render is a call you pay for and a transfer you carry. imagor
