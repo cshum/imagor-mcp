@@ -142,6 +142,35 @@ func TestVerifyAsksForAScaledPreview(t *testing.T) {
 	}
 }
 
+// The url is what the caller serves and the attachment is not it, so the report has to
+// say so. This was added after a real session where the agent showed the picture and
+// dropped the url, leaving the user with an image they could not serve.
+func TestAttachedPreviewNamesTheURLAsTheDeliverable(t *testing.T) {
+	out := VerifyOutput{Status: 200, Width: 1200, Height: 630,
+		AbsoluteURL: "http://localhost:8000/unsafe/1200x630/filters:image(a/b,c,d)/a.jpg"}
+	txt := verifySummary(out, "", true, 64)
+	for _, want := range []string{
+		out.AbsoluteURL,
+		"what the user serves",
+		"hand it back in full",
+		"scaled preview",
+	} {
+		if !strings.Contains(txt, want) {
+			t.Errorf("missing %q in:\n%s", want, txt)
+		}
+	}
+
+	// With nothing attached there is no preview to distinguish from the file, so the
+	// instruction would be noise.
+	bare := verifySummary(out, "", false, 0)
+	if strings.Contains(bare, "what the user serves") {
+		t.Errorf("the instruction belongs only where a preview was attached:\n%s", bare)
+	}
+	if !strings.Contains(bare, out.AbsoluteURL) {
+		t.Error("the url is reported whether or not a preview came back")
+	}
+}
+
 // An attached image is delivered to the client whether or not the model wants
 // it, so a caller that only wants the report can say so.
 func TestVerifyCanBeAskedForNoPreview(t *testing.T) {

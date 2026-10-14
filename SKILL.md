@@ -337,6 +337,10 @@ startup log and on no endpoint, so there is nothing to ask.
    dot's rows against its text's, a panel's against its neighbour's. Two centres can agree
    to the pixel while the shapes read as misaligned. Crop to the region you changed before
    you believe the number.
+7. **Hand back the url, in full, alongside the picture.** The url is what the user serves;
+   the image you checked is a scaled preview of it. An answer that shows the result and
+   drops the url leaves them with something they cannot use, which is the whole product
+   missing.
 
 **These rules are procedures and facts on purpose.** A procedure says what to type and is
 followed; a preference asks the reader to want the right thing and is not.

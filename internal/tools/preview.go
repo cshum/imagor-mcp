@@ -146,16 +146,18 @@ func verifySummary(out VerifyOutput, note string, attached bool, scale int) stri
 	}
 	fmt.Fprintf(&b, "\nurl: %s", out.AbsoluteURL)
 	if attached {
-		b.WriteString("\nThe rendered result is attached.")
+		b.WriteString("\nThe rendered result is attached, scaled down: compare it against your " +
+			"reference.")
 		if scale > 0 {
-			// Without the scale the caller cannot tell which coordinate system it
-			// is looking at, and a region asked for in preview pixels lands
-			// somewhere else entirely in the result.
 			fmt.Fprintf(&b, " It is %d%% of the result, so a detail too small to read "+
 				"here can be seen by calling again with preview_region as x,y,w,h in "+
 				"result pixels.", scale)
 		}
-		b.WriteString(" Compare it against your reference.")
+		// The url is what the caller serves and the attachment is not it. A caller
+		// that reports only what it can see leaves the reader with a picture they
+		// cannot serve, which is what happened before this line existed.
+		b.WriteString(" The url is what the user serves: hand it back in full, because " +
+			"the attachment is a scaled preview rather than the file.")
 	}
 	return b.String()
 }
