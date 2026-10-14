@@ -46,16 +46,14 @@ docker run -d --rm -p 8000:8000 -e IMAGOR_UNSAFE=1 shumc/imagor
 Unsafe is the local mode — URLs carry no signature, so one you edit by hand still renders, and
 nothing has to match between the two sides.
 
-**2. Run the server.**
+**2. Install the server.**
 
 ```sh
-docker run -i --rm -e IMAGOR_UNSAFE=1 -e IMAGOR_BASE_URL=http://host.docker.internal:8000 \
-  ghcr.io/cshum/imagor-mcp
+brew trust cshum/tap && brew install imagor-mcp
 ```
 
-The container carries the skill with it and needs nothing installed. `host.docker.internal` is
-how a container reaches the imagor on the host. On Linux, add
-`--add-host=host.docker.internal:host-gateway`.
+Or open [`imagor-mcp.mcpb`](https://github.com/cshum/imagor-mcp/releases/latest/download/imagor-mcp.mcpb)
+in a host that takes bundles.
 
 **3. Point a client at it.**
 
@@ -63,11 +61,8 @@ how a container reaches the imagor on the host. On Linux, add
 {
   "mcpServers": {
     "imagor": {
-      "command": "docker",
-      "args": ["run", "-i", "--rm",
-               "-e", "IMAGOR_UNSAFE=1",
-               "-e", "IMAGOR_BASE_URL=http://host.docker.internal:8000",
-               "ghcr.io/cshum/imagor-mcp"]
+      "command": "imagor-mcp",
+      "env": { "IMAGOR_UNSAFE": "1", "IMAGOR_BASE_URL": "http://localhost:8000" }
     }
   }
 }
@@ -76,8 +71,15 @@ how a container reaches the imagor on the host. On Linux, add
 In VS Code and Copilot, this writes that entry for you:
 
 ```
-vscode:mcp/install?%7B%22name%22%3A%22imagor%22%2C%22command%22%3A%22docker%22%2C%22args%22%3A%5B%22run%22%2C%22-i%22%2C%22--rm%22%2C%22-e%22%2C%22IMAGOR_UNSAFE%3D1%22%2C%22-e%22%2C%22IMAGOR_BASE_URL%3Dhttp%3A%2F%2Fhost.docker.internal%3A8000%22%2C%22ghcr.io%2Fcshum%2Fimagor-mcp%22%5D%7D
+vscode:mcp/install?%7B%22name%22%3A%22imagor%22%2C%22command%22%3A%22imagor-mcp%22%2C%22env%22%3A%7B%22IMAGOR_UNSAFE%22%3A%221%22%2C%22IMAGOR_BASE_URL%22%3A%22http%3A%2F%2Flocalhost%3A8000%22%7D%7D
 ```
+
+`IMAGOR_BASE_URL` does two jobs — it is where the server verifies a URL, and what it prefixes
+the URLs it returns. Both have to be an address **you** can open, so it names `localhost`, not
+a container-internal host. Run the server in a container instead and the URL it hands you is
+`host.docker.internal:8000`, which only resolves inside Docker: the container is available as
+`ghcr.io/cshum/imagor-mcp` with `-e IMAGOR_BASE_URL=http://host.docker.internal:8000`, but the
+URLs it returns will not open in a browser.
 
 The server speaks MCP over stdio, so nothing listens on a port.
 
