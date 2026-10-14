@@ -333,11 +333,10 @@ in a startup log and on no endpoint, so there is nothing to ask.
    should not hold the signing secret, and `validate_imagor_path` reads a path back to
    report whether it round-trips.
 3. `verify_imagor_url` the result, passing the same typed parameters you built from —
-   it takes parameters, not a URL. An outcome is `applied`, `declined` (recognised,
-   did nothing), `not_reported` (this processor does not handle it) or `unknown` (the
-   server reports no outcomes at all, so nothing can be concluded; neither is a
-   failure). **A `declined` filter is an error unless it is deliberately conditional**,
-   which is what `allow_declined` says.
+   it takes parameters, not a URL. An outcome is `applied`, `declined` (the server
+   recognised the filter and left the image unchanged) or one of the two that mean
+   nothing can be concluded — `not_reported` and `unknown`. Neither of those last two
+   is a failure; a `declined` is, and says so itself.
 4. **Look at what came back** — `applied` does not mean correct. Where the preview is
    too small to read a label, call again with `preview_region` as `x,y,w,h` in
    **result** pixels: full resolution for a fraction of the cost. `preview: false` for
