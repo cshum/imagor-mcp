@@ -7,12 +7,12 @@
     "url": "https://github.com/cshum/imagor-mcp",
     "source": "github"
   },
-  "version": "0.6.0",
+  "version": "0.6.1",
   "packages": [
     {
       "registryType": "mcpb",
-      "identifier": "https://github.com/cshum/imagor-mcp/releases/download/v0.6.0/imagor-mcp-v0.6.0.mcpb",
-      "fileSha256": "c6437bab1667f79f5e1ca1cc177b2b6e7fa9654e15099ab52718bac77cce4838",
+      "identifier": "https://github.com/cshum/imagor-mcp/releases/download/v0.6.1/imagor-mcp-v0.6.1.mcpb",
+      "fileSha256": "ba1d7354942a8f7bdace7f5314a4e5e36d1a10c26ea66fe1b6be60d48fa49fc1",
       "transport": {
         "type": "stdio"
       },
