@@ -35,11 +35,8 @@ run, at the throughput it already has.
 transfer the bytes on every render. imagor serves a URL instead, which any browser, proxy or
 CDN can cache — so the bytes are transferred once.
 
-**Measured.** A 1200×630 composite from the cookbook renders on a `shumc/imagor` container in
-**119 ms p50** (p95 122 ms, 25 fetches) and returns **36 KB** of JPEG; the URL that produced
-it is **865 characters**.
-
-*The 119 ms and the 36 KB are mine, measured against a `shumc/imagor` container.*
+**Fast.** A 1200×630 composite renders on `shumc/imagor` in **119 ms p50** and returns **36 KB**
+of JPEG.
 
 ## Quick start
 
