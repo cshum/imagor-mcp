@@ -43,17 +43,14 @@ CDN can cache — so the bytes are transferred once.
 docker run -d --rm -p 8000:8000 -e IMAGOR_UNSAFE=1 shumc/imagor
 ```
 
-Unsafe is the local mode — URLs carry no signature, so one you edit by hand still renders, and
-nothing has to match between the two sides.
+Unsafe is the local mode: URLs carry no signature, so one you edit by hand still renders and
+the two sides cannot disagree about a secret.
 
 **2. Install the server.**
 
 ```sh
 brew trust cshum/tap && brew install imagor-mcp
 ```
-
-Or open [`imagor-mcp.mcpb`](https://github.com/cshum/imagor-mcp/releases/latest/download/imagor-mcp.mcpb)
-in a host that takes bundles.
 
 **3. Point a client at it.**
 
@@ -74,26 +71,19 @@ In VS Code and Copilot, this writes that entry for you:
 vscode:mcp/install?%7B%22name%22%3A%22imagor%22%2C%22command%22%3A%22imagor-mcp%22%2C%22env%22%3A%7B%22IMAGOR_UNSAFE%22%3A%221%22%2C%22IMAGOR_BASE_URL%22%3A%22http%3A%2F%2Flocalhost%3A8000%22%7D%7D
 ```
 
-`IMAGOR_BASE_URL` does two jobs — it is where the server verifies a URL, and what it prefixes
-the URLs it returns. Both have to be an address **you** can open, so it names `localhost`, not
-a container-internal host. Run the server in a container instead and the URL it hands you is
-`host.docker.internal:8000`, which only resolves inside Docker: the container is available as
-`ghcr.io/cshum/imagor-mcp` with `-e IMAGOR_BASE_URL=http://host.docker.internal:8000`, but the
-URLs it returns will not open in a browser.
+**4. Ask it for something.** Open the **[cookbook](docs/gallery/cookbook.md)** and name a
+recipe, or describe the image you want and let it compose.
 
-The server speaks MCP over stdio, so nothing listens on a port.
-
-**4. Ask it for something.** One of the fourteen recipes in `cookbook/`, or describe what you
-want and let it compose.
-
-Published as `io.github.cshum/imagor-mcp` in the
-[official MCP Registry](https://registry.modelcontextprotocol.io/), where a client can install
-it by name, and on [Smithery](https://smithery.ai/server/adrian-pzhc/imagor-mcp). The tap
-carries macOS and Linux; Windows and anything else are on the
+That is the whole install. It is also on the
+[official MCP Registry](https://registry.modelcontextprotocol.io/) and
+[Smithery](https://smithery.ai/server/adrian-pzhc/imagor-mcp), as
+[`imagor-mcp.mcpb`](https://github.com/cshum/imagor-mcp/releases/latest/download/imagor-mcp.mcpb)
+for hosts that take bundles, and as `ghcr.io/cshum/imagor-mcp` in a container — which changes
+the base URL, so read [Configuration](#configuration) first. Windows binaries are on the
 [releases page](https://github.com/cshum/imagor-mcp/releases).
 
 **Before anything is public, move both sides to `IMAGOR_SECRET`** — see
-[Configuration](#configuration).
+[Security](docs/security.md).
 
 ## Tools
 
@@ -124,14 +114,22 @@ production.
 |---|---|
 | `IMAGOR_SECRET` | Signing secret. Selects **signed** mode: `<signature>/<path>`. |
 | `IMAGOR_UNSAFE` | `1`, `true`, `yes` or `on`. Selects **unsafe** mode: `unsafe/<path>`, development only. Must be explicit. |
-| `IMAGOR_BASE_URL` | Your imagor origin. Needed for `verify_imagor_url`, and it adds `absolute_url` to output. |
+| `IMAGOR_BASE_URL` | Your imagor origin, as **you** reach it. Needed for `verify_imagor_url`, and it adds `absolute_url` to output. |
 | `IMAGOR_SIGNER_TYPE` | `sha1` (default), `sha256` or `sha512`. |
 | `IMAGOR_SIGNER_TRUNCATE` | Signature length in characters. `0` means none. |
 | `IMAGOR_MCP_EXTRA_FILTERS` | Extra filter names for forks that register their own. |
 
 The signer settings must match your imagor exactly, or it rejects the URLs.
-**`IMAGOR_BASE_URL` has to be reachable from inside the imagor container** — the
-preview fetches the render back through it to scale it down.
+
+**`IMAGOR_BASE_URL` does two jobs.** It is where the server fetches a render back to verify
+it, and it is what the URLs it returns are prefixed with. Both have to be an address *you*
+can open, which is why it names `localhost` above and not a container-internal host.
+
+That is the one real cost of running the server in a container. There, the host is
+`host.docker.internal` and `localhost` is the container, so the server needs
+`-e IMAGOR_BASE_URL=http://host.docker.internal:8000` to work at all — and every URL it hands
+you then carries a name your browser cannot resolve. On the host the two jobs coincide and
+neither problem exists.
 
 ### Making previews faster
 
