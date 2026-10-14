@@ -40,85 +40,49 @@ of JPEG.
 
 ## Quick start
 
-**1. You need an imagor to render with.** Any imagor will do; the published image is
-[`shumc/imagor`](https://hub.docker.com/r/shumc/imagor):
+**1. Run an imagor.** Unsafe is the local mode — URLs carry no signature, so one you edit by
+hand still renders, and nothing has to match between the two sides below.
 
 ```sh
 docker run -d --rm -p 8000:8000 -e IMAGOR_UNSAFE=1 shumc/imagor
 ```
 
-`IMAGOR_UNSAFE=1` is a local server: URLs carry no signature, so one you edit by hand still
-renders. Both sides use it below, which is why nothing has to match. Already running an
-imagor? Point the config at it instead. (`imagor-base` is the image imagor is *built* from,
-not one to run.)
-
-**2. Install.** **In a host that takes bundles, this is the whole install** — download
-[`imagor-mcp-v0.5.0.mcpb`](https://github.com/cshum/imagor-mcp/releases/download/v0.5.0/imagor-mcp-v0.5.0.mcpb)
-and open it. It asks for the imagor URL and secret and runs the server for you, on macOS,
-Linux and Windows. The same bundle is on
-[Smithery](https://smithery.ai/server/adrian-pzhc/imagor-mcp) and in the
+**2. Get the server** — any one of these. In a host that opens bundles:
+[`imagor-mcp-v0.6.0.mcpb`](https://github.com/cshum/imagor-mcp/releases/download/v0.6.0/imagor-mcp-v0.6.0.mcpb),
+also on [Smithery](https://smithery.ai/server/adrian-pzhc/imagor-mcp) and in the
 [MCP Registry](https://registry.modelcontextprotocol.io/) as `io.github.cshum/imagor-mcp`.
 
-**Or run the server as a container**, which carries the skill with it:
-
 ```sh
-docker run -i --rm -e IMAGOR_UNSAFE=1 ghcr.io/cshum/imagor-mcp
-```
+# a container, which carries the skill with it
+docker run -i --rm -e IMAGOR_UNSAFE=1 -e IMAGOR_BASE_URL=http://host.docker.internal:8000 \
+  ghcr.io/cshum/imagor-mcp
 
-Point a client at the container instead of a binary:
-
-```json
-{
-  "mcpServers": {
-    "imagor": {
-      "command": "docker",
-      "args": ["run", "-i", "--rm",
-        "-e", "IMAGOR_UNSAFE=1",
-        "-e", "IMAGOR_BASE_URL=http://host.docker.internal:8000",
-        "ghcr.io/cshum/imagor-mcp"]
-    }
-  }
-}
-```
-
-Inside a container `localhost` is the container, so a local imagor is reached at
-`host.docker.internal` (`--add-host=host.docker.internal:host-gateway` on Linux).
-
-Anywhere else, the release carries both binaries for six platforms:
-
-```sh
+# or a binary — every platform is on the releases page
 curl -L -o imagor-mcp \
-  https://github.com/cshum/imagor-mcp/releases/download/v0.5.0/imagor-mcp_v0.5.0_darwin_arm64
+  https://github.com/cshum/imagor-mcp/releases/download/v0.6.0/imagor-mcp_v0.6.0_darwin_arm64
 chmod +x imagor-mcp
 ```
 
-Every platform is on the [releases page](https://github.com/cshum/imagor-mcp/releases).
-**The server is the one you need**; `imagor-template` runs a layout you already have,
-covered in [docs/development.md](docs/development.md).
-
-**3. Add it to your MCP client.**
+**3. Point a client at it.** With the binary on `PATH`:
 
 ```json
 {
   "mcpServers": {
     "imagor": {
       "command": "imagor-mcp",
-      "env": {
-        "IMAGOR_UNSAFE": "1",
-        "IMAGOR_BASE_URL": "http://localhost:8000"
-      }
+      "env": { "IMAGOR_UNSAFE": "1", "IMAGOR_BASE_URL": "http://localhost:8000" }
     }
   }
 }
 ```
 
-That is the whole setup. The server speaks MCP over stdio, so nothing listens on a port.
+For the container, the same block with `"command": "docker"` and the arguments above.
 
-**Before anything is public, move both sides to `IMAGOR_SECRET`** — the same value in the
-server and in the client — and leave unsafe behind. See [Configuration](#configuration).
+**4. Ask it for something.** One of the fourteen recipes in `cookbook/`, or describe what you
+want and let it compose.
 
-**4. Ask it for something.** Start from one of the fourteen recipes in `cookbook/`,
-or describe what you want and let it compose.
+The server speaks MCP over stdio, so nothing listens on a port. **Before anything is public,
+move both sides to `IMAGOR_SECRET`** — see [Configuration](#configuration).
 
 ## Tools
 
