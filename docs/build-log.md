@@ -219,11 +219,128 @@ say so where they assert it, rather than leaving it to be discovered.
 
 ---
 
+---
+
+## The instruction that contradicted the tool it named
+
+`build_imagor_url` ended by telling the caller to "call `verify_imagor_url` on the result". The
+result of building a URL is a URL. `verify_imagor_url` takes parameters, and says so in its own
+description: the same typed parameters as `build_imagor_url`, not a URL.
+
+So the tool that pointed at it was contradicting it. A real agent in a real session followed
+the instruction rather than the warning — it passed the composed path as `image`, the server
+built `unsafe/<that path>/<the rendered url>`, and imagor answered `404`. The agent then said it
+could not confirm the preview, which was true.
+
+**What it cost:** a round trip, and a wrong conclusion in a session that was otherwise working.
+**What fixed it:** "pass the same parameters to `verify_imagor_url`". **Why it took so long:**
+every test asserted what the tools *do*. Not one asserted what they *say*.
+
+## The document that arrived as one line
+
+`get_imagor_skill` returned the skill. The tool worked, every byte was there, and it was
+unreadable: a tool result's text content is the JSON of the structured output unless you set it
+yourself, so 18,720 characters of markdown arrived with no line breaks at all and 351 escaped
+`\n`. A caller in a real session stopped reading it and wrote a Python one-liner to recover the
+lines.
+
+**What fixed it:** setting the content explicitly — which `preview.go` had been doing for its
+own result from the start, with the reason in a comment: *"Content is set explicitly rather than
+left for the SDK, which would otherwise fill it with the JSON of the structured output alone."*
+Three more tools got the same treatment. **What it cost:** a round trip in a real session, and
+the discovery that one file had known the rule for months while three others quietly broke it.
+
+## A tool that did nothing the tool beside it did not
+
+`build_imagor_path` documented itself as the unsigned path, for a caller that signs with its own
+secret. Its input schema was byte-identical to `build_imagor_url`'s. It called the same builder
+and then blanked two fields. And its `path` field held the same value, because `build_imagor_url`
+already returns the bare path — the prefix lives in `url`, not in `path`, in both modes.
+
+A subset, offered as a capability, costing 4,225 characters of schema that every session pays
+whether or not it composes anything. Fixed cost went from 24,710 characters to 20,161 when it
+was removed, and nothing was lost.
+
+**How it was found:** by measuring the schemas rather than by reading the tools. It had been
+there from the beginning, and nothing about it looked wrong.
+
+## The feature I announced missing, twice
+
+I told the author the server does not return an image, and that adding one was a real change
+worth making. It does: a base64 JPEG in an MCP image content block, capped at 1 MiB, scaled to
+768 on the long edge, with the MIME type sniffed rather than trusted, and a sentence reporting
+the scale so a caller knows which coordinate system it is looking at.
+
+I had probed `render_template`, got one text block, and generalised. `render_template` returns
+only a URL **by design** — compiling is local and instant, fetching is `verify_imagor_url`'s job.
+I checked the compile tool and reported on the fetch tool.
+
+**What it cost:** a wrong claim, made twice, and part of a session spent planning a feature that
+already existed. **The shape is the one from the experiment that lied:** one observation is not a
+property. That mistake has now been made in the code, in the test harness, and in my own
+description of the tool.
+
+## The measurement nobody made
+
+Configuration said that turning the cache on made repeated looks at a composition much cheaper,
+with numbers: 386 ms for the first preview and 25 ms for a repeat, on a 1600×600 composition.
+
+Nothing in this project had measured that. And imagor's own page says the cache key is **the
+image path only** — filter parameters are not part of it — so the saving is not re-decoding a
+source, which applies to any request that reuses it at any size, not to repeating an identical
+composition. The sentence described something the cache does not do.
+
+**What fixed it:** deleting the section and linking imagor's page, which also documents two
+variables our copy had left out. **The numbers were not replaced with other numbers**, because
+the four-cell measurement that would have said whether they described the right thing needed
+Docker, and Docker was not running.
+
+## The config that was already correct
+
+A session began failing with `connection refused` against `192.168.0.124:8210`. That address was
+one I had configured myself while testing, so the report was a stale config, and I corrected it
+and said so.
+
+It was not the config. Both files had already been fixed and grep found the address in neither.
+What was running was the process: a test binary launched hours earlier, holding the old address
+in its environment, being talked to by a client that does not re-read its config for a server
+that is already running.
+
+**What it cost:** a confident wrong diagnosis. **What fixed it:** killing the process I had
+started. The lesson is narrower than it looks — **editing a config does not reach a process that
+is already running**, and the debris of a test is not litter. It is a running service with an old
+environment, and someone else is talking to it.
+
+## And more of the small ones
+
+**A check that read an error message as a result.** Fourteen cookbook recipes timed through the
+CLI, all reported passing. Every "path" was 213 characters, because 213 characters was the CLI
+complaining that no mode was set, and the check was for length rather than for shape. The second
+attempt reported fourteen failures, because the CLI genuinely needs `IMAGOR_BASE_URL` — fitting
+text means rendering a probe. The third attempt was the first to say anything true.
+
+**A download instruction that did not work.** Fetch the binary with `curl`, `chmod +x imagor-mcp`,
+then point a client at `"command": "imagor-mcp"`. `chmod` marks a file executable where it sits;
+it does not put it on `PATH`. The next two steps fail with `spawn ENOENT`, which a client reports
+as a server that would not start. An instruction that reads as sufficient and is not costs more
+than no instruction.
+
+**A heading over the wrong sentence.** `docs/tools.md` had a `## The cookbook` heading above a
+line about the tool list, and stated the same fact twice fifty lines apart in two different
+words. Nobody reads a document looking for that.
+
 ## What the pattern is
 
 Every entry above is a wrong answer that looked right. Not one of them errored. The
 server, the test, the check, the brief and the README each reported success while being
 wrong, and in every case **the only way to tell was to look at the thing itself** rather
 than at what something said about it.
+
+The later entries move the fault from the tool to the words about it: a description that
+contradicted the tool it named, a document delivered as one line of JSON, a heading over the
+wrong sentence, a measurement nobody took, a config blamed for a process. They fail the same
+way. Nothing checks a claim, so a wrong one reads exactly like a right one, and the fix is
+the same as everywhere else in this document — compare the claim against the thing, not
+against itself.
 
 That is why the tool exists, and it is why this document exists next to it.
