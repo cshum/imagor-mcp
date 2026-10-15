@@ -80,19 +80,22 @@ A brief like this one:
 > *Build a 1200×630 launch card: a deep green ground, a serif headline, a product photo
 > on the right, and the price below it. Show me what it looks like.*
 
-It writes the template, renders it, **looks at the image**, and revises. **Given a brief
-with no layout, no positions and no sizes, an agent designed three distinct banners
-across three runs** — hierarchy, colour, type pairing, invented copy — and zoomed into
-regions to read the small text it had drawn.
+It writes the layout, renders it, **looks at the image**, and revises. The brief names no
+position and no size.
+
+**A brief is a search.** A different layout each run, which is what asking for one means. Like
+a result? `parse_template` turns it into a recipe.
+
+**A recipe is a result.** The layout is fixed and the agent fills the values, so the same recipe
+looks the same every time. **[Start with one of fourteen »](docs/gallery/cookbook.md)**
 
 ## What this adds
 
-**The template layer runs inside your imagor.** Rendering stays in the instance you run, at
-the throughput it already has.
+**The template layer runs inside your imagor.** Rendering stays in the instance you run.
 
-**A layout compiles to a URL; a hosted template API returns an image.** Those bill and
-transfer the bytes on every render. imagor serves a URL instead, which any browser, proxy or
-CDN can cache — so the bytes are transferred once.
+**A layout compiles to a URL; a hosted template API returns an image.** Those bill and transfer
+bytes on every render. A URL is cached by any browser, proxy or CDN — so the bytes transfer
+once.
 
 ## Tools
 
