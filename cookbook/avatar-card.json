@@ -29,7 +29,7 @@
       "name": "circular portrait",
       "kind": "image",
       "image": "https://s.imagor.net/photos/photo-1586297135537-94bc9ba060aa.jpg",
-      "filters": "smart/filters:round_corner(160,160,173f34)",
+      "filters": "smart:round_corner(160,160,173f34)",
       "x": "135",
       "y": "155",
       "width": "320",
