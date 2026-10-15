@@ -25,6 +25,42 @@ Use the imagor cookbook recipe announcement, at 1200x628.
 1200x628/filters:text(b64:SU1BR09SIDEuOS44,88,87,Open-Sans-bold-18,d2f17f):image(84x5/color:d2f17f,88,138):text(b64:RXZlcnkgZmlsdGVyIG5vdyByZXBvcnRzIHdoZXRoZXIgaXQgcmFu,88,179,Liberation-Serif-68,f4f1e8,0,normal,708,low,normal,word):text(b64:QSBmaWx0ZXIgdGhhdCBkaWQgbm90aGluZyB1c2VkIHRvIGxvb2sgbGlrZSBvbmUgdGhhdCB3b3JrZWQu,88,389,Open-Sans-25,b3bec0,0,normal,696,low,normal,word):image(300x352/color:1d3b34,820,138):image(108x107/color:d2f17f,916,188):text(b64:4pyT,940,188,Open-Sans-bold-72,1d3b34):image(204x5/color:2f4a42,856,364):image(120x5/color:d2f17f,856,364):image(12x12/color:d2f17f,1080,364):image(204x5/color:2f4a42,856,401):image(168x5/color:d2f17f,856,401):image(12x12/color:d2f17f,1080,401):image(204x5/color:2f4a42,856,439):image(96x5/color:d2f17f,856,439):image(12x12/color:d2f17f,1080,439):text(imagor,88,502,Open-Sans-bold-20,d2f17f)/color:142e2b
 ```
 
+## avatar-card
+
+![avatar-card](gallery/avatar-card.png)
+
+*1200×630* — A landscape profile card with a circular portrait and a left-aligned identity block.
+
+**Ask your agent** — copy this into your client:
+
+```
+Use the imagor cookbook recipe avatar-card, at 1200x630.
+```
+
+**Or render it directly:**
+
+```
+1200x630/filters:image(full-68xfull-68/color:f4f1e8,34,34):image(full-80xfull-80/color:173f34,40,40):image(320x320/smart/filters:round_corner(160,160,173f34)/https://s.imagor.net/photos/photo-1586297135537-94bc9ba060aa.jpg,135,155):image(2x310/color:d8c79b,500,160):text(b64:TWVpIExhbQ,555,207,Open-Sans-bold-64,f4f1e8):text(b64:UGxhdGZvcm0gZW5naW5lZXJpbmc,558,302,Open-Sans-34,cbd4ce):text(b64:QG1laWxhbQ,558,365,Open-Sans-30,d8c79b):image(500x2/color:d8c79b,558,430)/color:173f34
+```
+
+## circles
+
+![circles](gallery/circles.png)
+
+*1200×630* — A row of contributors as circular portraits with names and roles beneath. The portraits should be images on a plain or transparent ground - a source with its own background shows that background as a square block around the circle, which is the source's shape and not a fault in the corner.
+
+**Ask your agent** — copy this into your client:
+
+```
+Use the imagor cookbook recipe circles, at 1200x630.
+```
+
+**Or render it directly:**
+
+```
+1200x630/filters:image(26x3/color:c36c4a,72,64):text(SABLON,112,53,Open-Sans-bold-18,242a27):text(b64:VGhlIHBlb3BsZSBiZWhpbmQgaXQ,72,102,Liberation-Serif-64,242a27,0,normal,full-144,low,normal,word):image(176x176/smart/filters:round_corner(88,88,f6f4ee)/https://s.imagor.net/photos/photo-1654765437547-6b572f52ee1a.jpg,92,238):image(176x176/smart/filters:round_corner(88,88,f6f4ee)/https://s.imagor.net/photos/photo-1595152772835-219674b2a8a6.jpg,372,238):image(176x176/smart/filters:round_corner(88,88,f6f4ee)/https://s.imagor.net/photos/photo-1764103372936-a2c6aceb4233.jpg,652,238):image(176x176/smart/filters:round_corner(88,88,f6f4ee)/https://s.imagor.net/photos/photo-1633625576932-348e73c45e82.jpg,932,238):image(220x83/filters:text(b64:TWVpIExhbQ,center,0,Open-Sans-bold-24,242a27,0,normal,220,center,normal,word):text(b64:UGxhdGZvcm0gZW5naW5lZXJpbmc,center,38,Open-Sans-16,6f7771,0,normal,220,center,normal,word)/color:none,70,431):image(220x83/filters:text(b64:Sm9uIEhv,center,0,Open-Sans-bold-24,242a27,0,normal,220,center,normal,word):text(b64:SW1hZ2UgcGlwZWxpbmU,center,38,Open-Sans-16,6f7771,0,normal,220,center,normal,word)/color:none,350,431):image(220x83/filters:text(b64:QWRhIENoZW5n,center,0,Open-Sans-bold-24,242a27,0,normal,220,center,normal,word):text(b64:RGV2ZWxvcGVyIGV4cGVyaWVuY2U,center,38,Open-Sans-16,6f7771,0,normal,220,center,normal,word)/color:none,630,431):image(220x83/filters:text(b64:U2FtIFl1ZW4,center,0,Open-Sans-bold-24,242a27,0,normal,220,center,normal,word):text(Reliability,center,38,Open-Sans-16,6f7771,0,normal,220,center,normal,word)/color:none,910,431):image(full-144x1/color:d9d6cd,72,556):image(78x30/filters:text(imagor,center,0,Open-Sans-bold-15,777d77,0,normal,78,center,normal,word)/color:none,1050,573)/color:f6f4ee
+```
+
 ## comparison
 
 ![comparison](gallery/comparison.png)
