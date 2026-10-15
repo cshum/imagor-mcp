@@ -49,6 +49,18 @@ Three checks worth knowing the edges of:
   refuses to publish fewer sections than are committed; that guard is the only reason
   the two lost recipes above were noticed at all.
 
+```
+go generate ./internal/filters   # after a dependency bump; commit the result
+```
+
+The catalogue is generated from the imagor release pinned in `go.mod`. A stale one
+accepts filters imagor ignores, or rejects ones that exist.
+
+**A green suite does not mean the output is right.** Every fault recorded in
+`docs/build-log.md` passed every check that existed at the time. Rendering the sheet
+and looking at it is the only test that has ever caught a layout fault, a substituted
+font, or a caption sitting on a picture.
+
 ## A field the validator cannot see
 
 `filtercat.Check` is what refuses a filter, and it judges the argument string. The
