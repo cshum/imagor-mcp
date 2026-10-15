@@ -1,6 +1,7 @@
 # Imagor MCP
 
 [![Test Status](https://github.com/cshum/imagor-mcp/workflows/ci/badge.svg)](https://github.com/cshum/imagor-mcp/actions/workflows/ci.yml)
+[![Docs](https://img.shields.io/badge/docs-docs.imagor.net-white)](https://docs.imagor.net)
 
 An MCP server and a skill that add template capability to
 [imagor](https://github.com/cshum/imagor).
@@ -84,4 +85,4 @@ The rest of the documentation:
 
 ## Licence
 
-MIT.
+MIT
