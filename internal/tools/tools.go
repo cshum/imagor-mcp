@@ -1681,7 +1681,9 @@ func Register(s *mcp.Server, cfg Config) {
 			"full-N, and one template then serves several sizes. A text slot given a height is fitted " +
 			"with fit_text against the box its geometry resolves to, because a font size is absolute " +
 			"and would otherwise be relatively smaller on a larger canvas. Values fill {{placeholders}}. " +
-			"Returns the path, the URL, and what each slot resolved to.",
+			"Returns the path, the URL, and what each slot resolved to. **Verify it before handing it " +
+			"over** - imagor answers 200 with the image unchanged when a filter does not apply, so a " +
+			"render that reports success is not a render that is right.",
 	}, cfg.RenderTemplateTool)
 
 	mcp.AddTool(s, &mcp.Tool{
