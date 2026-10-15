@@ -37,6 +37,29 @@ gallery so a change cannot land without it.
 CI runs `gofmt`, `go vet`, `go test -race`, and a drift guard on the generated filter
 catalogue. It does **not** look at a rendered image.
 
+Three checks worth knowing the edges of:
+
+- **`gofmt` and `go test` do not read struct tags; `go vet` does.** A `jsonschema:`
+  description *is* a tag, so editing one is a tag edit: a quote inside the value makes it
+  unparseable and the other two pass.
+- **The mirror check reads imagor's page at `?ref=master`.** On a 404 it prints
+  "does not carry the page yet" and exits **0**. It did that on every run from the day it
+  was written, because the ref it asks for does not exist.
+- **A failed recipe is dropped silently**, no error and no marker. The gallery job
+  refuses to publish fewer sections than are committed; that guard is the only reason
+  the two lost recipes above were noticed at all.
+
+## A field the validator cannot see
+
+`filtercat.Check` is what refuses a filter, and it judges the argument string. The
+builder folds `Source` and `Text` into that string, so anything checking `Args` alone
+rejects the form the schema tells callers to prefer — which is what happened to `source`
+and `text`. **One helper, used by both sides, is the only way they cannot drift.**
+
+The same shape recurs: a description or field that tells a caller to write something
+imagor rejects. Five defects in one day had it, and none of them errored at authoring
+time — each produced something that looked like success.
+
 ```
 go generate ./internal/filters   # after a dependency bump; commit the result
 ```
@@ -143,6 +166,24 @@ Two things will look like improvements and are not:
 The page gives each card a sentence to paste instead of a tool call to understand. A
 reader knows how to ask their agent for something; they do not know what an MCP tool is.
 
+## Releasing
+
+Tag only; the version comes from the tag. Two things reach a client **only** through a
+release, so a fix to either needs one: anything `go:embed`ed (`SKILL.md`,
+`references/cookbook.md`, the recipes) and every tool description.
+
+- `server.json`'s `description` is capped at **100 characters** by the registry schema;
+  the mcpb's has no limit, so the two differ on purpose. A 131-character one failed the
+  publish *inside the release run* — the version shipped and the registry stayed behind.
+- Read `isLatest` at `row._meta`, not `server._meta`, and allow 15-30s for the search
+  endpoint. A short timeout reads as "missing".
+- A failed publish is repairable without re-tagging: `publish-mcp.yml` takes a `tag` input
+  through `workflow_dispatch` and reads the file from the dispatch ref.
+- **`docker run` does not pull a cached tag.** Probing a release needs an explicit
+  `docker pull` first or it answers as whatever version was last pulled.
+- The gallery workflow pins the imagor image; the tag's own run is the one place that CI
+  change is exercised, so a red job there is worth reading rather than re-running.
+
 ## Two front ends, one engine — keep them in step
 
 `cmd/imagor-template` and `cmd/imagor-mcp` are bindings on the same code in
@@ -247,6 +288,12 @@ never comes back.
 ## Filters on a slot's own source
 
 An `image` field is data, not syntax, so a value that looks like a path is encoded and
-cannot carry filters. A filter on the slot's own source lives in `filters`, written
-without the `filters:` prefix — `smart`, or `smart/filters:round_corner(230,230,fff)`,
-which is one segment with an internal slash.
+cannot carry filters. A filter on the slot's own source lives in `filters`, written in
+imagor's own form and **colon-separated**: `smart()`, or
+`smart():round_corner(230,230,fff)`.
+
+The builder adds the single `filters:` prefix for you. Writing `smart/filters:…` — which
+this section said until it cost two recipes — emits two `filters:` in one nested path
+and imagor answers **400 invalid**. Measured: the colon form renders, the slash form
+400s. `avatar-card` and `circles` shipped the slash form and dropped out of the
+published page for it.
