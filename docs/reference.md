@@ -3,7 +3,7 @@
 ## Tools
 
 Every tool the server answers `tools/list` with. Every parameter maps onto a concept in the
-[layout format](#the-layout-format) — there are no invented parameters, and nothing is signed
+[layout format](#the-layout-format): there are no invented parameters, and nothing is signed
 except by a tool that builds a path.
 
 | Tool | Purpose |
@@ -26,10 +26,10 @@ so it costs a session nothing until someone picks it.
 ## The layout format
 
 A template carries no canvas size. Geometry is relative, and text with a `height` is fitted to
-its box, so the same layout serves 1200×630 and 1080×1080 — write it once, render it anywhere.
+its box, so the same layout serves 1200×630 and 1080×1080. Write it once, render it anywhere.
 
-The rest of the format — nested canvases, filters on a slot's own source, what a path can and
-cannot carry — is in [the skill](#the-skill), where the reader is an agent that has to write one.
+The rest of the format is in [the skill](#the-skill), where the reader is an agent that has to
+write one: nested canvases, filters on a slot's own source, and what a path can and cannot carry.
 
 ### One direction is the source
 
@@ -43,7 +43,7 @@ are gone, and a relative form like `38p` or `half` is already the number it reso
 an agent the template, not the path: a template re-fills for the next person, a path renders once.
 
 One caveat: a text slot with a height is fitted by measuring, and measuring renders a probe
-through imagor — so a compile needs a running imagor. Everything else is pure.
+through imagor, so a compile needs a running imagor. Everything else is pure.
 
 ## The skill
 
@@ -71,5 +71,5 @@ It is a tool parameter rather than one resource per section because a resource i
 application decides to read it, and a client that surfaces only tools would not see the skill at
 all.
 
-The prompt `compose-imagor-image` still carries the whole document — a user who picks it from a
-menu has asked for it.
+The prompt `compose-imagor-image` still carries the whole document, because a user who picks it
+from a menu has asked for it.

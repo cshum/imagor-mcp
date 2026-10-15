@@ -24,7 +24,7 @@ is why it names `localhost` and not a container-internal host.
 
 That is the one real cost of running the server in a container. There, the host is
 `host.docker.internal` and `localhost` is the container, so the server needs
-`-e IMAGOR_BASE_URL=http://host.docker.internal:8000` to work at all — and every URL it hands you
+`-e IMAGOR_BASE_URL=http://host.docker.internal:8000` to work at all, and every URL it hands you
 then carries a name your browser cannot resolve. On the host, one address does both jobs.
 Anything that puts a proxy or a different hostname in front of imagor does the same.
 
@@ -34,7 +34,7 @@ The server speaks MCP over stdio, so it is a `command` a client runs. Nearly eve
 describes that with the same three fields, and then disagrees about where the file lives and what
 the servers are keyed under.
 
-This is the shape most clients read — Claude Desktop, Claude Code, Cursor, Windsurf:
+This is the shape most clients read: Claude Desktop, Claude Code, Cursor, Windsurf.
 
 ```json
 {
@@ -89,7 +89,7 @@ The file itself:
 
 ### Codex
 
-TOML, so the JSON above is not a near miss — it is a syntax error:
+TOML, so the JSON above is not a near miss. It is a syntax error:
 
 ```toml
 [mcp_servers.imagor]
@@ -113,7 +113,7 @@ it reads and what it calls the servers. `command: imagor-mcp` assumes the
 
 `verify_imagor_url` fetches through imagor's `preview()` filter, which opts the request into
 imagor's in-memory cache. That cache is imagor's setting, not this server's, and it is keyed by
-source image rather than by composition — see
+source image rather than by composition. See
 [imagor's in-memory cache](https://docs.imagor.net/in-memory-cache) for the variables and what
 they do.
 
@@ -129,7 +129,7 @@ to mint valid URLs, like any backend. Trust the component; do not trust the agen
 - **Blast radius stays imagor's to set.** A URL from an errant agent is still subject to every
   limit on the instance it lands on: `HTTP_LOADER_ALLOWED_SOURCES`, `VIPS_MAX_RESOLUTION`,
   `IMAGOR_REQUEST_TIMEOUT`, and the `expire()` filter for a hard expiry. All of them are imagor's
-  settings, documented at [docs.imagor.net/security](https://docs.imagor.net/security) — this
+  settings, documented at [docs.imagor.net/security](https://docs.imagor.net/security). This
   server has no opinion about them and no way to override them.
 
 Do not host this multi-tenant for users whose keys you would then hold.
