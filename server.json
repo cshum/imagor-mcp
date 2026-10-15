@@ -19,25 +19,31 @@
       "environmentVariables": [
         {
           "name": "IMAGOR_BASE_URL",
-          "description": "The imagor server these tools build URLs for, for example http://localhost:8000",
-          "isRequired": true,
+          "description": "Where imagor is running, for example http://localhost:8000. Defaults to http://localhost:8000.",
+          "isRequired": false,
           "isSecret": false
         },
         {
           "name": "IMAGOR_UNSAFE",
-          "description": "Set to 1 when the imagor server runs in unsafe mode. Leave unset when it is signed.",
+          "description": "Set to 1 when the imagor server runs in unsafe mode, for trying things out. The server will not start without IMAGOR_UNSAFE or IMAGOR_SECRET.",
           "isRequired": false,
           "isSecret": false
         },
         {
           "name": "IMAGOR_SECRET",
-          "description": "The signing secret, when the imagor server is signed. Must match the server's own secret and signer settings.",
+          "description": "The signing secret, when the imagor server is signed. The alternative to IMAGOR_UNSAFE; the server will not start without one of the two.",
           "isRequired": false,
           "isSecret": true
         },
         {
           "name": "IMAGOR_SIGNER_TYPE",
-          "description": "sha1, sha256 or sha512. Must match the imagor server, and defaults to sha1 as the server does.",
+          "description": "Signature algorithm the imagor server is configured with: sha1 (default), sha256 or sha512. Must match the server or emitted URLs will not validate.",
+          "isRequired": false,
+          "isSecret": false
+        },
+        {
+          "name": "IMAGOR_SIGNER_TRUNCATE",
+          "description": "Signature length in characters, when the imagor server truncates signatures. Must match the server or emitted URLs will not validate.",
           "isRequired": false,
           "isSecret": false
         }

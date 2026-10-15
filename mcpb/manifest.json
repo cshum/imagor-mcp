@@ -24,7 +24,8 @@
         "IMAGOR_BASE_URL": "${user_config.imagor_base_url}",
         "IMAGOR_UNSAFE": "${user_config.imagor_unsafe}",
         "IMAGOR_SECRET": "${user_config.imagor_secret}",
-        "IMAGOR_SIGNER_TYPE": "${user_config.imagor_signer_type}"
+        "IMAGOR_SIGNER_TYPE": "${user_config.imagor_signer_type}",
+        "IMAGOR_SIGNER_TRUNCATE": "${user_config.imagor_signer_truncate}"
       },
       "platform_overrides": {
         "win32": {
@@ -37,9 +38,8 @@
     "imagor_base_url": {
       "type": "string",
       "title": "imagor base URL",
-      "description": "The imagor server these tools build URLs for, for example http://localhost:8000",
-      "default": "http://localhost:8000",
-      "required": true
+      "description": "Where imagor is running, for example http://localhost:8000.",
+      "default": "http://localhost:8000"
     },
     "imagor_unsafe": {
       "type": "string",
@@ -57,11 +57,21 @@
     "imagor_signer_type": {
       "type": "string",
       "title": "IMAGOR_SIGNER_TYPE",
-      "description": "sha1, sha256 or sha512. Must match the imagor server, and defaults to sha1 as the server does.",
+      "description": "Signature algorithm the imagor server uses: sha1 (default), sha256 or sha512. Must match the server or emitted URLs will not validate.",
       "default": "sha1"
+    },
+    "imagor_signer_truncate": {
+      "type": "string",
+      "title": "IMAGOR_SIGNER_TRUNCATE",
+      "description": "Signature length in characters, when the imagor server truncates signatures. Must match the server.",
+      "default": ""
     }
   },
   "compatibility": {
-    "platforms": ["darwin", "linux", "win32"]
+    "platforms": [
+      "darwin",
+      "linux",
+      "win32"
+    ]
   }
 }
