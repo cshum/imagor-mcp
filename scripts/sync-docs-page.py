@@ -108,7 +108,6 @@ def build():
     ]
     for title, nxt in SECTIONS:
         parts += [f"## {title}", "", to_docs_site(section(readme, title, nxt)), ""]
-    parts += [f"Everything above is the [imagor-mcp README]({REPO}#readme), kept in step with it.", ""]
     return "\n".join(parts)
 
 
