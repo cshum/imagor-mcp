@@ -3,10 +3,8 @@
 **An MCP server and a skill that add template capability to
 [imagor](https://github.com/cshum/imagor).**
 
-An agent writes a layout — slots, positions, type, colours — and the layout compiles to a single
-imagor URL, at any canvas size. That URL is served like any other, so it is signed, cached and
-delivered by the pipeline you already run: opened in a browser, put in a page, or stored behind a
-CDN.
+An agent writes a layout — OG cards, a product grid, quotes, testimonials — and it compiles to a
+single imagor URL, at any canvas size.
 
 [![Cards, each one a single imagor URL](docs/gallery/contact-sheet.png)](docs/gallery/cookbook.md)
 
