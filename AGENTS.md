@@ -9,7 +9,7 @@ The suite needs a live imagor, and it must be **the published image**, not a bin
 built for this machine:
 
 ```
-docker run -d -p 8197:8000 ghcr.io/cshum/imagor:1.9.10 -imagor-unsafe
+docker run -d -p 8197:8000 ghcr.io/cshum/imagor:1.9.11 -imagor-unsafe
 IMAGOR_BASE_URL=http://localhost:8197 IMAGOR_UNSAFE=1 go test ./...
 ```
 
@@ -202,43 +202,33 @@ release, so a fix to either needs one: anything `go:embed`ed (`SKILL.md`,
 `internal/tools`.
 
 **The repo is named for the server; the second command keeps its own name.** A user
-installs `imagor-mcp`, and the bundle, the server name in the manifest and the
-`go install` path all say so. `imagor-template` runs a template you already have, and
-renaming it to match the repo would be a lie about what it does.
+installs `imagor-mcp`, and the bundle, the manifest and the `go install` path all say so,
+while `imagor-template` runs a template you already have and renaming it would misdescribe
+it.
 
-Renaming the repo moved the **module path** with it, and a module path is verified
-rather than redirected: Go reads the `module` line and refuses a fetch whose path does
-not match. So `go install github.com/cshum/imagor-mcp/...` resolves only from the first
-tag cut after the rename — every earlier tag declares the old path and answers with
-`module declares its path as ... but was required as ...`. Old release URLs and the old
-`go install` path keep working, because GitHub redirects a renamed repo and the old tags
-are unchanged. **Cut a tag after any future rename**, or the install line is dead until
-you do.
+**Cut a tag after any future rename.** A module path is verified, not redirected: Go reads
+the `module` line and refuses a fetch whose path does not match, so
+`go install .../imagor-mcp/...` resolves only from a tag cut after the rename. Old release
+URLs and the old install path keep working, because GitHub redirects the repo and the old
+tags are unchanged. Nothing here is importable from outside the module, so a rename can
+only strand that one line.
 
-Nothing here is importable from outside the module, so a rename can only strand the
-`go install` line: the engine is all `internal/`, and the root package carries four
-embedded strings.
+**The CLI is a runner, not an authoring path.** Writing a template is what the agent does,
+so the CLI cannot stand in for it; it compiles a template you already have, where no agent
+is: a stored layout, a build step, a script checking the cookbook.
 
-**The CLI is a runner, not an authoring path.** A template has to be written, and writing
-one is what the agent does — so the CLI cannot stand in for the server. It compiles a
-template you already have, in a place with no agent in it: a stored layout, a build step,
-a script checking the cookbook. Describing it as an alternative to the agent was wrong and
-is worth not repeating.
-
-**`cmd/imagor-template/main_test.go` pins this**: `TestCompileMatchesTheServer` compiles
-every recipe through both front ends and fails if they disagree. If a change to the
-engine makes the two diverge, that test names the recipe. Add a recipe and it is covered
-without touching the test.
+**`TestCompileMatchesTheServer` pins the pair**: it compiles every recipe through both front
+ends and fails if they disagree, naming the recipe. Add a recipe and it is covered without
+touching the test.
 
 **Compiling is deterministic given an imagor, not pure.** A text slot with a height is
-fitted by measuring, and measuring renders a probe through imagor, so `IMAGOR_BASE_URL`
-has to resolve or every recipe with a fitted slot fails. **The CLI tests skip rather
-than fail without it** — a skip is the honest outcome, and CI provides a base URL.
+fitted by measuring, which renders a probe through imagor, so `IMAGOR_BASE_URL` must
+resolve. The CLI tests **skip** rather than fail without it; CI provides one.
 
-**The cookbook carries three canvas shapes** (`[w, h]`, `{width, height, background}`
-and `{width, height}` with the background alongside). `templateFile.canvas()` accepts
-all three so a recipe cannot become unusable through a front end that handles one. They
-should be normalised to one shape, but until then this is the compatibility layer.
+**The cookbook carries three canvas shapes** (`[w, h]`, `{width, height, background}`,
+`{width, height}` with the background alongside). `templateFile.canvas()` accepts all three
+so a recipe cannot become unusable through a front end that handles one — a compatibility
+layer that should be normalised to one shape.
 
 ## The `.mcpb` bundle: resolve paths before changing directory
 
