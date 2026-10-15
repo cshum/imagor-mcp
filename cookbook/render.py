@@ -30,6 +30,10 @@ BASE = os.environ.get("IMAGOR_BASE_URL", "http://localhost:8197")
 # job failed on a directory that only exists on a laptop.
 SRC = os.environ.get("IMAGOR_COOKBOOK_DIR", os.path.dirname(os.path.abspath(__file__)))
 OUT = sys.argv[1] if len(sys.argv) > 1 else "/tmp/gallery3"
+# The page and the images are both written into OUT, so by default a card references
+# "name.png" beside it. The repo commits the page one directory up, beside the rest of
+# the docs, so CI passes "gallery/" and the references stay correct.
+IMG = sys.argv[2] if len(sys.argv) > 2 else ""
 
 
 def canvas_of(recipe):
@@ -159,7 +163,7 @@ def main():
         "",
         "Each card also carries the URL it resolves to, for rendering without an agent.",
         "",
-        "[Back to the README](../README.md) · [All of them, one image](contact-sheet.png)",
+        f"[Back to the README](../README.md) · [All of them, one image]({IMG}contact-sheet.png)",
         "",
     ]
     for name, _ in ims:
@@ -170,7 +174,7 @@ def main():
         lines += [
             f"## {name}",
             "",
-            f"![{name}]({name}.png)",
+            f"![{name}]({IMG}{name}.png)",
             "",
             f"*{w}×{h}* — {note}",
             "",

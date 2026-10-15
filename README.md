@@ -6,9 +6,9 @@
 An agent writes a layout — OG cards, product grids, quotes, testimonials — that compiles to one
 imagor URL.
 
-[![Cards, each one a single imagor URL](docs/gallery/contact-sheet.png)](docs/gallery/cookbook.md)
+[![Cards, each one a single imagor URL](docs/gallery/contact-sheet.png)](docs/cookbook.md)
 
-*[See the recipes »](docs/gallery/cookbook.md)*
+*[See the recipes »](docs/cookbook.md)*
 
 ## Quick start
 
@@ -58,7 +58,7 @@ neither. Every client's file path, and the shape each one wants, is in
 **[docs/clients.md](docs/clients.md)**.
 
 **4. Ask it for something.** Name a recipe from the
-**[cookbook](docs/gallery/cookbook.md)** — each one carries a prompt to paste — or describe the
+**[cookbook](docs/cookbook.md)** — each one carries a prompt to paste — or describe the
 image you want. The agent composes through the tools: it writes the layout, renders it, looks at
 the result, and hands you back the url. Neither of you needs imagor's path syntax — the tools
 build the path, and refuse one that cannot work.
@@ -88,7 +88,7 @@ zoomed into regions to read the small text it had drawn. Like a result? `parse_t
 into a recipe.
 
 **A recipe is a result.** The layout is fixed and the agent fills the values, so the same recipe
-looks the same every time. **[Start with one of the recipes »](docs/gallery/cookbook.md)**
+looks the same every time. **[Start with one of the recipes »](docs/cookbook.md)**
 
 ## What this adds
 
@@ -110,7 +110,7 @@ is for, is in **[docs/tools.md](docs/tools.md)**.
 card, quotes, testimonials, an event, a comparison table, a price ladder. Take the
 closest, change the values, render it.
 
-**[Every card, and the path it resolves to »](docs/gallery/cookbook.md)** The template is
+**[Every card, and the path it resolves to »](docs/cookbook.md)** The template is
 not on that page: a recipe travels in the server and arrives by name.
 
 Every recipe renders **at three canvas sizes on every commit**, and the contact sheet above

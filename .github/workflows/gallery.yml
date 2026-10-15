@@ -65,14 +65,14 @@ jobs:
           IMAGOR_MCP_BIN: /tmp/imagor-mcp
         run: |
           pip install --quiet Pillow
-          python3 cookbook/render.py /tmp/gallery
+          python3 cookbook/render.py /tmp/gallery gallery/
           python3 cookbook/index.py
 
       - name: Copy the sheet and the hero cards
         run: |
           mkdir -p docs/gallery
           cp /tmp/gallery/_sheet.png docs/gallery/contact-sheet.png
-          cp /tmp/gallery/cookbook.md docs/gallery/cookbook.md
+          cp /tmp/gallery/cookbook.md docs/cookbook.md
           # every card is published, not just the three heroes: the page lists each
           # one with the path that produced it, and a broken image there is a broken
           # link in the documentation. The sheet is excluded because it is copied
@@ -86,13 +86,13 @@ jobs:
 
       - name: Commit if it changed
         run: |
-          if git diff --quiet -- docs/gallery; then
+          if git diff --quiet -- docs/gallery docs/cookbook.md; then
             echo "the gallery is unchanged"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/gallery
+          git add docs/gallery docs/cookbook.md
           git commit -m "gallery: re-render the contact sheet
 
           Rendered from the cookbook on $(date -u +%Y-%m-%d). Committed so the image

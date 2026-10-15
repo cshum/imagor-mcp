@@ -5,11 +5,11 @@ your agent** and it fetches that recipe and renders it for you.
 
 Each card also carries the URL it resolves to, for rendering without an agent.
 
-[Back to the README](../README.md) · [All of them, one image](contact-sheet.png)
+[Back to the README](../README.md) · [All of them, one image](gallery/contact-sheet.png)
 
 ## announcement
 
-![announcement](announcement.png)
+![announcement](gallery/announcement.png)
 
 *1200×628* — Headline, one supporting line, one visual. The tech/startup announcement card.
 
@@ -27,7 +27,7 @@ Use the imagor cookbook recipe announcement, at 1200x628.
 
 ## avatar-card
 
-![avatar-card](avatar-card.png)
+![avatar-card](gallery/avatar-card.png)
 
 *1200×630* — A landscape profile card with a circular portrait and a left-aligned identity block.
 
@@ -45,7 +45,7 @@ Use the imagor cookbook recipe avatar-card, at 1200x630.
 
 ## circles
 
-![circles](circles.png)
+![circles](gallery/circles.png)
 
 *1200×630* — A row of contributors as circular portraits with names and roles beneath. The portraits should be images on a plain or transparent ground - a source with its own background shows that background as a square block around the circle, which is the source's shape and not a fault in the corner.
 
@@ -63,7 +63,7 @@ Use the imagor cookbook recipe circles, at 1200x630.
 
 ## comparison
 
-![comparison](comparison.png)
+![comparison](gallery/comparison.png)
 
 *1200×630* — Two matched columns of points, for a before and after.
 
@@ -81,7 +81,7 @@ Use the imagor cookbook recipe comparison, at 1200x630.
 
 ## event
 
-![event](event.png)
+![event](gallery/event.png)
 
 *1200×628* — Date block, title, venue. The open-house / meetup format.
 
@@ -99,7 +99,7 @@ Use the imagor cookbook recipe event, at 1200x628.
 
 ## launch-card
 
-![launch-card](launch-card.png)
+![launch-card](gallery/launch-card.png)
 
 *1200×630* — Editorial split layout for a seasonal accessories collection announcement.
 
@@ -117,7 +117,7 @@ Use the imagor cookbook recipe launch-card, at 1200x630.
 
 ## news-announcement
 
-![news-announcement](news-announcement.png)
+![news-announcement](gallery/news-announcement.png)
 
 *1200×630* — A restrained, editorial announcement for a product return, pairing a prominent headline with a supporting quote and dateline.
 
@@ -135,7 +135,7 @@ Use the imagor cookbook recipe news-announcement, at 1200x630.
 
 ## og-modern
 
-![og-modern](og-modern.png)
+![og-modern](gallery/og-modern.png)
 
 *1200×630* — A dark, restrained Open Graph card with a textured navy ground, split headline, and fitted product grid.
 
@@ -153,7 +153,7 @@ Use the imagor cookbook recipe og-modern, at 1200x630.
 
 ## og-standard
 
-![og-standard](og-standard.png)
+![og-standard](gallery/og-standard.png)
 
 *1200×630* — A text-first 1200x630 Open Graph layout with a small brand mark, prominent title, supporting description, and quiet domain footer.
 
@@ -171,7 +171,7 @@ Use the imagor cookbook recipe og-standard, at 1200x630.
 
 ## product-grid
 
-![product-grid](product-grid.png)
+![product-grid](gallery/product-grid.png)
 
 *1800×942* — Lifestyle-led editorial product grid with a tall campaign panel and product captions nested in each image canvas.
 
@@ -189,7 +189,7 @@ Use the imagor cookbook recipe product-grid, at 1800x942.
 
 ## product-og
 
-![product-og](product-og.png)
+![product-og](gallery/product-og.png)
 
 *1200×630* — An editorial product share card with a featured product photograph and concise offer details.
 
@@ -207,7 +207,7 @@ Use the imagor cookbook recipe product-og, at 1200x630.
 
 ## quote-card
 
-![quote-card](quote-card.png)
+![quote-card](gallery/quote-card.png)
 
 *1200×630* — A pull quote on deep green: the quotation in serif, attributed below a rule.
 
@@ -225,7 +225,7 @@ Use the imagor cookbook recipe quote-card, at 1200x630.
 
 ## testimonial
 
-![testimonial](testimonial.png)
+![testimonial](gallery/testimonial.png)
 
 *1200×628* — B2B customer quote with an inset forest panel, warm paper margins and restrained brass accents.
 
@@ -243,7 +243,7 @@ Use the imagor cookbook recipe testimonial, at 1200x628.
 
 ## tip
 
-![tip](tip.png)
+![tip](gallery/tip.png)
 
 *1200×628* — One actionable tip per card. The educational format.
 
