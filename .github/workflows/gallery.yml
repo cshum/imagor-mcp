@@ -68,6 +68,19 @@ jobs:
           python3 cookbook/render.py /tmp/gallery gallery/
           python3 cookbook/index.py
 
+      # A recipe that fails to render is dropped from the page silently - no error, no marker -
+      # so the job used to commit a cookbook that had quietly lost sections, and the sheet shrank
+      # with it. Compare against the committed page and refuse rather than publish the loss.
+      - name: Refuse a page that lost recipes
+        run: |
+          new=$(grep -c '^## ' /tmp/gallery/cookbook.md || true)
+          old=$(grep -c '^## ' docs/cookbook.md || true)
+          echo "rendered $new recipe sections, the committed page has $old"
+          if [ "$new" -lt "$old" ]; then
+            echo "::error::the render lost $((old - new)) recipe section(s). A failed recipe is dropped silently, so this is refused rather than committed - find which one, fix it, and re-run."
+            exit 1
+          fi
+
       - name: Copy the sheet and the hero cards
         run: |
           mkdir -p docs/gallery
