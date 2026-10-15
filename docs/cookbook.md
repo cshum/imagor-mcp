@@ -3,13 +3,9 @@
 Ready-made layouts, each one a single imagor URL. Copy a card's prompt into your agent
 and it fetches that recipe and renders it for you.
 
-A brief is a search: the same brief three times gave three distinct banners, with
-hierarchy, colour, type pairing and invented copy. A recipe is a result: the layout is
-fixed and the agent fills the values, so the same recipe looks the same every time.
-
 Each card also carries the URL it resolves to, for rendering without an agent.
 
-[Back to the README](../README.md) · [All of them, one image](gallery/contact-sheet.png)
+[Back to the README](../README.md)
 
 ## announcement
 
