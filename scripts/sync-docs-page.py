@@ -31,9 +31,7 @@ SHORT = REPO.removeprefix("https://")
 SECTIONS = [
     ("Quick start", "What an agent does with it"),
     ("What an agent does with it", "What this adds"),
-    ("What this adds", "Tools"),
-    ("Tools", "The cookbook"),
-    ("The cookbook", "Going deeper"),
+    ("What this adds", "Going deeper"),
     ("Going deeper", "Licence"),
 ]
 
