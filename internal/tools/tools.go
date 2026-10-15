@@ -184,6 +184,14 @@ func textArgs(text, tail string) string {
 	return encoded + "," + tail
 }
 
+// filterArgs is the argument string a filter will actually carry: the same value the path
+// builder emits. Validating f.Args alone counts one argument too few whenever the source or the
+// text travels in its own field, so a filter written the documented way was rejected as
+// under-argumented while the path it built was correct.
+func filterArgs(f FilterInput) string {
+	return textArgs(f.Text, sourceArgs(f.Source, f.Args))
+}
+
 // FilterInput is one imagor filter and its arguments.
 type FilterInput struct {
 	Name string `json:"name" jsonschema:"filter name, for example fill, format, quality, blur, rotate, invert, watermark, text, image, max_age"`
@@ -282,10 +290,10 @@ func (in TransformInput) toParams() (imagorpath.Params, error) {
 		// silently, returning an unchanged image with a 200 response, so those
 		// are refused here. Excess arguments only warn — see filterWarnings —
 		// because imagor's tolerance differs per filter.
-		if outcome, msg := filtercat.Check(name, f.Args); outcome == filtercat.Rejected {
+		if outcome, msg := filtercat.Check(name, filterArgs(f)); outcome == filtercat.Rejected {
 			return imagorpath.Params{}, errors.New(msg)
 		}
-		filters = append(filters, imagorpath.Filter{Name: name, Args: textArgs(f.Text, sourceArgs(f.Source, f.Args))})
+		filters = append(filters, imagorpath.Filter{Name: name, Args: filterArgs(f)})
 	}
 	if in.MaxAgeSeconds > 0 {
 		filters = append(filters, imagorpath.Filter{Name: "max_age", Args: strconv.Itoa(in.MaxAgeSeconds)})
