@@ -38,7 +38,7 @@ type InnerSlot struct {
 	// An image field is data, not syntax: a value that looks like a path is encoded
 	// so it cannot be read as one. So a filter on this slot's own source needs
 	// somewhere else to live, and this is it.
-	Filters string `json:"filters,omitempty" jsonschema:"for image or rect: filters applied to this slot's own source, written without the filters: prefix, e.g. smart/filters:round_corner(230,230,fff)"`
+	Filters string `json:"filters,omitempty" jsonschema:"for image or rect: filters applied to this slot's own source, colon-separated, for example "smart():round_corner(230,230,fff)". The filters: prefix is added for you. Measured: a slash between filters 404s"`
 }
 
 // TemplateSlot is one element of a template.
@@ -71,7 +71,7 @@ type TemplateSlot struct {
 	// An image field is data, not syntax: a value that looks like a path is encoded
 	// so it cannot be read as one. So a filter on this slot's own source needs
 	// somewhere else to live, and this is it.
-	Filters string `json:"filters,omitempty" jsonschema:"for image or rect: filters applied to this slot's own source, written without the filters: prefix, e.g. smart/filters:round_corner(230,230,fff)"`
+	Filters string `json:"filters,omitempty" jsonschema:"for image or rect: filters applied to this slot's own source, colon-separated, for example "smart():round_corner(230,230,fff)". The filters: prefix is added for you. Measured: a slash between filters 404s"`
 
 	// A slot that carries its own slots is a canvas: its width and height become
 	// the canvas the inner slots are laid out on, and the result is drawn at this
@@ -280,10 +280,11 @@ func (c Config) RenderTemplateTool(ctx context.Context, _ *mcp.CallToolRequest, 
 				}
 				// fit-in comes first, then filters, then the source. A fitted
 				// image carries fill(none), which centres it in its box and makes
-				// the letterbox transparent. The slot's own filters follow as a
-				// segment of their own, because the image field is data and cannot
-				// hold a path - and because a slot may need both, e.g. smart and
-				// round_corner, which is one segment with an internal slash.
+				// the letterbox transparent. The slot's own filters join the same
+				// filters: namespace, colon-separated the way imagor writes them,
+				// because the image field is data and cannot hold a path. Measured:
+				// smart():round_corner(10) renders, smart()/round_corner(10) 404s -
+				// a slash is a path separator, not a filter separator.
 				dims := fmt.Sprintf("%sx%s", iw, ih)
 				if slot.Fit {
 					dims = "fit-in/" + dims

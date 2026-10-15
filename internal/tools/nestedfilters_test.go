@@ -55,3 +55,24 @@ func TestFilterSourceThatIsAPathIsNotTreatedAsAURL(t *testing.T) {
 		t.Errorf("a path-typed Source was still encoded as a URL: %s", out.Path)
 	}
 }
+
+// The jsonschema description told callers to separate slot filters with a slash and gave
+// smart/filters:round_corner(230,230,fff) as the example. Measured against imagor: that form 404s and the
+// colon-separated one renders, so the documented form is asserted here rather than only described.
+func TestSlotFiltersAreColonSeparated(t *testing.T) {
+	c := Config{Unsafe: true}
+	_, out, err := c.RenderTemplateTool(context.Background(), nil, TemplateInput{
+		CanvasWidth: 1200, CanvasHeight: 630, Background: "color:ffffff",
+		Slots: []TemplateSlot{{
+			Name: "p", Kind: "image", Image: "https://example.com/a.png",
+			X: "0", Y: "0", Width: "400", Height: "full",
+			Filters: "smart():round_corner(230,230,fff)",
+		}},
+	})
+	if err != nil {
+		t.Fatalf("render: %v", err)
+	}
+	if !strings.Contains(out.Path, "filters:smart():round_corner(230,230,fff)") {
+		t.Errorf("the slot filters are not one colon-separated filters: segment: %s", out.Path)
+	}
+}
