@@ -1584,7 +1584,8 @@ func Register(s *mcp.Server, cfg Config) {
 			"filter's signature, description and accepted argument forms, which are generated " +
 			"from imagor's own filter reference. Build and verify in a loop: a request returns " +
 			"200 whether or not a filter did anything, so pass the same parameters to " +
-			"verify_imagor_url rather than assuming it worked.",
+			"verify_imagor_url rather than assuming it worked." +
+			" For a composed layout rendered at a canvas size, use render_template.",
 	}, cfg.BuildURLTool)
 
 	mcp.AddTool(s, &mcp.Tool{
@@ -1647,7 +1648,8 @@ func Register(s *mcp.Server, cfg Config) {
 	mcp.AddTool(s, &mcp.Tool{
 		Name: "validate_imagor_path",
 		Description: "Parse an imagor path and report whether it round-trips unchanged, plus a short " +
-			"summary of the transformation it describes. Use this to check a path before serving it.",
+			"summary of the transformation it describes. Use this to check a path before serving it." +
+			" To convert an existing path into an editable layout, use parse_template.",
 	}, cfg.ValidateTool)
 
 	mcp.AddTool(s, &mcp.Tool{
@@ -1683,7 +1685,8 @@ func Register(s *mcp.Server, cfg Config) {
 			"and would otherwise be relatively smaller on a larger canvas. Values fill {{placeholders}}. " +
 			"Returns the path, the URL, and what each slot resolved to. **Verify it before handing it " +
 			"over** - imagor answers 200 with the image unchanged when a filter does not apply, so a " +
-			"render that reports success is not a render that is right.",
+			"render that reports success is not a render that is right." +
+			" For one image with typed parameters and no layout, use build_imagor_url.",
 	}, cfg.RenderTemplateTool)
 
 	mcp.AddTool(s, &mcp.Tool{
@@ -1692,7 +1695,8 @@ func Register(s *mcp.Server, cfg Config) {
 			"rather than retyped. This is the inverse of render_template and the two are meant to be " +
 			"used together: render, look, adjust the JSON, render again. Read get_imagor_skill before " +
 			"composing anything. Note that the geometry comes back absolute - a path records the " +
-			"numbers a template resolved to, not the forms it was written in.",
+			"numbers a template resolved to, not the forms it was written in." +
+			" To check a path without converting it, use validate_imagor_path.",
 	}, cfg.ParseTemplateTool)
 
 	mcp.AddTool(s, &mcp.Tool{

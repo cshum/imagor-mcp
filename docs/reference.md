@@ -6,6 +6,11 @@ Every tool the server answers `tools/list` with. Every parameter maps onto a con
 [layout format](#the-layout-format): there are no invented parameters, and nothing is signed
 except by a tool that builds a path.
 
+The names carry a rule. A tool that works on imagor itself, its URL grammar and its filters, says
+`imagor`: `build_imagor_url`, `describe_imagor`, `get_imagor_skill`, `list_imagor_filters`,
+`validate_imagor_path`, `verify_imagor_url`. One that works on the template layer built on top
+does not: `fit_text`, `get_cookbook_recipe`, `parse_template`, `render_template`.
+
 | Tool | Purpose |
 |---|---|
 | `render_template` | Render a layout at a canvas size, with values filled in. Start here: half the loop. |
