@@ -74,12 +74,12 @@ trusted with, and what it refuses.
 
 ## Going deeper
 
-- [Setup](docs/setup.md) — every setting, the config file each client reads, and what to do
+- **[Setup](docs/setup.md)** — every setting, the config file each client reads, and what to do
   before it is public.
-- [Reference](docs/reference.md) — every tool the server serves, the layout format, and the
+- **[Reference](docs/reference.md)** — every tool the server serves, the layout format, and the
   skill.
-- [Cookbook](docs/cookbook.md) — the ready-made layouts, and the url each one resolves to.
-- [Contributing](CONTRIBUTING.md) — building, testing, and the CLI.
+- **[Cookbook](docs/cookbook.md)** — the ready-made layouts, and the url each one resolves to.
+- **[Contributing](CONTRIBUTING.md)** — building, testing, and the CLI.
 
 ## Licence
 
