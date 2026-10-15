@@ -83,15 +83,18 @@ A brief like this one:
 It writes the layout, renders it, **looks at the image**, and revises. The brief names no
 position and no size.
 
-**A brief is a search.** A different layout each run, which is what asking for one means. Like
-a result? `parse_template` turns it into a recipe.
+**A brief is a search, so each run gives a different layout.** Given the same brief three times,
+an agent produced three distinct banners — hierarchy, colour, type pairing, invented copy — and
+zoomed into regions to read the small text it had drawn. Like a result? `parse_template` turns it
+into a recipe.
 
 **A recipe is a result.** The layout is fixed and the agent fills the values, so the same recipe
 looks the same every time. **[Start with one of fourteen »](docs/gallery/cookbook.md)**
 
 ## What this adds
 
-**The template layer runs inside your imagor.** Rendering stays in the instance you run.
+**The template layer runs inside your imagor.** Rendering stays in the instance you run, at the
+throughput it already has.
 
 **A layout compiles to a URL; a hosted template API returns an image.** Those bill and transfer
 bytes on every render. A URL is cached by any browser, proxy or CDN — so the bytes transfer
