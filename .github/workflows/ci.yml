@@ -72,7 +72,7 @@ jobs:
           # the page up to date.
           url=https://api.github.com/repos/cshum/imagor/contents/docs/docs/imagor-mcp.md
           if ! curl -sfL --max-time 30 -H "Accept: application/vnd.github.raw" \
-               -H "Authorization: Bearer $GH_TOKEN" "$url?ref=main" -o /tmp/imagor-mcp-page.md; then
+               -H "Authorization: Bearer $GH_TOKEN" "$url?ref=master" -o /tmp/imagor-mcp-page.md; then
             echo "::notice::imagor/docs does not carry the page yet, so there is nothing to compare"
             exit 0
           fi
