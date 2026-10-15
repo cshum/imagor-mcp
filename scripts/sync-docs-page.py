@@ -25,6 +25,8 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 REPO = "https://github.com/cshum/imagor-mcp"
 BLOB = f"{REPO}/blob/main"
 SHORT = REPO.removeprefix("https://")
+SLUG = REPO.removeprefix("https://github.com/")
+OWNER, NAME = SLUG.split("/")
 
 # The sections the page mirrors, in the order the README has them. Adding a section to
 # the README means adding it here; that is the one thing this script cannot infer.
@@ -86,7 +88,9 @@ def build():
         "",
         "# Imagor MCP",
         "",
-        f"[![Test Status]({REPO}/workflows/ci/badge.svg)]({REPO}/actions/workflows/ci.yml)",
+        f"[![Test Status]({REPO}/workflows/ci/badge.svg)]({REPO}/actions/workflows/ci.yml) "
+        f'<iframe src="https://ghbtns.com/github-btn.html?user={OWNER}&repo={NAME}&type=star&count=true" '
+        f'frameBorder="0" scrolling="0" width="110" height="20" title="Star {SLUG} on GitHub"></iframe>',
         "",
         intro,
         "",
