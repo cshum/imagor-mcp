@@ -3,8 +3,8 @@
 **An MCP server and a skill that add template capability to
 [imagor](https://github.com/cshum/imagor).**
 
-An agent writes a layout — OG cards, a product grid, quotes, testimonials — and it compiles to a
-single imagor URL.
+An agent writes a layout — OG cards, product grids, quotes, testimonials — that compiles to one
+imagor URL.
 
 [![Cards, each one a single imagor URL](docs/gallery/contact-sheet.png)](docs/gallery/cookbook.md)
 
