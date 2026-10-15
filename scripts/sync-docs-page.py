@@ -70,7 +70,9 @@ def to_docs_site(text):
 
 def build():
     readme = (ROOT / "README.md").read_text()
-    intro = readme[readme.index("**An MCP server"):readme.index(INTRO_END)].strip()
+    # Everything between the title and the contact sheet: the subtitle and the line under it.
+    # Found by position, not by wording, so rewording or unbolding them cannot break this.
+    intro = readme[readme.index("\n", readme.index("# Imagor MCP")):readme.index(INTRO_END)].strip()
     parts = [
         "---",
         "slug: /mcp",
