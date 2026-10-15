@@ -1,5 +1,7 @@
 # Imagor MCP
 
+[![Test Status](https://github.com/cshum/imagor-mcp/workflows/ci/badge.svg)](https://github.com/cshum/imagor-mcp/actions/workflows/ci.yml)
+
 An MCP server and a skill that add template capability to
 [imagor](https://github.com/cshum/imagor).
 
@@ -60,9 +62,9 @@ to paste, or describe the image you want. The agent composes through the tools: 
 the result, and hands you back the url. Neither of you needs imagor's path syntax: the tools
 build the path, and refuse one that cannot work.
 
-That is the whole install. It is also on the
-[official MCP Registry](https://registry.modelcontextprotocol.io/), where a client can install
-it by name, and as `ghcr.io/cshum/imagor-mcp` in a container, which needs a different base
+That is the whole install. It is also in the official MCP Registry as
+`io.github.cshum/imagor-mcp`, which some clients install by name, and as
+`ghcr.io/cshum/imagor-mcp` in a container, which needs a different base
 URL, in [Setup](docs/setup.md). Windows binaries are on the
 [releases page](https://github.com/cshum/imagor-mcp/releases).
 

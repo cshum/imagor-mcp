@@ -69,6 +69,8 @@ def build():
     # Everything between the title and the contact sheet: the subtitle and the line under it.
     # Found by position, not by wording, so rewording or unbolding them cannot break this.
     intro = readme[readme.index("\n", readme.index("# Imagor MCP")):readme.index(INTRO_END)].strip()
+    # the readme carries its own badge; this page adds one, and two would be one too many
+    intro = "\n".join(l for l in intro.splitlines() if not l.startswith("[![")).strip()
     parts = [
         "---",
         "slug: /mcp",
@@ -85,15 +87,12 @@ def build():
         "# Imagor MCP",
         "",
         f"[![Test Status]({REPO}/workflows/ci/badge.svg)]({REPO}/actions/workflows/ci.yml)",
-        "[![MCP Registry](https://img.shields.io/badge/registry-io.github.cshum%2Fimagor--mcp-white)]"
-        "(https://registry.modelcontextprotocol.io/)",
         "",
         intro,
         "",
         ":::info",
         f"**GitHub:** [{SHORT}]({REPO})  ",
-        "**Registry:** [registry.modelcontextprotocol.io](https://registry.modelcontextprotocol.io/) "
-        "— install as `io.github.cshum/imagor-mcp`  ",
+        "**Registry:** install as `io.github.cshum/imagor-mcp`  ",
         f"**Docker:** [ghcr.io/cshum/imagor-mcp]({REPO}/pkgs/container/imagor-mcp)  ",
         f"**Releases:** [macOS, Linux and Windows binaries]({REPO}/releases)  ",
         "**Requires:** imagor **1.9.10**",
