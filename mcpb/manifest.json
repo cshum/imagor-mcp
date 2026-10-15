@@ -4,7 +4,7 @@
   "name": "imagor-mcp",
   "display_name": "Imagor MCP",
   "version": "0.0.0",
-  "description": "Build and verify imagor image URLs, and render layouts at any canvas size, from an MCP client.",
+  "description": "An MCP server and a skill for imagor. An agent writes a layout (OG cards, product grids, quotes) and it compiles to one imagor URL.",
   "author": {
     "name": "Adrian Shum"
   },
