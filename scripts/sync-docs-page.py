@@ -93,7 +93,6 @@ def build():
         ":::info",
         f"**GitHub:** [{SHORT}]({REPO})  ",
         "**Registry:** install as `io.github.cshum/imagor-mcp`  ",
-        f"**Docker:** [ghcr.io/cshum/imagor-mcp]({REPO}/pkgs/container/imagor-mcp)  ",
         f"**Releases:** [macOS, Linux and Windows binaries]({REPO}/releases)  ",
         "**Requires:** imagor **1.9.10**",
         ":::",
