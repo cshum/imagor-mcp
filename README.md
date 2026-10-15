@@ -74,8 +74,6 @@ trusted with, and what it refuses.
 
 ## Going deeper
 
-The rest of the documentation:
-
 - [Setup](docs/setup.md) — every setting, the config file each client reads, and what to do
   before it is public.
 - [Reference](docs/reference.md) — every tool the server serves, the layout format, and the
