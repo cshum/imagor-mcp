@@ -2,6 +2,7 @@
 
 [![Test Status](https://github.com/cshum/imagor-mcp/workflows/ci/badge.svg)](https://github.com/cshum/imagor-mcp/actions/workflows/ci.yml)
 [![Docs](https://img.shields.io/badge/docs-docs.imagor.net-white)](https://docs.imagor.net)
+[![Imagor MCP rated A on Glama](https://glama.ai/mcp/servers/cshum/imagor-mcp/badges/score.svg)](https://glama.ai/mcp/servers/cshum/imagor-mcp)
 
 An MCP server and a skill that add a template layer to
 [imagor](https://github.com/cshum/imagor).
