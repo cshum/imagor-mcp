@@ -35,9 +35,9 @@ func TestDocsListEveryToolAndNothingElse(t *testing.T) {
 		t.Fatal("no tools served")
 	}
 
-	raw, err := os.ReadFile("../../docs/tools.md")
+	raw, err := os.ReadFile("../../docs/reference.md")
 	if err != nil {
-		t.Fatalf("docs/tools.md: %v", err)
+		t.Fatalf("docs/reference.md: %v", err)
 	}
 	documented := map[string]bool{}
 	for _, m := range docToolRow.FindAllStringSubmatch(string(raw), -1) {
@@ -59,9 +59,9 @@ func TestDocsListEveryToolAndNothingElse(t *testing.T) {
 	sort.Strings(extra)
 
 	if len(missing) > 0 {
-		t.Errorf("served but not documented in docs/tools.md: %s", strings.Join(missing, ", "))
+		t.Errorf("served but not documented in docs/reference.md: %s", strings.Join(missing, ", "))
 	}
 	if len(extra) > 0 {
-		t.Errorf("documented in docs/tools.md but not served: %s", strings.Join(extra, ", "))
+		t.Errorf("documented in docs/reference.md but not served: %s", strings.Join(extra, ", "))
 	}
 }
