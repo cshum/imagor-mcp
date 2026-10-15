@@ -1,4 +1,4 @@
-# imagor-mcp
+# Imagor MCP
 
 **An MCP server and a skill that add template capability to
 [imagor](https://github.com/cshum/imagor).**
