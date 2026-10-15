@@ -4,12 +4,11 @@
 [imagor](https://github.com/cshum/imagor).**
 
 An agent writes a layout — OG cards, a product grid, quotes, testimonials — and it compiles to a
-single imagor URL, at any canvas size.
+single imagor URL.
 
 [![Cards, each one a single imagor URL](docs/gallery/contact-sheet.png)](docs/gallery/cookbook.md)
 
-*Every card above is one imagor URL, composed by an agent from a brief. **[All of them, with the URL each
-resolves to, and a prompt to ask for it »](docs/gallery/cookbook.md)***
+*[See the recipes »](docs/gallery/cookbook.md)*
 
 ## Quick start
 
