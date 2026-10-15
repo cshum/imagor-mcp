@@ -76,7 +76,7 @@ def build():
     parts = [
         "---",
         "slug: /mcp",
-        "description: Extends imagor with template capability for agents: a layout compiles to one imagor URL, at any canvas size.",
+        "description: Extends imagor with template capability for agents, compiling a layout to one imagor URL at any canvas size.",
         "keywords:",
         "  - imagor-mcp",
         "  - Imagor MCP",
