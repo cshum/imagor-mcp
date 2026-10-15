@@ -29,9 +29,7 @@ SHORT = REPO.removeprefix("https://")
 # The sections the page mirrors, in the order the README has them. Adding a section to
 # the README means adding it here; that is the one thing this script cannot infer.
 SECTIONS = [
-    ("Quick start", "What an agent does with it"),
-    ("What an agent does with it", "What this adds"),
-    ("What this adds", "Going deeper"),
+    ("Quick start", "Going deeper"),
     ("Going deeper", "Licence"),
 ]
 
