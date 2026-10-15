@@ -202,7 +202,7 @@ A canvas, its slots, and the values that fill them:
  "values": {"eyebrow":"ENGINEERING"}}
 ```
 
-The cookbook holds fourteen of these, so reach for one before writing the JSON out.
+The cookbook holds ready-made layouts of this kind, so reach for one before writing the JSON out.
 
 **A slot's `filters` field applies filters to that slot's own source**, because the image
 field is data rather than syntax — a path written there is encoded as a source. Write the
@@ -262,7 +262,7 @@ URL both work, signed or not.
 
 ## Cookbook
 
-Fourteen ready-made layouts, fetched by name with `get_cookbook_recipe`.
+Ready-made layouts, fetched by name with `get_cookbook_recipe`.
 
 **Match on what a layout is for, not on its name**, which will not resemble the request.
 Take the closest and change the values rather than composing from nothing: the recipes

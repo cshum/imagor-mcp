@@ -25,7 +25,7 @@ for f in sorted(glob.glob("cookbook/*.json")):
 out = [
     "# Cookbook",
     "",
-    "Fourteen ready-made layouts. **Read this to choose one, then fetch it by name.**",
+    "Ready-made layouts. **Read this to choose one, then fetch it by name.**",
     "A recipe is the channel between you and `render_template` - it is not the product,",
     "and it is not something to reproduce by hand.",
     "",

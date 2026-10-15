@@ -8,10 +8,10 @@ imagor URL, at any canvas size. That URL is served like any other, so it is sign
 delivered by the pipeline you already run: opened in a browser, put in a page, or stored behind a
 CDN.
 
-[![Fourteen cards, each one a single imagor URL](docs/gallery/contact-sheet.png)](docs/gallery/cookbook.md)
+[![Cards, each one a single imagor URL](docs/gallery/contact-sheet.png)](docs/gallery/cookbook.md)
 
-*Every card above is one imagor URL, composed by an agent from a brief. **[All fourteen,
-with the URL each resolves to, and a prompt to ask for it »](docs/gallery/cookbook.md)***
+*Every card above is one imagor URL, composed by an agent from a brief. **[All of them, with the URL each
+resolves to, and a prompt to ask for it »](docs/gallery/cookbook.md)***
 
 ## Quick start
 
@@ -91,7 +91,7 @@ zoomed into regions to read the small text it had drawn. Like a result? `parse_t
 into a recipe.
 
 **A recipe is a result.** The layout is fixed and the agent fills the values, so the same recipe
-looks the same every time. **[Start with one of fourteen »](docs/gallery/cookbook.md)**
+looks the same every time. **[Start with one of the recipes »](docs/gallery/cookbook.md)**
 
 ## What this adds
 
@@ -109,7 +109,7 @@ is for, is in **[docs/tools.md](docs/tools.md)**.
 
 ## The cookbook
 
-`cookbook/` holds **fourteen ready-made layouts** — OG cards, a product grid, a profile
+`cookbook/` holds **ready-made layouts** — OG cards, a product grid, a profile
 card, quotes, testimonials, an event, a comparison table, a price ladder. Take the
 closest, change the values, render it.
 

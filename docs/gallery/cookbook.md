@@ -1,11 +1,11 @@
 # Cookbook
 
-Fourteen layouts, each one a single imagor URL. **Copy a card's prompt into
+Ready-made layouts, each one a single imagor URL. **Copy a card's prompt into
 your agent** and it fetches that recipe and renders it for you.
 
 Each card also carries the URL it resolves to, for rendering without an agent.
 
-[Back to the README](../README.md) · [All fourteen, one image](contact-sheet.png)
+[Back to the README](../README.md) · [All of them, one image](contact-sheet.png)
 
 ## announcement
 
