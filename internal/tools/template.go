@@ -38,7 +38,7 @@ type InnerSlot struct {
 	// An image field is data, not syntax: a value that looks like a path is encoded
 	// so it cannot be read as one. So a filter on this slot's own source needs
 	// somewhere else to live, and this is it.
-	Filters string `json:"filters,omitempty" jsonschema:"for image or rect: filters applied to this slot's own source, colon-separated, for example "smart():round_corner(230,230,fff)". The filters: prefix is added for you. Measured: a slash between filters 404s"`
+	Filters string `json:"filters,omitempty" jsonschema:"for image or rect: filters applied to this slot's own source, colon-separated, for example smart():round_corner(230,230,fff). The filters: prefix is added for you. Measured: a slash between filters 404s"`
 }
 
 // TemplateSlot is one element of a template.
@@ -71,7 +71,7 @@ type TemplateSlot struct {
 	// An image field is data, not syntax: a value that looks like a path is encoded
 	// so it cannot be read as one. So a filter on this slot's own source needs
 	// somewhere else to live, and this is it.
-	Filters string `json:"filters,omitempty" jsonschema:"for image or rect: filters applied to this slot's own source, colon-separated, for example "smart():round_corner(230,230,fff)". The filters: prefix is added for you. Measured: a slash between filters 404s"`
+	Filters string `json:"filters,omitempty" jsonschema:"for image or rect: filters applied to this slot's own source, colon-separated, for example smart():round_corner(230,230,fff). The filters: prefix is added for you. Measured: a slash between filters 404s"`
 
 	// A slot that carries its own slots is a canvas: its width and height become
 	// the canvas the inner slots are laid out on, and the result is drawn at this
