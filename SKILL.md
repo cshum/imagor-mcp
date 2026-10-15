@@ -10,6 +10,45 @@ with the image unchanged when a filter does not apply. It returns the rendered r
 an image, so check it against your reference rather than reading the report alone — the
 report says a filter ran, not that the result is right.
 
+
+## How to compose
+
+Compose through the tools. Do not write a path by hand and do not edit one by hand: a path that
+looks right and is not is the failure this server exists to catch, and the tools that build one
+refuse what a text editor will happily accept. To change a composition you already have,
+`parse_template` reads it back into a template rather than you retyping it.
+
+**These rules are procedures and facts on purpose.** A procedure says what to type and is
+followed; a preference asks the reader to want the right thing and is not.
+
+1. `describe_imagor` once, for the grammar this server targets, and `list_imagor_filters`
+   before using a filter you have not used here — imagor ignores an unrecognised one
+   silently, and the request comes back `200` with the image unchanged.
+2. Build with `build_imagor_url`, which refuses an invalid composition rather than emitting
+   it, so a refusal is a mistake worth fixing rather than working around. Its `path` field
+   is the bare path with no prefix and no signature, for a caller that signs itself; `url`
+   and `absolute_url` carry the prefix and signature the server is configured for.
+   `validate_imagor_path` reads a path back to report whether it round-trips.
+3. `verify_imagor_url` the result, passing the same typed parameters you built from — it
+   takes parameters, not a URL. An outcome is `applied`, `declined` (the server recognised
+   the filter and left the image unchanged) or one of the two that mean nothing can be
+   concluded — `not_reported` and `unknown`. Neither of those last two is a failure; a
+   `declined` is, and says so itself.
+4. **Look at what came back** — `applied` does not mean correct. Where the preview is too
+   small to read a label, call again with `preview_region` as `x,y,w,h` in **result**
+   pixels: full resolution for a fraction of the cost. `preview: false` for the report
+   alone. Iterate until it matches.
+5. To composite, build small pieces first — one tile, then the grid, then the banner. A
+   wrong number in a nested path is much harder to see in the finished image.
+6. Measure only what looking cannot settle, and measure the **rows**, not the centres: a
+   dot's rows against its text's, a panel's against its neighbour's. Two centres can agree
+   to the pixel while the shapes read as misaligned. Crop to the region you changed before
+   you believe the number.
+7. **Give the url to the user, in full, alongside the picture.** The url is the output;
+   the image you checked is a scaled preview of it. Showing the result and dropping the
+   url leaves them with nothing they can serve.
+
+
 ## Order in a path
 
 ```
@@ -316,35 +355,3 @@ composition.
 
 The probe answers on behaviour, not a version string: imagor reports its version in a
 startup log and on no endpoint, so there is nothing to ask.
-
-## Working method
-
-1. `describe_imagor` once, for the grammar this server targets, and `list_imagor_filters`
-   before using a filter you have not used here — imagor ignores an unrecognised one
-   silently, and the request comes back `200` with the image unchanged.
-2. Build with `build_imagor_url`, which refuses an invalid composition rather than emitting
-   it, so a refusal is a mistake worth fixing rather than working around. Its `path` field
-   is the bare path with no prefix and no signature, for a caller that signs itself; `url`
-   and `absolute_url` carry the prefix and signature the server is configured for.
-   `validate_imagor_path` reads a path back to report whether it round-trips.
-3. `verify_imagor_url` the result, passing the same typed parameters you built from — it
-   takes parameters, not a URL. An outcome is `applied`, `declined` (the server recognised
-   the filter and left the image unchanged) or one of the two that mean nothing can be
-   concluded — `not_reported` and `unknown`. Neither of those last two is a failure; a
-   `declined` is, and says so itself.
-4. **Look at what came back** — `applied` does not mean correct. Where the preview is too
-   small to read a label, call again with `preview_region` as `x,y,w,h` in **result**
-   pixels: full resolution for a fraction of the cost. `preview: false` for the report
-   alone. Iterate until it matches.
-5. To composite, build small pieces first — one tile, then the grid, then the banner. A
-   wrong number in a nested path is much harder to see in the finished image.
-6. Measure only what looking cannot settle, and measure the **rows**, not the centres: a
-   dot's rows against its text's, a panel's against its neighbour's. Two centres can agree
-   to the pixel while the shapes read as misaligned. Crop to the region you changed before
-   you believe the number.
-7. **Give the url to the user, in full, alongside the picture.** The url is the output;
-   the image you checked is a scaled preview of it. Showing the result and dropping the
-   url leaves them with nothing they can serve.
-
-**These rules are procedures and facts on purpose.** A procedure says what to type and is
-followed; a preference asks the reader to want the right thing and is not.

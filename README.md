@@ -58,8 +58,11 @@ VS Code keys its servers under `servers` and Codex reads TOML, so the block abov
 neither. Every client's file path, and the shape each one wants, is in
 **[docs/clients.md](docs/clients.md)**.
 
-**4. Ask it for something.** Open the **[cookbook](docs/gallery/cookbook.md)** and name a
-recipe, or describe the image you want and let it compose.
+**4. Ask it for something.** Name a recipe from the
+**[cookbook](docs/gallery/cookbook.md)** — each one carries a prompt to paste — or describe the
+image you want. The agent composes through the tools: it writes the layout, renders it, looks at
+the result, and hands you back the url. Neither of you needs imagor's path syntax — the tools
+build the path, and refuse one that cannot work.
 
 That is the whole install. It is also on the
 [official MCP Registry](https://registry.modelcontextprotocol.io/), where a client can install
