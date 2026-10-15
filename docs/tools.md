@@ -14,7 +14,7 @@ except by a tool that builds a path.
 | `validate_imagor_path` | Parse a path, report whether it round-trips, and summarize the transformation. |
 | `list_imagor_filters` | Accepted filters with signature, description and argument forms. |
 | `describe_imagor` | The supported path grammar and the current signing mode. |
-| `get_cookbook_recipe` | Fetch a ready-made layout by name. **Call it with no name first** to get the list. |
+| `get_cookbook_recipe` | Fetch a ready-made layout by name. **Call it with no name first** to get the list — **[every recipe, with the url each resolves to](cookbook.md)**. |
 | `get_imagor_skill` | The skill, for a client that reads it as a tool rather than a resource. **Called with no section it returns the outline**; name one to read just that part. |
 
 The server also serves one **prompt**, `compose-imagor-image`, which loads the skill with a
