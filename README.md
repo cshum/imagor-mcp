@@ -96,9 +96,9 @@ looks the same every time. **[Start with one of fourteen »](docs/gallery/cookbo
 **The template layer runs inside your imagor.** Rendering stays in the instance you run, at the
 throughput it already has.
 
-**A layout compiles to a URL; a hosted template API returns an image.** Those bill and transfer
-bytes on every render. A URL is cached by any browser, proxy or CDN — so the bytes transfer
-once.
+**A hosted template API returns an image; a layout here compiles to a URL.** Those bill and
+transfer bytes on every render. A URL is cached by any browser, proxy or CDN, so the bytes
+transfer once.
 
 ## Tools
 
