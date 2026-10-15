@@ -94,7 +94,7 @@ def build():
         f"**GitHub:** [{SHORT}]({REPO})  ",
         "**Registry:** install as `io.github.cshum/imagor-mcp`  ",
         f"**Releases:** [macOS, Linux and Windows binaries]({REPO}/releases)  ",
-        "**Requires:** imagor **1.9.10**",
+        "**Requires:** imagor 1.9.10 or above",
         ":::",
         "",
         "[![Cards, each one a single imagor URL]"
