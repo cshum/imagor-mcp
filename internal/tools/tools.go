@@ -290,6 +290,11 @@ func (in TransformInput) toParams() (imagorpath.Params, error) {
 		// silently, returning an unchanged image with a 200 response, so those
 		// are refused here. Excess arguments only warn — see filterWarnings —
 		// because imagor's tolerance differs per filter.
+		// A filter's Source may itself be an imagor path, the same way in.Image can. Without
+		// this it was encoded as a URL and imagor was asked to resolve it as a host.
+		if inner, ok := nestedSource(f.Source); ok {
+			f.Source = "path:" + inner
+		}
 		if outcome, msg := filtercat.Check(name, filterArgs(f)); outcome == filtercat.Rejected {
 			return imagorpath.Params{}, errors.New(msg)
 		}

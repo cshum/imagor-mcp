@@ -290,13 +290,16 @@ func (c Config) RenderTemplateTool(ctx context.Context, _ *mcp.CallToolRequest, 
 				}
 				var segs []string
 				if slot.Fit {
-					segs = append(segs, "filters:fill(none)")
+					segs = append(segs, "fill(none)")
 				}
 				if f := strings.Trim(strings.TrimSpace(slot.Filters), "/"); f != "" {
 					segs = append(segs, f)
 				}
 				if len(segs) > 0 {
-					inner = fmt.Sprintf("%s/%s/%s", dims, strings.Join(segs, "/"), source)
+					// One filters: namespace, filters colon-joined the way imagor writes them. Emitting
+					// the slot's filters without the prefix made imagor read them as the source, so
+					// filters: "upscale()" asked DNS for a host called upscale() and 404'd.
+					inner = fmt.Sprintf("%s/filters:%s/%s", dims, strings.Join(segs, ":"), source)
 				} else {
 					inner = fmt.Sprintf("%s/%s", dims, source)
 				}
